@@ -1,0 +1,40 @@
+services:
+  minio:
+    image: minio/minio:latest
+    entrypoint: >
+      /bin/sh -c "
+      minio server /mnt/data --console-address \":9001\" &
+      sleep 5;
+      /usr/bin/mc alias set myminio http://localhost:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD};
+      /usr/bin/mc mb --ignore-existing myminio/roda;
+      /usr/bin/mc policy set download myminio/roda;
+      wait
+      "
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+      - MINIO_VOLUMES=/mnt/data
+    volumes:
+      - minio_data:/mnt/data
+    networks:
+      - echo-network
+    restart: unless-stopped
+  postgres:
+    image: postgres:${POSTGRES_VERSION}
+    container_name: postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - roda-pg:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT}:5432"
+
+volumes:
+  roda-pg:
+  minio_data:
+
+networks:
+  echo-network:
+    driver: bridge
