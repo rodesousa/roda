@@ -11,6 +11,7 @@ defmodule Roda.Repo.Migrations.AddLlm do
       add :default_model, :string
       add :is_active, :boolean, default: true, null: false
       add :config, :map, default: %{}
+      add :capability, :string
 
       timestamps()
     end
