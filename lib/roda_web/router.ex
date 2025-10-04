@@ -17,13 +17,15 @@ defmodule RodaWeb.Router do
   scope "/", RodaWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", TestLive, :home
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", RodaWeb do
-  #   pipe_through :api
-  # end
+  scope "/api", RodaWeb do
+    pipe_through :api
+
+    post "/chunks/upload", ChunkController, :upload
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:roda, :dev_routes) do
@@ -39,6 +41,8 @@ defmodule RodaWeb.Router do
 
       live_dashboard "/dashboard", metrics: RodaWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
+
+
     end
   end
 end

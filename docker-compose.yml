@@ -19,6 +19,8 @@ services:
     networks:
       - echo-network
     restart: unless-stopped
+    ports:
+      - 127.0.0.1:9000:9000
   postgres:
     image: postgres:${POSTGRES_VERSION}
     container_name: postgres
