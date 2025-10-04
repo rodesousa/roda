@@ -1,4 +1,4 @@
-defmodule Roda.Services.Minio do
+defmodule Roda.Minio do
   @moduledoc """
   Provides functions to interact with MinIO/S3 storage.
   """

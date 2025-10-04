@@ -1,1 +1,1 @@
-alias Roda.Services.Minio
+alias Roda.Minio
