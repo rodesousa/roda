@@ -67,15 +67,19 @@ defmodule Roda.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"},
+      #  encrypted field for api key
+      {:cloak_ecto, "~> 1.2.0"},
       # minio
       {:ex_aws, "~> 2.0"},
       {:ex_aws_s3, "~> 2.0"},
       {:poison, "~> 3.0"},
       {:hackney, "~> 1.9"},
       {:sweet_xml, "~> 0.7"},
-      # job worker
+      # job worke
       {:oban, "~> 2.19"},
-      {:igniter, "~> 0.5", only: [:dev]}
+      {:igniter, "~> 0.5", only: [:dev]},
+      #  Litellm for elixir
+      {:instructor, "~> 0.1.0"}
     ]
   end
 

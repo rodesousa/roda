@@ -12,3 +12,6 @@ server:
 
 ecto_migration:
 	@mix ecto.migrate
+
+gen_secret:
+	@mix phx.gen.secret 32

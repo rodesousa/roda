@@ -37,3 +37,5 @@ npm-debug.log
 
 # Claude
 .claude
+
+.env

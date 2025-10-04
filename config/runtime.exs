@@ -12,6 +12,13 @@ config :ex_aws, :s3,
   host: "localhost",
   port: 9000
 
+# Cloack
+config :roda, Roda.Vault,
+  ciphers: [
+    default:
+      {Cloak.Ciphers.AES.GCM, tag: "AES.GCM.V1", key: env!("CLOAK_KEY") |> Base.decode64!()}
+  ]
+
 # config/runtime.exs is executed for all environments, including
 # during releases. It is executed after compilation and before the
 # system starts, so it is typically used to load production configuration

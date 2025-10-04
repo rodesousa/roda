@@ -14,7 +14,6 @@
  * - Resume creates a NEW MediaRecorder (reuses existing stream)
  * - This ensures each chunk is a valid, standalone WebM file
  *
- * @see /AUDIO_RECORDING.md for full documentation
  */
 export const Recorder = {
   mounted() {
