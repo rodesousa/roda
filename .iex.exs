@@ -1,0 +1,1 @@
+alias Roda.Services.Minio

@@ -35,3 +35,5 @@ roda-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# Claude
+.claude

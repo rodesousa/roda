@@ -1,5 +1,8 @@
 up:
-	@docker-compose up -d
+	@docker compose up -d
+
+down:
+	@docker compose down -v
 
 env:
 	@cp env.sample .env

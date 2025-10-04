@@ -1,4 +1,16 @@
 import Config
+import Dotenvy
+source!([".env", System.get_env()])
+
+#  MINIO
+config :ex_aws,
+  access_key_id: env!("MINIO_ROOT_USER"),
+  secret_access_key: env!("MINIO_ROOT_PASSWORD")
+
+config :ex_aws, :s3,
+  scheme: "http://",
+  host: "localhost",
+  port: 9000
 
 # config/runtime.exs is executed for all environments, including
 # during releases. It is executed after compilation and before the
