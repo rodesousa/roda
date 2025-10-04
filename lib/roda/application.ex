@@ -11,6 +11,7 @@ defmodule Roda.Application do
       RodaWeb.Telemetry,
       Roda.Repo,
       {DNSCluster, query: Application.get_env(:roda, :dns_cluster_query) || :ignore},
+      {Oban, Application.fetch_env!(:roda, Oban)},
       {Phoenix.PubSub, name: Roda.PubSub},
       # Start a worker by calling: Roda.Worker.start_link(arg)
       # {Roda.Worker, arg},

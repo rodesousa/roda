@@ -9,3 +9,6 @@ env:
 
 server:
 	@iex -S mix phx.server
+
+ecto_migration:
+	@mix ecto.migrate

@@ -7,6 +7,12 @@
 # General application configuration
 import Config
 
+config :roda, Oban,
+  engine: Oban.Engines.Basic,
+  notifier: Oban.Notifiers.Postgres,
+  queues: [default: 10],
+  repo: Roda.Repo
+
 config :roda,
   ecto_repos: [Roda.Repo],
   generators: [timestamp_type: :utc_datetime]

@@ -1,4 +1,5 @@
 import Config
+config :roda, Oban, testing: :manual
 
 # Configure your database
 #

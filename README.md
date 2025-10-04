@@ -28,6 +28,12 @@ Start the Docker services (PostgreSQL and MinIO):
 make up
 ```
 
+Run database migrations to create all schemas
+
+```bash
+make ecto_migration
+```
+
 Install dependencies and start the Phoenix server:
 
 ```bash
