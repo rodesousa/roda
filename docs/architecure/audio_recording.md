@@ -29,7 +29,7 @@ graph TB
     Hook -->|POST /api/chunks/upload<br/>FormData| Controller
     Controller -->|upload_audio_chunk| MinioService
     MinioService -->|S3 PUT| MinIO
-    Controller -->|{success, path}| Hook
+    Controller -->|success + path| Hook
     Hook -->|pushEvent chunk_uploaded| UI
 ```
 
@@ -54,7 +54,7 @@ sequenceDiagram
     Hook->>Controller: POST /api/chunks/upload
     Controller->>MinIO: upload chunk.webm
     MinIO-->>Controller: OK
-    Controller-->>Hook: {success: true, path}
+    Controller-->>Hook: success + path
     Hook->>LiveView: pushEvent("chunk_uploaded")
 
     User->>LiveView: Click "Pause"

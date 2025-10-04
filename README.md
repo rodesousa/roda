@@ -35,3 +35,9 @@ make server
 ```
 
 The application will be available at [`localhost:4000`](http://localhost:4000).
+
+## Technical Documentation
+
+Detailed technical specifications and architecture documents:
+
+- [Audio Recording System](./docs/architecure/audio_recording.md) - Real-time audio recording with chunk-based storage in MinIO
