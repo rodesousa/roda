@@ -67,6 +67,7 @@ defmodule Roda.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"},
+      {:multipart, "~> 0.4.0"},
       #  encrypted field for api key
       {:cloak_ecto, "~> 1.2.0"},
       # minio
@@ -75,7 +76,7 @@ defmodule Roda.MixProject do
       {:poison, "~> 3.0"},
       {:hackney, "~> 1.9"},
       {:sweet_xml, "~> 0.7"},
-      # job worke
+      # job worker
       {:oban, "~> 2.19"},
       {:igniter, "~> 0.5", only: [:dev]},
       #  Litellm for elixir

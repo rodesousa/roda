@@ -1,4 +1,4 @@
-defmodule Roda.Services.Minio do
+defmodule Roda.Minio do
   @moduledoc """
   Provides functions to interact with MinIO/S3 storage.
   """
@@ -50,6 +50,26 @@ defmodule Roda.Services.Minio do
     key = "audio-chunks/#{chunk_id}#{extension}"
 
     upload_file(bucket(), key, chunk_binary)
+  end
+
+  @doc """
+  Downloads an file chunk from MinIO storage.
+
+  ## Example
+
+      iex> Minio.get_file("roda/audio-chunks/uuid.webm")
+      {:ok, <<binary_data>>}
+
+      iex> Minio.get_file("audio-chunks/uuid.webm")
+      {:ok, <<binary_data>>}
+  """
+  def get_file(bucket, key) when is_bitstring(key) do
+    Minio.S3.get_object(bucket, key)
+    |> Minio.request()
+    |> case do
+      {:ok, %{body: body}} -> {:ok, body}
+      {:error, reason} -> {:error, reason}
+    end
   end
 
   defp bucket, do: "roda"

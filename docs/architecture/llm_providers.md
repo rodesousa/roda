@@ -34,6 +34,5 @@ mix phx.gen.secret 32
 
 **Storage:**
 ```bash
-# .env (NOT committed to git)
 CLOAK_KEY=3Jnb4X9cF8kN2pL7qR5sT6vY8zA1bC3dE4fG5hH6iJ7kK8lL9mM0nN1oO2pP3qQ=
 ```
