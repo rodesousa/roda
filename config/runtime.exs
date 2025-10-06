@@ -86,6 +86,12 @@ if config_env() == :prod do
     ],
     secret_key_base: secret_key_base
 
+  #  config memgraph
+  config :roda, Boltx,
+    uri: "bolt://localhost:7687",
+    auth: [username: env!("MEMGRAPH_USER"), password: env!("MEMGRAPH_PASSWORD")],
+    pool_size: 10
+
   # ## SSL Support
   #
   # To get SSL working, you will need to add the `https` key

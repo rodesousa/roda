@@ -13,6 +13,7 @@ defmodule Roda.Application do
       {DNSCluster, query: Application.get_env(:roda, :dns_cluster_query) || :ignore},
       {Oban, Application.fetch_env!(:roda, Oban)},
       {Phoenix.PubSub, name: Roda.PubSub},
+      {Bolt.Sips, Application.get_env(:bolt_sips, Bolt)},
       # Start a worker by calling: Roda.Worker.start_link(arg)
       # {Roda.Worker, arg},
       # Start to serve requests, typically the last entry

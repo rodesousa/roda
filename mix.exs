@@ -81,7 +81,10 @@ defmodule Roda.MixProject do
       {:oban, "~> 2.19"},
       {:igniter, "~> 0.5", only: [:dev]},
       #  Litellm for elixir
-      {:instructor, "~> 0.1.0"}
+      {:instructor, "~> 0.1.0"},
+      # memgraph
+      # {:boltx, github: "sagastume/boltx", branch: "master"},
+      {:bolt_sips, "~> 2.0"}
     ]
   end
 

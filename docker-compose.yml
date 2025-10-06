@@ -17,7 +17,7 @@ services:
     volumes:
       - minio_data:/mnt/data
     networks:
-      - echo-network
+      - roda-network
     restart: unless-stopped
     ports:
       - 127.0.0.1:9000:9000
@@ -32,11 +32,25 @@ services:
       - roda-pg:/var/lib/postgresql/data
     ports:
       - "127.0.0.1:${POSTGRES_PORT}:5432"
+  memgraph:
+    image: memgraph/memgraph-mage:3.5.2
+    container_name: memgraph
+    environment:
+      MEMGRAPH_USER: ${MEMGRAPH_USER}
+      MEMGRAPH_PASSWORD: ${MEMGRAPH_PASSWORD}
+    volumes:
+      - roda-memgraph:/var/lib/memgraph
+    ports:
+      - "127.0.0.1:7687:7687"
+    networks:
+      - roda-network
+    restart: unless-stopped
 
 volumes:
   roda-pg:
   minio_data:
+  roda-memgraph:
 
 networks:
-  echo-network:
+  roda-network:
     driver: bridge

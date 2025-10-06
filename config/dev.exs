@@ -10,6 +10,15 @@ config :roda, Roda.Repo,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
+#  config memgraph
+config :bolt_sips, Bolt,
+  url: "bolt://localhost:7687",
+  basic_auth: [username: "memgraph", password: "memgraph"],
+  pool_size: 10
+
+# Utiliser Jason au lieu de Poison
+config :bolt_sips, :json_library, Jason
+
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #
