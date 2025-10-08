@@ -22,7 +22,7 @@ services:
     ports:
       - 127.0.0.1:9000:9000
   postgres:
-    image: postgres:${POSTGRES_VERSION}
+    image: pgvector/pgvector:pg18
     container_name: postgres
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
@@ -30,6 +30,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - roda-pg:/var/lib/postgresql/data
+      - ./priv/repo/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
     ports:
       - "127.0.0.1:${POSTGRES_PORT}:5432"
   memgraph:

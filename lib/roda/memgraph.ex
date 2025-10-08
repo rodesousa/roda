@@ -3,6 +3,8 @@ defmodule Roda.Memgraph do
   Memgraph graph database interface using Bolt.Sips.
   """
 
+  require Logger
+
   @doc """
   Returns a connection from the Bolt.Sips pool.
 
@@ -37,20 +39,5 @@ defmodule Roda.Memgraph do
   """
   def query!(statement, params \\ %{}) do
     Bolt.Sips.query!(conn(), statement, params)
-  end
-
-  @doc """
-  Executes a query within a transaction.
-
-  ## Example
-
-      iex> Roda.Memgraph.transaction(fn ->
-      ...>   Roda.Memgraph.query!("CREATE (p:Person {name: 'Bob'})")
-      ...>   Roda.Memgraph.query!("CREATE (p:Person {name: 'Charlie'})")
-      ...> end)
-      {:ok, result}
-  """
-  def transaction(fun) do
-    Bolt.Sips.transaction(conn(), fun)
   end
 end
