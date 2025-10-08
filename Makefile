@@ -24,3 +24,6 @@ extract_chunk:
 	@docker exec roda-minio-1 /usr/bin/mc cp myminio/roda/audio-chunks/$(CHUNK_ID).webm /tmp/$(CHUNK_ID).webm
 	@docker cp roda-minio-1:/tmp/$(CHUNK_ID).webm ./$(CHUNK_ID).webm
 	@echo "Chunk saved to: ./$(CHUNK_ID).webm"
+
+ecto_rollback:
+	@echo "mix ecto.rollback OR mix ecto.rollback --step 2 OR mix ecto.rollback -to ID_TIMESPAMP"
