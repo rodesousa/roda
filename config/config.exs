@@ -30,6 +30,8 @@ config :roda,
   ecto_repos: [Roda.Repo],
   generators: [timestamp_type: :utc_datetime]
 
+config :roda, Roda.Repo, types: Roda.PostgrexTypes
+
 # Configures the endpoint
 config :roda, RodaWeb.Endpoint,
   url: [host: "localhost"],
@@ -78,6 +80,7 @@ config :logger, :default_formatter,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
+
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

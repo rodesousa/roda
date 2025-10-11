@@ -7,11 +7,9 @@ defmodule Roda.Repo.Migrations.AddLlm do
       add :name, :string, null: false
       add :provider_type, :string, null: false
       add :api_key, :binary, null: false
-      add :api_base_url, :string
-      add :default_model, :string
+      add :model, :string
       add :is_active, :boolean, default: true, null: false
       add :config, :map, default: %{}
-      add :capability, :string
 
       timestamps()
     end

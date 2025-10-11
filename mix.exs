@@ -84,7 +84,11 @@ defmodule Roda.MixProject do
       {:instructor, "~> 0.1.0"},
       # memgraph
       # {:boltx, github: "sagastume/boltx", branch: "master"},
-      {:bolt_sips, "~> 2.0"}
+      {:bolt_sips, "~> 2.0"},
+      # uuidv7
+      {:uniq, "~> 0.6.1"},
+      # pgvector
+      {:pgvector, "~> 0.3.0"}
     ]
   end
 

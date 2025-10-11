@@ -3,6 +3,7 @@ defmodule Roda.Conversations.Chunk do
   import Ecto.Changeset
   alias Roda.Conversations.Conversation
 
+  @primary_key {:id, Uniq.UUID, autogenerate: true, version: 7}
   schema "chunks" do
     field :text, :string
     field :position, :integer
