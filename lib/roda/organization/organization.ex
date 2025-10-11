@@ -2,6 +2,7 @@ defmodule Roda.Organization.Organization do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @primary_key {:id, Uniq.UUID, autogenerate: true, version: 7}
   schema "organizations" do
     field :name, :string
 
@@ -9,18 +10,34 @@ defmodule Roda.Organization.Organization do
     field :embedding_provider_type, :string
     field :embedding_api_base_url, :string
     field :embedding_model, :string
+    field :embedding_encrypted_api_key, Roda.Encrypted.Binary
 
     timestamps(type: :utc_datetime)
   end
 
-  def name_changeset(%__MODULE__{} = project, attrs) do
-    project
+  def changeset(attrs) do
+    %__MODULE__{}
+    |> cast(attrs, [
+      :name,
+      :embedding_dimension,
+      :embedding_provider_type,
+      :embedding_api_base_url,
+      :embedding_model,
+      :embedding_encrypted_api_key
+    ])
+    |> validate_required([:name])
+    |> validate_inclusion(:embedding_provider_type, ["openai", "anthopric"])
+    |> validate_format(:embedding_api_base_url, ~r/^https:\/\//)
+  end
+
+  def name_changeset(attrs) do
+    %__MODULE__{}
     |> cast(attrs, [:name])
     |> validate_required([:name])
   end
 
-  def embedding_changeset(%__MODULE__{} = project, attrs) do
-    project
+  def update_embedding_changeset(%__MODULE__{} = organization, attrs) do
+    organization
     |> cast(attrs, [
       :embedding_dimension,
       :embedding_provider_type,

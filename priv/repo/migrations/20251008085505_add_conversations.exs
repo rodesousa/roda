@@ -5,10 +5,11 @@ defmodule Roda.Repo.Migrations.AddConversations do
     create table(:organizations, primary_key: false) do
       add :id, :uuid, primary_key: true
       add :name, :string, null: false
-      add :embedding_dimension, :integer, null: false
-      add :embedding_provider_type, :string, null: false
-      add :embedding_model, :string, null: false
-      add :embedding_api_base_url, :string, null: false
+      add :embedding_dimension, :integer
+      add :embedding_provider_type, :string
+      add :embedding_model, :string
+      add :embedding_api_base_url, :string
+      add :embedding_encrypted_api_key, :binary, skip_default_validation: true
       timestamps(type: :utc_datetime)
     end
 
@@ -24,6 +25,9 @@ defmodule Roda.Repo.Migrations.AddConversations do
 
     create table(:conversations, primary_key: false) do
       add :id, :uuid, primary_key: true
+
+      add :project_id, references(:projects, type: :uuid, on_delete: :delete_all)
+
       timestamps(type: :utc_datetime)
     end
 

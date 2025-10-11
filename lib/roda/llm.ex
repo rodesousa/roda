@@ -1,12 +1,46 @@
-defmodule Roda.Llm do
-  alias Roda.LLM.{Provider, Audio}
+defmodule Roda.LLM do
+  alias Roda.LLM.{Provider}
   alias Roda.Minio
+  require Logger
 
-  def chat_completion() do
+  def chat_completion(%Provider{} = provider, content) do
+    response =
+      provider
+      |> get_chat_url()
+      |> Req.post(
+        headers: [{"authorization", "Bearer #{provider.api_key}"}],
+        receive_timeout: 60_000,
+        json: %{model: provider.model, messages: [%{role: "user", content: content}]}
+      )
+
+    with {:ok, %{body: body}} <- response,
+         %{"choices" => [%{"message" => %{"content" => content}}]} <- body do
+      content
+    end
+  end
+
+  def embeddings(provider, content) when is_binary(content) do
+    embeddings(provider, [content])
+  end
+
+  def embeddings(provider, content) when is_list(content) do
+    response =
+      provider
+      |> get_embeddings_url()
+      |> Req.post(
+        headers: [{"authorization", "Bearer #{provider.api_key}"}],
+        receive_timeout: 60_000,
+        json: %{model: provider.model, input: content}
+      )
+
+    with {:ok, %{body: body}} <- response,
+         %{"data" => content} <- body do
+      content
+    end
   end
 
   def audio_transcribe(
-        %Provider{capability: "transcribe_audio"} = provider,
+        %Provider{} = provider,
         bucket,
         chunk_filepath
       ) do
@@ -44,5 +78,21 @@ defmodule Roda.Llm do
       {:error, reason} ->
         {:error, reason}
     end
+  end
+
+  def get_embeddings_url(%{provider_type: "openai"} = provider) do
+    "#{provider.api_base_url}/v1/embeddings"
+  end
+
+  def get_chat_url(%Provider{provider_type: "openai"} = provider) do
+    "#{provider.api_base_url}/v1/chat/completions"
+  end
+
+  def get_chat_url(%Provider{provider_type: "anthropic"} = provider) do
+    "#{provider.api_base_url}/v1/messages"
+  end
+
+  def get_chat_url() do
+    raise "nop"
   end
 end

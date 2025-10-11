@@ -9,7 +9,6 @@ defmodule Roda.Repo.Migrations.AddEmbeddingSchema do
       add :id, :uuid, primary_key: true
       add :chunk_id, references(:chunks, type: :uuid, on_delete: :delete_all), null: false
       add :model, :string, null: false
-      add :dims, :integer, null: false
       add :embedding, :vector, size: 1024
       timestamps(type: :utc_datetime)
     end

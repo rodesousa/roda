@@ -8,7 +8,7 @@ defmodule Roda.Conversations.Chunk do
     field :text, :string
     field :position, :integer
 
-    belongs_to :conversation, Conversation
+    belongs_to :conversation, Conversation, type: :binary_id
 
     timestamps(type: :utc_datetime)
   end

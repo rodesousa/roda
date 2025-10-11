@@ -9,6 +9,7 @@ defmodule Roda.Application do
   def start(_type, _args) do
     children = [
       RodaWeb.Telemetry,
+      Roda.Vault,
       Roda.Repo,
       {DNSCluster, query: Application.get_env(:roda, :dns_cluster_query) || :ignore},
       {Oban, Application.fetch_env!(:roda, Oban)},

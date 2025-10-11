@@ -7,7 +7,7 @@ defmodule Roda.Conversations.Embedding.Embedding1536 do
   schema "embeddings_1536" do
     field :model, :string
     field :embedding, Pgvector.Ecto.Vector
-    belongs_to :chunk_id, Chunk
+    belongs_to :chunk, Chunk, type: :binary_id
 
     timestamps(type: :utc_datetime)
   end

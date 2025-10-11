@@ -22,7 +22,7 @@ Set up environment variables:
 make env
 ```
 
-Set `CLOAK_KEY` in `.env` with the output `openssl rand -base64 32` or `mix phx.gen.secret 32`
+Set `CLOAK_KEY` in `.env` with the output `openssl rand -base64 32`
 
 Start the Docker services (PostgreSQL and MinIO):
 
