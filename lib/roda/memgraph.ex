@@ -4,14 +4,16 @@ defmodule Roda.Memgraph do
   """
 
   require Logger
+  alias Roda.Organization.Organization
+  alias Roda.Conversations.Chunk
 
   @doc """
   Returns a connection from the Bolt.Sips pool.
 
   ## Example
 
-      iex> Roda.Memgraph.conn()
-      #PID<0.123.0>
+  iex> Roda.Memgraph.conn()
+  #PID<0.123.0>
   """
   def conn do
     Bolt.Sips.conn()
@@ -22,8 +24,8 @@ defmodule Roda.Memgraph do
 
   ## Example
 
-      iex> Roda.Memgraph.query("RETURN 1 AS num")
-      {:ok, %Bolt.Sips.Response{results: [%{"num" => 1}]}}
+  iex> Roda.Memgraph.query("RETURN 1 AS num")
+  {:ok, %Bolt.Sips.Response{results: [%{"num" => 1}]}}
   """
   def query(statement, params \\ %{}) do
     Bolt.Sips.query(conn(), statement, params)
@@ -34,10 +36,232 @@ defmodule Roda.Memgraph do
 
   ## Example
 
-      iex> Roda.Memgraph.query!("CREATE (p:Person {name: $name}) RETURN p", %{name: "Alice"})
-      %Bolt.Sips.Response{results: [%{"p" => ...}]}
+  iex> Roda.Memgraph.query!("CREATE (p:Person {name: $name}) RETURN p", %{name: "Alice"})
+  %Bolt.Sips.Response{results: [%{"p" => ...}]}
   """
   def query!(statement, params \\ %{}) do
     Bolt.Sips.query!(conn(), statement, params)
+  end
+
+  @doc """
+  Stores entities from a chunk in Memgraph with deduplication.
+
+  Creates the chunk node if it doesn't exist, then performs entity deduplication.
+  If an entity already exists in the project, it links the existing entity to the chunk.
+  Otherwise, it creates a new entity node.
+
+  This function is idempotent - if the chunk has already been processed, it skips
+  processing and returns :ok.
+
+  **IMPORTANT:** This function should ONLY be called from `Roda.Workers.EntityExtractionWorker`.
+  Do not call this function directly from other parts of the application.
+
+  ## Deduplication
+
+  Level 1 (Hash-based) - **Currently implemented**:
+  - Computes `entity_dedup_hash` from `name + type`
+  - Searches for existing entities in the same project
+  - Links to existing entity if found, creates new one otherwise
+
+  Level 1.5 (String similarity) - **Future implementation**:
+  - Uses Jaro-Winkler distance on `entity_normalized_name`
+  - Detects typos and variations (e.g., "Marie Dubois" vs "Marie Duboi")
+
+  Level 2 (Vector search) - **Future implementation**:
+  - Semantic similarity using entity embeddings
+  - Detects synonyms and related concepts (e.g., "IBM" vs "International Business Machines")
+
+  Level 3 (Metadata boost) - **Future implementation**:
+  - Context-aware scoring based on chunk proximity
+  - Penalizes ambiguous names in different contexts
+
+  Level 4 (LLM decision) - **Future implementation**:
+  - LLM-powered final decision for gray zone cases
+  - Conservative approach with async human review
+
+  ## Example
+
+      iex> entities_from_llm_extraction = [
+      ...>   %{name: "Marie Dubois", type: "PERSON", description: "French politician"},
+      ...>   %{name: "Paris", type: "LOCATION", description: "Capital of France"}
+      ...> ]
+      iex> Roda.Memgraph.store_entities_with_deduplication(chunk, entities_from_llm_extraction, organization)
+      :ok
+  """
+  def store_entities_with_deduplication(
+        %Chunk{} = chunk,
+        entities,
+        %Organization{} = organization
+      ) do
+    case chunk_exists?(chunk.id) do
+      true ->
+        Logger.info("Chunk #{chunk.id} already processed in Memgraph, skipping")
+        :ok
+
+      false ->
+        do_store_entities_with_deduplication(chunk, entities, organization)
+    end
+  end
+
+  defp chunk_exists?(chunk_id) do
+    query = """
+    MATCH (c:Chunk {id: $chunk_id})
+    RETURN c.id
+    LIMIT 1
+    """
+
+    case query(query, %{chunk_id: chunk_id}) do
+      {:ok, %Bolt.Sips.Response{results: [_]}} ->
+        true
+
+      _ ->
+        false
+    end
+  end
+
+  defp do_store_entities_with_deduplication(
+         %Chunk{} = chunk,
+         entities,
+         %Organization{} = organization
+       ) do
+    project_id = chunk.conversation.project_id
+
+    # Create Chunk node first
+    create_chunk_node(chunk.id, project_id)
+
+    Enum.each(entities, fn entity ->
+      entity_dedup_hash = compute_entity_dedup_hash(entity.name, entity.type)
+      entity_normalized_name = normalize_name(entity.name)
+
+      case find_by_hash(project_id, entity_dedup_hash) do
+        {:ok, existing_entity_id} ->
+          {:ok, _} = link_entity_to_chunk(existing_entity_id, chunk.id)
+
+        {:not_found} ->
+          {:ok, _} =
+            create_new_entity(
+              organization.id,
+              project_id,
+              chunk.id,
+              entity,
+              entity_dedup_hash,
+              entity_normalized_name
+            )
+      end
+    end)
+
+    :ok
+  end
+
+  defp create_chunk_node(chunk_id, project_id) do
+    query = """
+    CREATE (c:Chunk {
+      id: $chunk_id,
+      project_id: $project_id,
+      created_at: datetime()
+    })
+    RETURN c.id
+    """
+
+    params = %{
+      chunk_id: chunk_id,
+      project_id: project_id
+    }
+
+    case query(query, params) do
+      {:ok, _} ->
+        :ok
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  defp compute_entity_dedup_hash(name, type) do
+    normalized = "#{String.downcase(String.trim(name))}_#{String.downcase(type)}"
+    :crypto.hash(:sha256, normalized) |> Base.encode16(case: :lower)
+  end
+
+  defp normalize_name(name) do
+    name
+    |> String.trim()
+    |> String.downcase()
+  end
+
+  defp link_entity_to_chunk(entity_id, chunk_id) do
+    query = """
+    MATCH (e:Entity {id: $entity_id})
+    MATCH (c:Chunk {id: $chunk_id})
+    MERGE (e)-[:MENTIONED_IN]->(c)
+    """
+
+    params = %{entity_id: entity_id, chunk_id: chunk_id}
+    query(query, params)
+  end
+
+  defp create_new_entity(
+         org_id,
+         project_id,
+         chunk_id,
+         entity,
+         entity_dedup_hash,
+         entity_normalized_name
+       ) do
+    entity_id = Uniq.UUID.uuid7()
+
+    query = """
+    CREATE (e:Entity {
+      id: $id,
+      organization_id: $organization_id,
+      project_id: $project_id,
+      name: $name,
+      type: $type,
+      description: $description,
+      entity_dedup_hash: $entity_dedup_hash,
+      entity_normalized_name: $entity_normalized_name,
+      created_at: datetime(),
+      updated_at: datetime()
+    })
+    WITH e
+    MATCH (c:Chunk {id: $chunk_id})
+    CREATE (e)-[:MENTIONED_IN]->(c)
+    RETURN e.id
+    """
+
+    params = %{
+      id: entity_id,
+      organization_id: org_id,
+      project_id: project_id,
+      name: entity.name,
+      type: entity.type,
+      description: entity.description,
+      entity_dedup_hash: entity_dedup_hash,
+      entity_normalized_name: entity_normalized_name,
+      chunk_id: chunk_id
+    }
+
+    case query(query, params) do
+      {:ok, _} ->
+        {:ok, entity_id}
+
+      {:error, reason} ->
+        {:error, reason}
+    end
+  end
+
+  defp find_by_hash(project_id, entity_dedup_hash) do
+    query = """
+    MATCH (e:Entity {project_id: $project_id, entity_dedup_hash: $entity_dedup_hash})
+    RETURN e.id AS entity_id
+    LIMIT 1
+    """
+
+    case query(query, %{project_id: project_id, entity_dedup_hash: entity_dedup_hash}) do
+      {:ok, %Bolt.Sips.Response{results: [%{"entity_id" => id}]}} ->
+        {:ok, id}
+
+      _ ->
+        {:not_found}
+    end
   end
 end

@@ -4,12 +4,8 @@ defmodule Roda.Workers.EmbeddingWorker do
   require Logger
 
   use Oban.Worker,
-    max_attempts: 5,
-    priority: 0,
-    queue: :embedding,
-    tags: [],
-    replace: [],
-    unique: false
+    max_attempts: 3,
+    queue: :embedding
 
   @impl Oban.Worker
   def perform(%Oban.Job{args: %{"chunks" => chunks, "organization_id" => organization_id}}) do

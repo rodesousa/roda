@@ -82,7 +82,7 @@ config :logger, :default_formatter,
 config :phoenix, :json_library, Jason
 
 config :roda, Oban,
-  queues: [default: 10, embedding: 50],
+  queues: [default: 10, embedding: 50, entity_extraction: 50],
   repo: Roda.Repo
 
 # Import environment specific config. This must remain at the bottom

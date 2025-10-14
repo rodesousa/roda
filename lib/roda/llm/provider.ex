@@ -19,9 +19,7 @@ defmodule Roda.LLM.Provider do
   use Ecto.Schema
   import Ecto.Changeset
 
-  @primary_key {:id, :binary_id, autogenerate: true}
-  @foreign_key_type :binary_id
-
+  @primary_key {:id, Uniq.UUID, autogenerate: true, version: 7}
   @derive {Inspect, except: [:api_key]}
   schema "llm_providers" do
     field :name, :string
@@ -32,21 +30,21 @@ defmodule Roda.LLM.Provider do
     field :is_active, :boolean, default: true
     field :config, :map, default: %{}
 
+    belongs_to :organization, Organization, type: :binary_id
     timestamps()
   end
 
   def changeset(attrs) do
     %__MODULE__{}
     |> cast(attrs, __schema__(:fields))
-    |> validate_required([:name, :provider_type, :api_key])
-    |> validate_length(:name, min: 1, max: 255)
-    |> validate_length(:api_key, min: 1)
+    |> validate_required(required())
   end
 
   def update_changeset(provider, attrs) do
     provider
-    |> cast(attrs, [:api_key, :name, :model, :is_active, :config])
-    |> validate_required([:api_key])
-    |> validate_length(:api_key, min: 1)
+    |> cast(attrs, __schema__(:fields))
+    |> validate_required(required())
   end
+
+  defp required(), do: [:name, :provider_type, :api_key, :model, :organization_id, :api_base_url]
 end

@@ -57,7 +57,7 @@ defmodule Roda.LLM do
     multipart =
       Multipart.new()
       |> Multipart.add_part(file_part)
-      |> Multipart.add_part(Multipart.Part.text_field(provider.default_model, :model))
+      |> Multipart.add_part(Multipart.Part.text_field(provider.model, :model))
 
     headers =
       [
@@ -92,7 +92,7 @@ defmodule Roda.LLM do
     "#{provider.api_base_url}/v1/messages"
   end
 
-  def get_chat_url() do
+  def get_chat_url(_p) do
     raise "nop"
   end
 end

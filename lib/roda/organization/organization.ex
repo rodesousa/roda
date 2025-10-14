@@ -3,6 +3,8 @@ defmodule Roda.Organization.Organization do
   import Ecto.Changeset
 
   @primary_key {:id, Uniq.UUID, autogenerate: true, version: 7}
+
+  @derive {Inspect, except: [:embedding_api_base_url]}
   schema "organizations" do
     field :name, :string
 

@@ -9,7 +9,7 @@ defmodule Roda.Repo.Migrations.AddConversations do
       add :embedding_provider_type, :string
       add :embedding_model, :string
       add :embedding_api_base_url, :string
-      add :embedding_encrypted_api_key, :binary, skip_default_validation: true
+      add :embedding_encrypted_api_key, :binary
       timestamps(type: :utc_datetime)
     end
 
@@ -42,6 +42,24 @@ defmodule Roda.Repo.Migrations.AddConversations do
       timestamps(type: :utc_datetime)
     end
 
+    create table(:llm_providers, primary_key: false) do
+      add :id, :uuid, primary_key: true
+      add :name, :string, null: false
+      add :provider_type, :string, null: false
+      add :api_key, :binary, null: false
+      add :model, :string, null: false
+      add :api_base_url, :string, null: false
+      add :is_active, :boolean, default: true, null: false
+      add :config, :map, default: %{}
+
+      add :organization_id, references(:organizations, type: :uuid, on_delete: :delete_all),
+        null: false
+
+      timestamps()
+    end
+
     create index(:chunks, [:conversation_id])
+    create unique_index(:llm_providers, [:provider_type, :name])
+    create index(:llm_providers, [:is_active])
   end
 end
