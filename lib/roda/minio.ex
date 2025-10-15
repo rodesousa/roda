@@ -12,10 +12,13 @@ defmodule Roda.Minio do
 
       iex> Minio.list("roda")
       {:ok, %{body: %{contents: [], name: "roda"}}}
+
+      iex> Minio.list("roda", pref: "org")
+      {:ok, %{body: %{contents: [], name: "roda"}}}
   """
-  def list(bucket) when is_bitstring(bucket) do
-    bucket
-    |> Minio.S3.list_objects()
+  def list(args \\ []) do
+    bucket()
+    |> Minio.S3.list_objects(args)
     |> Minio.request!()
   end
 
@@ -41,13 +44,13 @@ defmodule Roda.Minio do
 
   ## Example
 
-      iex> Minio.upload_audio_chunk(chunk_binary, "chunk.webm")
+      iex> Minio.upload_audio_chunk(chunk_binary, "folder/folder", chunk.webm")
       {:ok, "roda/audio-chunks/550e8400-e29b-41d4-a716-446655440000.webm"}
   """
-  def upload_audio_chunk(chunk_binary, original_filename) do
-    chunk_id = Ecto.UUID.generate()
+  def upload_audio_chunk(chunk_binary, path, original_filename) do
+    chunk_id = Uniq.UUID.uuid7()
     extension = Path.extname(original_filename)
-    key = "audio-chunks/#{chunk_id}#{extension}"
+    key = "#{path}/#{chunk_id}#{extension}"
 
     upload_file(bucket(), key, chunk_binary)
   end
@@ -63,8 +66,8 @@ defmodule Roda.Minio do
       iex> Minio.get_file("audio-chunks/uuid.webm")
       {:ok, <<binary_data>>}
   """
-  def get_file(bucket, key) when is_bitstring(key) do
-    Minio.S3.get_object(bucket, key)
+  def get_file(key) when is_bitstring(key) do
+    Minio.S3.get_object(bucket(), key)
     |> Minio.request()
     |> case do
       {:ok, %{body: body}} -> {:ok, body}

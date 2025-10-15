@@ -15,15 +15,21 @@
  * - This ensures each chunk is a valid, standalone WebM file
  *
  */
+
+type Conversation = {
+  id: string
+}
+
 export const Recorder = {
   mounted() {
     this.mediaRecorder = null;
     this.chunks = [];
     this.stream = null;
     this.isPaused = false; // Track pause state manually
+    this.conversation = null;
 
     // Listen for events from LiveView
-    this.handleEvent("start_recording", () => this.startRecording());
+    this.handleEvent("start_recording", (conversation: Conversation) => this.startRecording(conversation));
     this.handleEvent("pause_recording", () => this.pauseRecording());
     this.handleEvent("resume_recording", () => this.resumeRecording());
     this.handleEvent("stop_recording", () => this.stopRecording());
@@ -35,8 +41,10 @@ export const Recorder = {
    * Reuses existing stream if available (after pause/resume).
    * Creates new MediaRecorder instance each time.
    */
-  async startRecording() {
+  async startRecording(conversation: Conversation) {
     try {
+
+      this.conversation = conversation;
       // Request microphone access if not already available
       if (!this.stream) {
         this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -100,7 +108,7 @@ export const Recorder = {
   resumeRecording() {
     if (this.isPaused && this.stream) {
       // Restart a new MediaRecorder with existing stream
-      this.startRecording();
+      this.startRecording(this.conversation);
       this.pushEvent("recording_resumed", {});
     }
   },
@@ -110,8 +118,9 @@ export const Recorder = {
       // stop() automatically triggers ondataavailable for final chunk
       this.isPaused = false;
       this.mediaRecorder.stop();
-      this.pushEvent("recording_stopped", {});
     }
+
+    this.pushEvent("recording_stopped", {});
   },
 
   /**
@@ -127,8 +136,11 @@ export const Recorder = {
     const formData = new FormData();
     const filename = `chunk-${Date.now()}.${this.getExtension()}`;
 
+    console.log(this.conversation)
+
     formData.append("chunk", blob, filename);
     formData.append("timestamp", new Date().toISOString());
+    formData.append("conversation_id", this.conversation.id);
 
     try {
       const response = await fetch("/api/chunks/upload", {

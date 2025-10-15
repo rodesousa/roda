@@ -128,7 +128,7 @@ defmodule Roda.Workers.EntityExtractionWorker do
   end
 
   defp get_provider(%Organization{} = organization) do
-    case Roda.Providers.get_provider_by_organization_id(organization) do
+    case Roda.Providers.get_provider_by_organization(organization) do
       nil -> {:error, :provider_not_found}
       provider -> {:ok, provider}
     end

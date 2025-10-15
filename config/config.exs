@@ -23,7 +23,12 @@ config :roda, :scopes,
 config :roda, Oban,
   engine: Oban.Engines.Basic,
   notifier: Oban.Notifiers.Postgres,
-  queues: [default: 10],
+  queues: [
+    default: 10,
+    embedding: 50,
+    entity_extraction: 50,
+    audio_transcribe: 50
+  ],
   repo: Roda.Repo
 
 config :roda,
@@ -80,10 +85,6 @@ config :logger, :default_formatter,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
-
-config :roda, Oban,
-  queues: [default: 10, embedding: 50, entity_extraction: 50],
-  repo: Roda.Repo
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

@@ -41,11 +41,8 @@ defmodule Roda.LLM do
 
   def audio_transcribe(
         %Provider{} = provider,
-        bucket,
-        chunk_filepath
+        audio_binary
       ) do
-    {:ok, audio_binary} = Minio.get_file(bucket, chunk_filepath)
-
     file_part = %Multipart.Part{
       body: audio_binary,
       headers: [

@@ -33,8 +33,9 @@ defmodule Roda.Repo.Migrations.AddConversations do
 
     create table(:chunks, primary_key: false) do
       add :id, :uuid, primary_key: true
-      add :text, :text
-      add :position, :integer
+      add :text, :text, null: false
+      add :position, :integer, null: false
+      add :path, :string, null: false
 
       add :conversation_id, references(:conversations, type: :uuid, on_delete: :delete_all),
         null: false
@@ -50,6 +51,7 @@ defmodule Roda.Repo.Migrations.AddConversations do
       add :model, :string, null: false
       add :api_base_url, :string, null: false
       add :is_active, :boolean, default: true, null: false
+      add :type, :string, null: false
       add :config, :map, default: %{}
 
       add :organization_id, references(:organizations, type: :uuid, on_delete: :delete_all),
@@ -61,5 +63,10 @@ defmodule Roda.Repo.Migrations.AddConversations do
     create index(:chunks, [:conversation_id])
     create unique_index(:llm_providers, [:provider_type, :name])
     create index(:llm_providers, [:is_active])
+
+    create unique_index(:llm_providers, [:organization_id, :type],
+             where: "is_active = true",
+             name: :llm_providers_one_active_per_type
+           )
   end
 end

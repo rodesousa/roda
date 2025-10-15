@@ -28,6 +28,7 @@ defmodule Roda.LLM.Provider do
     field :api_base_url, :string
     field :model, :string
     field :is_active, :boolean, default: true
+    field :type, :string
     field :config, :map, default: %{}
 
     belongs_to :organization, Organization, type: :binary_id
@@ -38,13 +39,16 @@ defmodule Roda.LLM.Provider do
     %__MODULE__{}
     |> cast(attrs, __schema__(:fields))
     |> validate_required(required())
+    |> validate_inclusion(:type, ["chat", "audio"])
   end
 
   def update_changeset(provider, attrs) do
     provider
     |> cast(attrs, __schema__(:fields))
     |> validate_required(required())
+    |> validate_inclusion(:type, ["chat", "audio"])
   end
 
-  defp required(), do: [:name, :provider_type, :api_key, :model, :organization_id, :api_base_url]
+  defp required(),
+    do: [:name, :provider_type, :api_key, :model, :organization_id, :api_base_url, :type]
 end

@@ -7,6 +7,7 @@ defmodule Roda.Conversations.Chunk do
   schema "chunks" do
     field :text, :string
     field :position, :integer
+    field :path, :string
 
     belongs_to :conversation, Conversation, type: :binary_id
 
@@ -16,6 +17,6 @@ defmodule Roda.Conversations.Chunk do
   def changeset(attrs) do
     %__MODULE__{}
     |> cast(attrs, __schema__(:fields))
-    |> validate_required([:conversation_id, :position, :text])
+    |> validate_required([:conversation_id, :position, :text, :path])
   end
 end
