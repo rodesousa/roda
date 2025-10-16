@@ -6,6 +6,8 @@ defmodule Roda.Conversations.Conversation do
 
   @primary_key {:id, Uniq.UUID, autogenerate: true, version: 7}
   schema "conversations" do
+    field :fully_transcribed, :boolean, default: false
+
     has_many :chunks, Chunk
     belongs_to :project, Project, type: :binary_id
 
@@ -14,6 +16,12 @@ defmodule Roda.Conversations.Conversation do
 
   def changeset(attrs) do
     %__MODULE__{}
+    |> cast(attrs, __schema__(:fields))
+    |> validate_required([:project_id])
+  end
+
+  def update_changeset(%__MODULE__{} = conversation, attrs) do
+    conversation
     |> cast(attrs, __schema__(:fields))
     |> validate_required([:project_id])
   end

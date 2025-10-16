@@ -35,12 +35,33 @@ defmodule Roda.Workers.TranscribeWorker do
         name
       end)
       |> Enum.with_index(fn %{key: key}, index ->
+        [chunk_uuid, _] = Path.basename(key) |> String.split(".")
         {:ok, audio_binary} = Minio.get_file(key)
         text = "coucou"
-        # LLM.audio_transcribe(provider, audio_binary)
-        %{position: index, conversation_id: conversation_id, path: key, text: text}
-        |> Conversations.add_chunk()
+
+        LLM.audio_transcribe(provider, audio_binary)
+
+        create_chunk(
+          %{
+            id: chunk_uuid,
+            position: index,
+            conversation_id: conversation_id,
+            path: key,
+            text: text
+          },
+          conversation.project.organization_id
+        )
       end)
+
+      Conversations.Conversation.update_changeset(conversation, %{fully_transcribed: true})
+      |> Repo.update!()
+
+      %{
+        organization_id: conversation.project.organization_id,
+        conversation_id: conversation.id
+      }
+      |> Roda.Workers.EntityExtractionWorker.new()
+      |> Oban.insert!()
 
       :ok
     else
@@ -61,6 +82,16 @@ defmodule Roda.Workers.TranscribeWorker do
     end
   end
 
+  defp create_chunk(args, _orga_id) do
+    case Repo.get(Conversations.Chunk, args.id) do
+      nil ->
+        Conversations.add_chunk!(args)
+
+      _ ->
+        :ok
+    end
+  end
+
   defp get_provider(organization_id) do
     case Roda.Providers.get_provider_by_organization(organization_id, "audio") do
       nil -> {:error, :provider_not_found}
@@ -68,8 +99,8 @@ defmodule Roda.Workers.TranscribeWorker do
     end
   end
 
-  defp get_conversation(convsersation_id) do
-    case Conversations.get_conversation(convsersation_id) do
+  defp get_conversation(conversation_id) do
+    case Conversations.get_conversation(conversation_id) do
       nil -> {:error, :conversation_not_found}
       conversation -> {:ok, conversation}
     end

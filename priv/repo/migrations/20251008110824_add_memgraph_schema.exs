@@ -15,16 +15,16 @@ defmodule Roda.Repo.Migrations.AddMemgraphSchema do
       )
 
     # Constraints
-    execute_memgraph("CREATE CONSTRAINT ON (c:Chunk) ASSERT c.id IS UNIQUE;")
-    execute_memgraph("CREATE CONSTRAINT ON (c:Chunk) ASSERT EXISTS (c.project_id);")
+    execute_memgraph("CREATE CONSTRAINT ON (c:Conversation) ASSERT c.id IS UNIQUE;")
+    execute_memgraph("CREATE CONSTRAINT ON (c:Conversation) ASSERT EXISTS (c.project_id);")
 
     execute_memgraph("CREATE CONSTRAINT ON (e:Entity) ASSERT e.id IS UNIQUE;")
     execute_memgraph("CREATE CONSTRAINT ON (e:Entity) ASSERT EXISTS (e.project_id);")
     execute_memgraph("CREATE CONSTRAINT ON (e:Entity) ASSERT EXISTS (e.organization_id);")
 
     # Property indexes
-    execute_memgraph("CREATE INDEX ON :Chunk(id);")
-    execute_memgraph("CREATE INDEX ON :Chunk(project_id);")
+    execute_memgraph("CREATE INDEX ON :Conversation(id);")
+    execute_memgraph("CREATE INDEX ON :Conversation(project_id);")
 
     execute_memgraph("CREATE INDEX ON :Entity(project_id);")
     execute_memgraph("CREATE INDEX ON :Entity(organization_id);")

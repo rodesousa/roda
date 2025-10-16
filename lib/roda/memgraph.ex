@@ -5,7 +5,7 @@ defmodule Roda.Memgraph do
 
   require Logger
   alias Roda.Organization.Organization
-  alias Roda.Conversations.Chunk
+  alias Roda.Conversations.Conversation
 
   @doc """
   Returns a connection from the Bolt.Sips pool.
@@ -44,13 +44,13 @@ defmodule Roda.Memgraph do
   end
 
   @doc """
-  Stores entities from a chunk in Memgraph with deduplication.
+  Stores entities from a conversation in Memgraph with deduplication.
 
-  Creates the chunk node if it doesn't exist, then performs entity deduplication.
-  If an entity already exists in the project, it links the existing entity to the chunk.
-  Otherwise, it creates a new entity node.
+  Creates the conversation node if it doesn't exist, then performs entity deduplication
+  at the project level. If an entity already exists in the project, it links the existing
+  entity to the conversation. Otherwise, it creates a new entity node.
 
-  This function is idempotent - if the chunk has already been processed, it skips
+  This function is idempotent - if the conversation has already been processed, it skips
   processing and returns :ok.
 
   **IMPORTANT:** This function should ONLY be called from `Roda.Workers.EntityExtractionWorker`.
@@ -72,7 +72,7 @@ defmodule Roda.Memgraph do
   - Detects synonyms and related concepts (e.g., "IBM" vs "International Business Machines")
 
   Level 3 (Metadata boost) - **Future implementation**:
-  - Context-aware scoring based on chunk proximity
+  - Context-aware scoring based on conversation proximity
   - Penalizes ambiguous names in different contexts
 
   Level 4 (LLM decision) - **Future implementation**:
@@ -81,36 +81,38 @@ defmodule Roda.Memgraph do
 
   ## Example
 
-      iex> entities_from_llm_extraction = [
+      iex> conversation = %Conversation{id: "conv-123", project_id: "proj-1"}
+      iex> entities = [
       ...>   %{name: "Marie Dubois", type: "PERSON", description: "French politician"},
       ...>   %{name: "Paris", type: "LOCATION", description: "Capital of France"}
       ...> ]
-      iex> Roda.Memgraph.store_entities_with_deduplication(chunk, entities_from_llm_extraction, organization)
+      iex> organization = %Organization{id: "org-1"}
+      iex> Roda.Memgraph.store_conversation_entities(conversation, entities, organization)
       :ok
   """
-  def store_entities_with_deduplication(
-        %Chunk{} = chunk,
+  def store_conversation_entities(
+        %Conversation{} = conversation,
         entities,
         %Organization{} = organization
       ) do
-    case chunk_exists?(chunk.id) do
+    case conversation_exists?(conversation.id) do
       true ->
-        Logger.info("Chunk #{chunk.id} already processed in Memgraph, skipping")
+        Logger.info("Conversation #{conversation.id} already processed in Memgraph, skipping")
         :ok
 
       false ->
-        do_store_entities_with_deduplication(chunk, entities, organization)
+        do_store_conversation_entities(conversation, entities, organization)
     end
   end
 
-  defp chunk_exists?(chunk_id) do
+  defp conversation_exists?(conversation_id) do
     query = """
-    MATCH (c:Chunk {id: $chunk_id})
+    MATCH (c:Conversation {id: $conversation_id})
     RETURN c.id
     LIMIT 1
     """
 
-    case query(query, %{chunk_id: chunk_id}) do
+    case query(query, %{conversation_id: conversation_id}) do
       {:ok, %Bolt.Sips.Response{results: [_]}} ->
         true
 
@@ -119,15 +121,15 @@ defmodule Roda.Memgraph do
     end
   end
 
-  defp do_store_entities_with_deduplication(
-         %Chunk{} = chunk,
+  defp do_store_conversation_entities(
+         %Conversation{} = conversation,
          entities,
          %Organization{} = organization
        ) do
-    project_id = chunk.conversation.project_id
+    project_id = conversation.project_id
 
-    # Create Chunk node first
-    create_chunk_node(chunk.id, project_id)
+    # Create Conversation node first
+    create_conversation_node(conversation.id, project_id)
 
     Enum.each(entities, fn entity ->
       entity_dedup_hash = compute_entity_dedup_hash(entity.name, entity.type)
@@ -135,14 +137,14 @@ defmodule Roda.Memgraph do
 
       case find_by_hash(project_id, entity_dedup_hash) do
         {:ok, existing_entity_id} ->
-          {:ok, _} = link_entity_to_chunk(existing_entity_id, chunk.id)
+          {:ok, _} = link_entity_to_conversation(existing_entity_id, conversation.id)
 
         {:not_found} ->
           {:ok, _} =
             create_new_entity(
               organization.id,
               project_id,
-              chunk.id,
+              conversation.id,
               entity,
               entity_dedup_hash,
               entity_normalized_name
@@ -153,10 +155,10 @@ defmodule Roda.Memgraph do
     :ok
   end
 
-  defp create_chunk_node(chunk_id, project_id) do
+  defp create_conversation_node(conversation_id, project_id) do
     query = """
-    CREATE (c:Chunk {
-      id: $chunk_id,
+    CREATE (c:Conversation {
+      id: $conversation_id,
       project_id: $project_id,
       created_at: datetime()
     })
@@ -164,7 +166,7 @@ defmodule Roda.Memgraph do
     """
 
     params = %{
-      chunk_id: chunk_id,
+      conversation_id: conversation_id,
       project_id: project_id
     }
 
@@ -188,21 +190,21 @@ defmodule Roda.Memgraph do
     |> String.downcase()
   end
 
-  defp link_entity_to_chunk(entity_id, chunk_id) do
+  defp link_entity_to_conversation(entity_id, conversation_id) do
     query = """
     MATCH (e:Entity {id: $entity_id})
-    MATCH (c:Chunk {id: $chunk_id})
+    MATCH (c:Conversation {id: $conversation_id})
     MERGE (e)-[:MENTIONED_IN]->(c)
     """
 
-    params = %{entity_id: entity_id, chunk_id: chunk_id}
+    params = %{entity_id: entity_id, conversation_id: conversation_id}
     query(query, params)
   end
 
   defp create_new_entity(
          org_id,
          project_id,
-         chunk_id,
+         conversation_id,
          entity,
          entity_dedup_hash,
          entity_normalized_name
@@ -223,7 +225,7 @@ defmodule Roda.Memgraph do
       updated_at: datetime()
     })
     WITH e
-    MATCH (c:Chunk {id: $chunk_id})
+    MATCH (c:Conversation {id: $conversation_id})
     CREATE (e)-[:MENTIONED_IN]->(c)
     RETURN e.id
     """
@@ -237,7 +239,7 @@ defmodule Roda.Memgraph do
       description: entity.description,
       entity_dedup_hash: entity_dedup_hash,
       entity_normalized_name: entity_normalized_name,
-      chunk_id: chunk_id
+      conversation_id: conversation_id
     }
 
     case query(query, params) do

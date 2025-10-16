@@ -1,5 +1,6 @@
 defmodule Roda.LLM do
-  alias Roda.LLM.{Provider}
+  @behaviour Roda.Llm.LlmBehaviour
+  alias Roda.LLM.Provider
   alias Roda.Minio
   require Logger
 

@@ -17,6 +17,6 @@ defmodule Roda.Conversations.Chunk do
   def changeset(attrs) do
     %__MODULE__{}
     |> cast(attrs, __schema__(:fields))
-    |> validate_required([:conversation_id, :position, :text, :path])
+    |> validate_required([:conversation_id, :position, :text])
   end
 end

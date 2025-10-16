@@ -23,6 +23,7 @@ defmodule RodaWeb.ConnCase do
       @endpoint RodaWeb.Endpoint
 
       use RodaWeb, :verified_routes
+      use Oban.Testing, repo: Roda.Repo
 
       # Import conveniences for testing with connections
       import Plug.Conn

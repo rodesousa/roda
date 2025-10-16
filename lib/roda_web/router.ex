@@ -21,6 +21,7 @@ defmodule RodaWeb.Router do
     pipe_through :browser
 
     live "/", TestLive, :home
+    live "/testify", TestifyLive
   end
 
   # Other scopes may use custom stacks.

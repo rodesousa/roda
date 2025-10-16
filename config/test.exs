@@ -17,6 +17,15 @@ config :roda, Roda.Repo,
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 
+# Configure Memgraph for tests
+config :bolt_sips, Bolt,
+  url: "bolt://localhost:7687",
+  basic_auth: [username: "memgraph", password: "memgraph"],
+  pool_size: 5
+
+# Use Jason for JSON in Bolt.Sips
+config :bolt_sips, :json_library, Jason
+
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
 config :roda, RodaWeb.Endpoint,
@@ -39,3 +48,5 @@ config :phoenix, :plug_init_mode, :runtime
 # Enable helpful, but potentially expensive runtime checks
 config :phoenix_live_view,
   enable_expensive_runtime_checks: true
+
+config :roda, :llm, Roda.Llm.Adapters.LlmMock

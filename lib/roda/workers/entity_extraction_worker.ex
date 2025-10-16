@@ -6,12 +6,16 @@ defmodule Roda.Workers.EntityExtractionWorker do
     queue: :entity_extraction,
     max_attempts: 3
 
-  alias Roda.{Repo, Organization, LLM, Conversations}
+  alias Roda.{Repo, Organization, Conversations}
   alias Roda.Organization.Organization
-  alias Roda.Conversations.Chunk
+  alias Roda.Conversations.Conversation
   alias Roda.LLM.Provider
   alias Roda.Memgraph
   require Logger
+
+  defp llm() do
+    Application.get_env(:roda, :llm)
+  end
 
   defp entity_extraction_prompt(input_text) do
     """
@@ -88,22 +92,22 @@ defmodule Roda.Workers.EntityExtractionWorker do
   def perform(%Oban.Job{
         args: %{
           "organization_id" => org_id,
-          "chunk_id" => chunk_id
+          "conversation_id" => conversation_id
         }
       }) do
-    Logger.info("Extracting entities from chunk #{chunk_id}")
+    Logger.info("Extracting entities from conversation #{conversation_id}")
 
-    with {:ok, chunk} <- get_chunk(chunk_id),
+    with {:ok, conversation} <- get_conversation(conversation_id),
          {:ok, organization} <- get_organization(org_id),
          {:ok, provider} <- get_provider(organization),
-         {:ok, entities} <- extract_entities(provider, chunk.text),
+         {:ok, entities} <- extract_entities(provider, conversation),
          :ok <-
-           Memgraph.store_entities_with_deduplication(
-             chunk,
+           Memgraph.store_conversation_entities(
+             conversation,
              entities,
              organization
            ) do
-      Logger.info("Successfully extracted entities from chunk #{chunk_id}")
+      Logger.info("Successfully extracted entities from conversation #{conversation_id}")
 
       :ok
     else
@@ -113,10 +117,15 @@ defmodule Roda.Workers.EntityExtractionWorker do
     end
   end
 
-  defp get_chunk(chunk_id) do
-    case Conversations.get_chunk(chunk_id) do
-      nil -> {:error, :chunk_not_found}
-      chunk -> {:ok, chunk}
+  defp get_conversation(conversation_id) do
+    case Conversations.get_conversation(conversation_id) do
+      nil ->
+        {:error, :conversation_not_found}
+
+      conversation ->
+        # Preload project for Memgraph
+        conversation = Roda.Repo.preload(conversation, :project)
+        {:ok, conversation}
     end
   end
 
@@ -134,59 +143,25 @@ defmodule Roda.Workers.EntityExtractionWorker do
     end
   end
 
-  # defp extract_entities(%Provider{} = provider, text) do
-  #     prompt = entity_extraction_prompt(text)
-  #
-  #     case LLM.chat_completion(provider, prompt) do
-  #       nil ->
-  #         {:error, :extraction_failed}
-  #
-  #       response ->
-  #         entities = parse_entities(response)
-  #         {:ok, entities}
-  #     end
-  #   end
+  defp extract_entities(%Provider{} = provider, %Conversation{} = conversation) do
+    text =
+      Enum.reduce(conversation.chunks, "", fn %{text: text}, acc ->
+        """
+        #{acc}
+        #{text}
+        """
+      end)
 
-  defp extract_entities(%Provider{} = provider, text) do
-    entities = [
-      %{
-        description:
-          "Mathilde Panot est une députée et présidente du groupe LFI à l'Assemblée nationale",
-        name: "Mathilde Panot",
-        type: "PERSON"
-      },
-      %{
-        description:
-          "Apolline de Malherbe est une journaliste qui a interrogé Mathilde Panot sur BFM TV",
-        name: "Apolline de Malherbe",
-        type: "PERSON"
-      },
-      %{
-        description: "BFM TV est une chaîne de télévision où Mathilde Panot a été interrogée",
-        name: "BFM TV",
-        type: "ORGANIZATION"
-      },
-      %{
-        description:
-          "Groupe LFI est un groupe politique à l'Assemblée nationale dont Mathilde Panot est la présidente",
-        name: "Groupe LFI",
-        type: "ORGANIZATION"
-      },
-      %{
-        description:
-          "Assemblée nationale est l'institution législative où Mathilde Panot est députée et présidente du groupe LFI",
-        name: "Assemblée nationale",
-        type: "ORGANIZATION"
-      },
-      %{
-        description:
-          "Gouvernement socialiste est une hypothèse politique à laquelle Mathilde Panot dit ne pas croire",
-        name: "Gouvernement socialiste",
-        type: "CONCEPT"
-      }
-    ]
+    prompt = entity_extraction_prompt(text)
 
-    {:ok, entities}
+    case llm().chat_completion(provider, prompt) do
+      nil ->
+        {:error, :extraction_failed}
+
+      response ->
+        entities = parse_entities(response)
+        {:ok, entities}
+    end
   end
 
   defp parse_entities(response) do
@@ -196,7 +171,6 @@ defmodule Roda.Workers.EntityExtractionWorker do
     |> Enum.filter(&String.starts_with?(&1, "entity|"))
     |> Enum.map(&parse_entity_line/1)
     |> Enum.filter(&(&1 != nil))
-    |> IO.inspect(label: " after parse")
   end
 
   defp parse_entity_line(line) do

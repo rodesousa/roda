@@ -3,12 +3,12 @@ defmodule Roda.Conversations do
   alias Roda.Conversations.{Chunk, Conversation}
   import Ecto.Query
 
-  def add_chunk(attrs) do
+  def add_chunk!(attrs) do
     Chunk.changeset(attrs)
     |> Repo.insert!()
   end
 
-  def add_conversation(attrs) do
+  def add_conversation!(attrs) do
     Conversation.changeset(attrs)
     |> Repo.insert!()
   end
@@ -24,14 +24,18 @@ defmodule Roda.Conversations do
     Conversation
     |> where([c], c.id == ^conversation_id)
     |> preload(:project)
+    |> preload(:chunks)
     |> Repo.one()
   end
 
   def get_conversation_minio_path(conversation_id) do
     case get_conversation(conversation_id) do
-      nil -> {:error, nil}
+      nil ->
+        {:error, nil}
+
       conversation ->
-        {:ok, "org_#{conversation.project.organization_id}/proj_#{conversation.project.id}/conv_#{conversation.id}"}
+        {:ok,
+         "org_#{conversation.project.organization_id}/proj_#{conversation.project.id}/conv_#{conversation.id}"}
     end
   end
 end
