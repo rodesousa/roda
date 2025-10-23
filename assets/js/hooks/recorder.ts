@@ -136,8 +136,6 @@ export const Recorder = {
     const formData = new FormData();
     const filename = `chunk-${Date.now()}.${this.getExtension()}`;
 
-    console.log(this.conversation)
-
     formData.append("chunk", blob, filename);
     formData.append("timestamp", new Date().toISOString());
     formData.append("conversation_id", this.conversation.id);

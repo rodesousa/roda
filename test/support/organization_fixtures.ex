@@ -1,7 +1,7 @@
 defmodule Roda.OrganizationFixtures do
   alias Roda.Repo
   alias Roda.LLM.Provider
-  alias Roda.Organization.{Organization, Project}
+  alias Roda.Organizations.{Organization, Project}
 
   def init_organization() do
     org =

@@ -27,7 +27,8 @@ config :roda, Oban,
     default: 10,
     embedding: 50,
     entity_extraction: 50,
-    audio_transcribe: 50
+    audio_transcribe: 50,
+    question: 50
   ],
   repo: Roda.Repo
 

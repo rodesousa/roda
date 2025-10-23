@@ -1,4 +1,4 @@
-defmodule Roda.Organization.Organization do
+defmodule Roda.Organizations.Organization do
   use Ecto.Schema
   import Ecto.Changeset
 
@@ -7,6 +7,7 @@ defmodule Roda.Organization.Organization do
   @derive {Inspect, except: [:embedding_api_base_url]}
   schema "organizations" do
     field :name, :string
+    field :is_active, :boolean, default: true
 
     field :embedding_dimension, :integer
     field :embedding_provider_type, :string

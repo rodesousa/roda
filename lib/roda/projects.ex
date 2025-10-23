@@ -1,10 +1,9 @@
 defmodule Roda.Projects do
-  alias Roda.Repo
-  alias Roda.Project.Project
-
   def add(args \\ %{}) do
-    Project.changeset(args)
-    |> Repo.insert()
+    Roda.Organizations.add_project(args)
   end
 
+  def get_conversations(project_id) do
+    Roda.Organizations.get_conversations(project_id)
+  end
 end

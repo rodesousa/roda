@@ -10,10 +10,11 @@ defmodule RodaWeb.TestLive do
   end
 
   defp init_assign(socket) do
-    project = 
-Roda.Organization.Project
-    |> Roda.Repo.all()
-    |> hd()
+    project =
+      Roda.Organizations.Project
+      |> Roda.Repo.all()
+      |> hd()
+
     socket
     |> assign(
       recording_state: :idle,
@@ -95,10 +96,7 @@ Roda.Organization.Project
   end
 
   @impl true
-  def handle_event("test", data, socket) do
-    data
-    |> IO.inspect(label: "DATA")
-
+  def handle_event("test", _data, socket) do
     {:noreply, socket}
   end
 

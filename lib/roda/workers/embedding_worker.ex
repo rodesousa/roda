@@ -1,7 +1,6 @@
 defmodule Roda.Workers.EmbeddingWorker do
-  alias Roda.{LLM, Repo, Embeddings}
-  alias Roda.Organization.Organization
-  alias Roda.Conversations
+  alias Roda.{Conversations, Repo, Embeddings}
+  alias Roda.Organizations.Organization
   require Logger
 
   use Oban.Worker,

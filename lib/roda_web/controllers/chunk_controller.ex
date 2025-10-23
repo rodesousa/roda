@@ -2,7 +2,7 @@ defmodule RodaWeb.ChunkController do
   use RodaWeb, :controller
 
   alias Roda.{Minio, Repo, Conversations}
-  alias Roda.Organization.Project
+  alias Roda.Organizations.Project
 
   @doc """
   Uploads an audio chunk to MinIO storage.

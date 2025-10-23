@@ -3,7 +3,7 @@ defmodule RodaWeb.TestifyLiveTest do
   import Phoenix.LiveViewTest
   alias Roda.{Repo, Conversations}
   alias Roda.Conversations.{Chunk, Conversation}
-  alias Roda.Organization.{Organization, Project}
+  alias Roda.Organizations.{Organization, Project}
   alias Roda.OrganizationFixtures
 
   setup do

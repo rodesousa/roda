@@ -1,4 +1,4 @@
-defmodule Roda.Organization.Project do
+defmodule Roda.Organizations.Project do
   use Ecto.Schema
   import Ecto.Changeset
   alias Roda.Organization.Organization
@@ -6,6 +6,7 @@ defmodule Roda.Organization.Project do
   @primary_key {:id, Uniq.UUID, autogenerate: true, version: 7}
   schema "projects" do
     field :name, :string
+    field :is_active, :boolean, default: true
 
     belongs_to :organization, Organization, type: :binary_id
     timestamps(type: :utc_datetime)

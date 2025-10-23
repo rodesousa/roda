@@ -1,6 +1,6 @@
 defmodule Roda.Providers do
   import Ecto.Query
-  alias Roda.Organization.Organization
+  alias Roda.Organizations.Organization
   alias Roda.LLM.Provider
   alias Roda.Repo
 

@@ -103,3 +103,60 @@
 [data-phx-session], [data-phx-teleported-src] { display: contents }
 
 /* This file is for your main application CSS */
+
+/* Markdown styling */
+.prose {
+  & h1 {
+    @apply text-3xl font-bold mt-6 mb-4;
+  }
+
+  & h2 {
+    @apply text-2xl font-bold mt-5 mb-3;
+  }
+
+  & h3 {
+    @apply text-xl font-semibold mt-4 mb-2;
+  }
+
+  & p {
+    @apply mb-4 leading-relaxed;
+  }
+
+  & ul, & ol {
+    @apply mb-4 ml-6;
+  }
+
+  & li {
+    @apply mb-2;
+  }
+
+  & strong {
+    @apply font-semibold;
+  }
+
+  & em {
+    @apply italic;
+  }
+
+  & hr {
+    @apply my-6 border-base-300;
+  }
+}
+
+/* Citations styling */
+.citation-ref {
+  @apply inline-block ml-0.5 px-1.5 py-0.5 text-xs font-semibold rounded;
+  @apply bg-primary/10 text-primary;
+  @apply transition-all duration-200;
+  @apply no-underline;
+}
+
+.citation-ref:hover {
+  @apply bg-primary/20 scale-110;
+  @apply shadow-sm;
+}
+
+/* Modal citations */
+#citation-modal blockquote {
+  @apply my-0;
+}

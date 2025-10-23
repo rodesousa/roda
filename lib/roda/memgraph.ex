@@ -4,7 +4,7 @@ defmodule Roda.Memgraph do
   """
 
   require Logger
-  alias Roda.Organization.Organization
+  alias Roda.Organizations.Organization
   alias Roda.Conversations.Conversation
 
   @doc """

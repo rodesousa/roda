@@ -1,8 +1,45 @@
 defmodule Roda.LLM do
   @behaviour Roda.Llm.LlmBehaviour
   alias Roda.LLM.Provider
-  alias Roda.Minio
   require Logger
+
+  def models(%Provider{provider_type: "openai"} = provider) do
+    "#{provider.api_base_url}/v1/models"
+    |> Req.get(
+      headers: [{"authorization", "Bearer #{provider.api_key}"}],
+      receive_timeout: 60_000
+    )
+    |> case do
+      {:ok, %{status: 200, body: body}} -> {:ok, body["data"]}
+      {:ok, %{status: 401}} -> {:error, :bad_api_key}
+      {:ok, %{body: %{"detail" => detail}}} -> {:error, detail}
+      {:ok, _} -> {:error, :unknown}
+      {:error, _} -> {:error, :bad_url}
+    end
+  end
+
+  def chat_completion2(%Provider{} = provider, content) do
+    Logger.debug("Begin")
+
+    response =
+      provider
+      |> get_chat_url()
+      |> Req.post(
+        headers: [{"authorization", "Bearer #{provider.api_key}"}],
+        receive_timeout: 60_000,
+        json: %{model: provider.model, messages: [%{role: "user", content: content}]}
+      )
+
+    Logger.debug("Request done #{inspect(response)}")
+
+    with {:ok, %{body: body}} <- response,
+         %{"choices" => [%{"message" => %{"content" => content}}]} <- body do
+      {:ok, content}
+    else
+      {:ok, %{body: body}} -> {:api_error, body}
+      error -> {:error, error}
+    end
+  end
 
   def chat_completion(%Provider{} = provider, content) do
     response =
@@ -17,6 +54,8 @@ defmodule Roda.LLM do
     with {:ok, %{body: body}} <- response,
          %{"choices" => [%{"message" => %{"content" => content}}]} <- body do
       content
+    else
+      {:ok, %{body: body}} -> {:error, body}
     end
   end
 
@@ -82,11 +121,11 @@ defmodule Roda.LLM do
     "#{provider.api_base_url}/v1/embeddings"
   end
 
-  def get_chat_url(%Provider{provider_type: "openai"} = provider) do
+  def get_chat_url(%{provider_type: "openai"} = provider) do
     "#{provider.api_base_url}/v1/chat/completions"
   end
 
-  def get_chat_url(%Provider{provider_type: "anthropic"} = provider) do
+  def get_chat_url(%{provider_type: "anthropic"} = provider) do
     "#{provider.api_base_url}/v1/messages"
   end
 

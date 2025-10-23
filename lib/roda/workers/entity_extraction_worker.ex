@@ -6,11 +6,10 @@ defmodule Roda.Workers.EntityExtractionWorker do
     queue: :entity_extraction,
     max_attempts: 3
 
-  alias Roda.{Repo, Organization, Conversations}
-  alias Roda.Organization.Organization
+  alias Roda.{Memgraph, Repo, Organization, Conversations}
+  alias Roda.Organizations.Organization
   alias Roda.Conversations.Conversation
   alias Roda.LLM.Provider
-  alias Roda.Memgraph
   require Logger
 
   defp llm() do

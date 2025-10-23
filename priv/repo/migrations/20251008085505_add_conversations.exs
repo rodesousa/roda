@@ -5,6 +5,7 @@ defmodule Roda.Repo.Migrations.AddConversations do
     create table(:organizations, primary_key: false) do
       add :id, :uuid, primary_key: true
       add :name, :string, null: false
+      add :is_active, :boolean, default: true
       add :embedding_dimension, :integer
       add :embedding_provider_type, :string
       add :embedding_model, :string
@@ -16,6 +17,7 @@ defmodule Roda.Repo.Migrations.AddConversations do
     create table(:projects, primary_key: false) do
       add :id, :uuid, primary_key: true
       add :name, :string, null: false
+      add :is_active, :boolean, default: true
 
       add :organization_id, references(:organizations, type: :uuid, on_delete: :delete_all),
         null: false
@@ -26,6 +28,7 @@ defmodule Roda.Repo.Migrations.AddConversations do
     create table(:conversations, primary_key: false) do
       add :id, :uuid, primary_key: true
       add :fully_transcribed, :boolean, default: false
+      add :from_chat, :boolean, default: false
 
       add :project_id, references(:projects, type: :uuid, on_delete: :delete_all)
 
@@ -46,7 +49,6 @@ defmodule Roda.Repo.Migrations.AddConversations do
 
     create table(:llm_providers, primary_key: false) do
       add :id, :uuid, primary_key: true
-      add :name, :string, null: false
       add :provider_type, :string, null: false
       add :api_key, :binary, null: false
       add :model, :string, null: false
@@ -62,12 +64,8 @@ defmodule Roda.Repo.Migrations.AddConversations do
     end
 
     create index(:chunks, [:conversation_id])
-    create unique_index(:llm_providers, [:provider_type, :name])
     create index(:llm_providers, [:is_active])
 
-    create unique_index(:llm_providers, [:organization_id, :type],
-             where: "is_active = true",
-             name: :llm_providers_one_active_per_type
-           )
+    create unique_index(:llm_providers, [:organization_id, :type], where: "is_active = true")
   end
 end

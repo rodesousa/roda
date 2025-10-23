@@ -88,7 +88,11 @@ defmodule Roda.MixProject do
       # uuidv7
       {:uniq, "~> 0.6.1"},
       # pgvector
-      {:pgvector, "~> 0.3.0"}
+      {:pgvector, "~> 0.3.0"},
+      # date
+      {:timex, "~> 3.7"},
+      # qrcode
+      {:eqrcode, "~> 0.2.1"}
     ]
   end
 

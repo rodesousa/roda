@@ -1,6 +1,6 @@
 defmodule Roda.Embeddings do
   alias Roda.Conversations.Embedding.{Embedding1024, Embedding1536}
-  alias Roda.Organization.Organization
+  alias Roda.Organizations.Organization
   alias Roda.Repo
 
   def add(%Organization{embedding_dimension: 1024} = organization, embedding, chunk_id) do

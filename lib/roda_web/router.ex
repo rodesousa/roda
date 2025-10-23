@@ -20,11 +20,30 @@ defmodule RodaWeb.Router do
   scope "/", RodaWeb do
     pipe_through :browser
 
-    live "/", TestLive, :home
-    live "/testify", TestifyLive
+    # orga view
+    live "/orgas/:orga_id/projects", Orga.ProjectsLive
+    live "/orgas/:orga_id/settings", Orga.OrganizationSettingsLive
+
+    # project view
+    live "/orgas/:orga_id/projects/:project_id/settings", Orga.ProjectSettingsLive
+
+    # testimonies
+    live "/orgas/:orga_id/projects/:project_id/testify", Orga.TestifyLive
+    live "/orgas/:orga_id/projects/:project_id/testimonies", Orga.TestimoniesLive
+
+    # Question
+    live "/orgas/:orga_id/projects/:project_id/questions", Orga.QuestionsLive
+    live "/orgas/:orga_id/projects/:project_id/questions/new", Orga.NewQuestionLive
+    live "/orgas/:orga_id/projects/:project_id/questions/:question_id", Orga.QuestionLive
   end
 
-  # Other scopes may use custom stacks.
+  scope "/", RodaWeb do
+    pipe_through :browser
+
+    live "/admin", Admin.OrgasLive
+    live "/admin/orgas/:orga_id", Admin.ProjectsLive
+  end
+
   scope "/api", RodaWeb do
     pipe_through :api
 
