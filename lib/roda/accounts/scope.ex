@@ -17,8 +17,18 @@ defmodule Roda.Accounts.Scope do
   """
 
   alias Roda.Accounts.User
+  alias Roda.Organizations.{Organization, OrganizationMembership}
 
-  defstruct user: nil
+  @type t :: %__MODULE__{
+    user: %User{},
+    organization: %Organization{},
+    membership: %OrganizationMembership{}
+  }
+
+  defstruct user: nil,
+            organization: nil,
+            # contient le role de l'user dans l'orga
+            membership: nil
 
   @doc """
   Creates a scope for the given user.
@@ -30,4 +40,43 @@ defmodule Roda.Accounts.Scope do
   end
 
   def for_user(nil), do: nil
+
+  @doc """
+  Creates a scope for a user within a specific organization.
+  """
+  def for_user_in_organization(
+        %User{} = user,
+        %Organization{} = org,
+        %OrganizationMembership{} = membership
+      ) do
+    %__MODULE__{
+      user: user,
+      organization: org,
+      membership: membership
+    }
+  end
+
+  @doc """
+  Checks if the current scope has admin rights in the organization.
+  """
+  def admin?(%__MODULE__{membership: %{role: "admin"}}), do: true
+  def admin?(_), do: false
+
+  @doc """
+  Checks if the current scope has manager rights (admin or manager).
+  """
+  def manager?(%__MODULE__{membership: %{role: role}}) when role in ["admin", "manager"], do: true
+  def manager?(_), do: false
+
+  @doc """
+  Checks if the current scope is a member of the organization.
+  """
+  def member?(%__MODULE__{membership: %{role: _}}), do: true
+  def member?(_), do: false
+
+  @doc """
+  Checks if the current scope has a specific role.
+  """
+  def has_role?(%__MODULE__{membership: %{role: role}}, role), do: true
+  def has_role?(_, _), do: false
 end

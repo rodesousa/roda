@@ -175,7 +175,7 @@ defmodule RodaWeb.Orga.TestifyLive do
         # }
         # |> Roda.Workers.EmbeddingWorker.new()
         # |> Oban.insert!()
-        #
+
         # %{
         #   organization_id: ass.organization_id,
         #   conversation_id: conversation.id

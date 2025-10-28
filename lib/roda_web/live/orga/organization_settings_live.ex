@@ -4,26 +4,22 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
   """
   use RodaWeb, :live_view
 
-  alias Roda.{Conversations, Date, Providers, Repo}
-  alias Roda.{Organizations, Questions}
-  alias Roda.Organizations.Organization
+  alias Roda.{Repo, Accounts}
+  alias Roda.{Organizations}
   alias Roda.LLM.Provider
+  alias Roda.Accounts.User
 
   defp llm() do
     Application.get_env(:roda, :llm)
   end
 
-  @tabs ["users", "embedding", "audio", "chat"]
+  @tabs ["users", "embedding", "audio", "chat", "projects"]
 
   @impl true
-  def mount(
-        %{"orga_id" => orga_id},
-        _session,
-        socket
-      ) do
-    orga = Organizations.get_orga_by_id(orga_id)
-    audio_provider = Providers.get_provider_by_organization(orga_id, "audio")
-    chat_provider = Providers.get_provider_by_organization(orga_id, "chat")
+  def mount(_, _session, socket) do
+    ass = socket.assigns
+    audio_provider = Organizations.get_provider_by_organization(ass.current_scope, "audio")
+    chat_provider = Organizations.get_provider_by_organization(ass.current_scope, "chat")
 
     chat_form =
       case chat_provider do
@@ -51,14 +47,15 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
     socket =
       socket
       |> assign(
-        organization: orga,
         chat_provider: safe_chat_provider_provider,
         audio_provider: safe_audio_provider,
-        orga_form: to_form(Organization.update_embedding_changeset(orga, %{})),
+        orga_form: to_form(%{}),
         chat_form: chat_form,
         audio_form: audio_form,
         test_errors: %{audio: nil, chat: nil, embedding: nil}
       )
+      |> assign_users()
+      |> assign_new_member()
       |> assign_projects()
 
     {:ok, socket}
@@ -69,11 +66,58 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
     tab =
       case Map.get(params, "tab") in @tabs do
         true -> Map.get(params, "tab")
-        false -> "audio"
+        false -> "projects"
       end
 
     socket =
       assign(socket, tab: tab)
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("regenerate_invite", p, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("copy_invite_link", p, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("delete", p, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("set_role", p, socket) do
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("invite_member", %{"user" => user}, socket) do
+    %{current_scope: scope} = socket.assigns
+
+    socket =
+      case Organizations.register_user_and_invite(scope, user) do
+        {:ok, %{user: user}} ->
+          {:ok, _} =
+            Accounts.deliver_login_instructions(
+              user,
+              &url(~p"/users/log-in/#{&1}")
+            )
+
+          socket
+          |> put_flash(:info, gettext("An email was sent to %{email}", %{email: user.email}))
+          |> assign_users()
+          |> assign_new_member()
+          |> push_event("close:modal", %{id: "new-member"})
+
+        {:error, %Ecto.Changeset{} = changeset} ->
+          changeset = %{changeset | action: :validate}
+          assign(socket, user_form: to_form(changeset))
+      end
 
     {:noreply, socket}
   end
@@ -99,8 +143,13 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
 
   @impl true
   def handle_event("save_audio", %{"provider" => provider, "action" => "test"}, socket) do
-    ass = socket.assigns
-    args = Map.merge(%{"organization_id" => ass.organization.id, "type" => "audio"}, provider)
+    %{current_scope: scope} = ass = socket.assigns
+
+    args =
+      Map.merge(
+        %{"organization_id" => scope.organization.id, "type" => "audio"},
+        provider
+      )
 
     socket =
       case Provider.changeset(args) do
@@ -124,8 +173,8 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
 
   @impl true
   def handle_event("save_chat", %{"provider" => provider, "action" => "test"}, socket) do
-    ass = socket.assigns
-    args = Map.merge(%{"organization_id" => ass.organization.id, "type" => "chat"}, provider)
+    %{current_scope: scope} = ass = socket.assigns
+    args = Map.merge(%{"organization_id" => scope.organization.id, "type" => "chat"}, provider)
 
     socket =
       case Provider.changeset(args) do
@@ -151,10 +200,10 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
 
   @impl true
   def handle_event("save_audio", %{"provider" => provider_args, "action" => "save"}, socket) do
-    ass = socket.assigns
+    %{current_scope: scope} = ass = socket.assigns
 
     args =
-      Map.merge(%{"organization_id" => ass.organization.id, "type" => "audio"}, provider_args)
+      Map.merge(%{"organization_id" => scope.organization.id, "type" => "audio"}, provider_args)
 
     socket =
       case Provider.changeset(ass.audio_provider, args) do
@@ -178,10 +227,10 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
 
   @impl true
   def handle_event("save_chat", %{"provider" => provider_args, "action" => "save"}, socket) do
-    ass = socket.assigns
+    %{current_scope: scope} = ass = socket.assigns
 
     args =
-      Map.merge(%{"organization_id" => ass.organization.id, "type" => "chat"}, provider_args)
+      Map.merge(%{"organization_id" => scope.organization.id, "type" => "chat"}, provider_args)
 
     socket =
       case Provider.changeset(ass.chat_provider, args) do
@@ -209,12 +258,40 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
     <.page
       current="settings"
       sidebar_type={:organization}
-      sidebar_params={%{orga_id: @organization.id}}
+      sidebar_params={%{orga_id: @current_scope.organization.id}}
     >
       <.page_content>
         <div class="tabs tabs-lift">
           <input
-            :if={false}
+            type="radio"
+            name="my_tabs_3"
+            class="tab"
+            aria-label={gettext("Projects")}
+            phx-click="tab"
+            phx-value-tab="projects"
+            checked={@tab == "projects"}
+          />
+          <div class="tab-content bg-base-100 border-base-300 p-6">
+            <div class="overflow-x-auto">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>{gettext("Name")}</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <%= for p <- @projects do %>
+                    <tr>
+                      <td>{p.name}</td>
+                      <td></td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <input
             type="radio"
             name="my_tabs_3"
             class="tab"
@@ -224,7 +301,11 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
             checked={@tab == "users"}
           />
           <div class="tab-content bg-base-100 border-base-300 p-6">
-            USERS
+            <.new_user_component user_form={@user_form} />
+            <.button phx-click={show_modal("new-member")}>
+              {gettext("New member")}
+            </.button>
+            <.users_component users={@users} />
           </div>
 
           <input
@@ -357,6 +438,59 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
     """
   end
 
+  def users_component(assigns) do
+    ~H"""
+    <div class="overflow-x-auto">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>{gettext("Email")}</th>
+            <th>{gettext("Role")}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <%= for u <- @users do %>
+            <tr>
+              <td>{u.email}</td>
+              <td>{u.role}</td>
+              <td>
+                <.dropdown name={gettext("options")}>
+                  <:items>
+                    <li :if={u.role == "invite"} phx-click="copy_invite_link">
+                      {gettext("COpy invite link")}
+                    </li>
+                  </:items>
+                </.dropdown>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    """
+  end
+
+  def new_user_component(assigns) do
+    ~H"""
+    <.modal id="new-member">
+      <.form :let={f} for={@user_form} phx-submit="invite_member">
+        <div class="flex-col space-y-4 py-4">
+          <.input field={f[:email]} label={gettext("Email")} />
+        </div>
+        <div class="modal-action">
+          <.button type="submit">
+            {gettext("Create")}
+          </.button>
+          <.button type="button" phx-click={hide_modal("new-member")}>
+            {gettext("Cancel")}
+          </.button>
+        </div>
+      </.form>
+    </.modal>
+    """
+  end
+
   defp test_errors(%{error: nil} = assigns) do
     ~H"""
     """
@@ -380,11 +514,29 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
     """
   end
 
-  defp assign_projects(socket) do
-    ass = socket.assigns
-    projects = []
+  def assign_users(socket) do
+    %{current_scope: scope} = socket.assigns
 
-    assign(socket, projects: projects)
+    users =
+      Organizations.get_membership_by_organization(scope)
+      |> Enum.map(fn m ->
+        %{id: m.user.id, email: m.user.email, role: m.role}
+      end)
+
+    assign(socket, users: users)
+  end
+
+  defp assign_projects(socket) do
+    %{current_scope: scope} = socket.assigns
+
+    assign(socket,
+      projects: Organizations.list_project_by_orga(scope)
+    )
+  end
+
+  def assign_new_member(socket) do
+    user = User.email_changeset(%User{}, %{})
+    assign(socket, user_form: to_form(user))
   end
 
   ## VERY EXPERIMENTAL

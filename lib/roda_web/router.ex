@@ -20,19 +20,21 @@ defmodule RodaWeb.Router do
   scope "/", RodaWeb do
     pipe_through :browser
 
-    # orga view
-    live "/orgas/:orga_id/projects", Orga.ProjectsLive
-    live "/orgas/:orga_id/settings", Orga.OrganizationSettingsLive
+    live_session :mount_organization_context,
+      on_mount: [{RodaWeb.UserAuth, :mount_organization_context}] do
+      live "/orgas/:orga_id/projects", Orga.ProjectsLive
+      live "/orgas/:orga_id/settings", Orga.OrganizationSettingsLive
+      live "/orgas/:orga_id/projects/:project_id/questions", Orga.QuestionsLive
+    end
 
     # project view
-    live "/orgas/:orga_id/projects/:project_id/settings", Orga.ProjectSettingsLive
+    # live "/orgas/:orga_id/projects/:project_id/settings", Orga.ProjectSettingsLive
 
     # testimonies
     live "/orgas/:orga_id/projects/:project_id/testify", Orga.TestifyLive
     live "/orgas/:orga_id/projects/:project_id/testimonies", Orga.TestimoniesLive
 
     # Question
-    live "/orgas/:orga_id/projects/:project_id/questions", Orga.QuestionsLive
     live "/orgas/:orga_id/projects/:project_id/questions/new", Orga.NewQuestionLive
     live "/orgas/:orga_id/projects/:project_id/questions/:question_id", Orga.QuestionLive
   end
@@ -40,8 +42,11 @@ defmodule RodaWeb.Router do
   scope "/", RodaWeb do
     pipe_through :browser
 
-    live "/admin", Admin.OrgasLive
-    live "/admin/orgas/:orga_id", Admin.ProjectsLive
+    live_session :require_platform_admin,
+      on_mount: [{RodaWeb.UserAuth, :require_platform_admin}] do
+      live "/admin", Admin.OrgasLive
+      live "/admin/orgas/:orga_id", Admin.ProjectsLive
+    end
   end
 
   scope "/api", RodaWeb do
@@ -67,8 +72,8 @@ defmodule RodaWeb.Router do
     end
   end
 
-  # ## Authentication routes
-  #
+  ## Authentication routes
+
   # scope "/", RodaWeb do
   #   pipe_through [:browser, :require_authenticated_user]
   #
@@ -80,18 +85,24 @@ defmodule RodaWeb.Router do
   #
   #   post "/users/update-password", UserSessionController, :update_password
   # end
-  #
-  # scope "/", RodaWeb do
-  #   pipe_through [:browser]
-  #
-  #   live_session :current_user,
-  #     on_mount: [{RodaWeb.UserAuth, :mount_current_scope}] do
-  #     live "/users/register", UserLive.Registration, :new
-  #     live "/users/log-in", UserLive.Login, :new
-  #     live "/users/log-in/:token", UserLive.Confirmation, :new
-  #   end
-  #
-  #   post "/users/log-in", UserSessionController, :create
-  #   delete "/users/log-out", UserSessionController, :delete
-  # end
+
+  scope "/", RodaWeb do
+    pipe_through [:browser]
+
+    live_session :require_authenticated,
+      on_mount: [{RodaWeb.UserAuth, :require_authenticated}] do
+      live "/", OrgasLive
+      live "/users/settings", UserLive.Settings, :edit
+    end
+
+    live_session :current_user,
+      on_mount: [{RodaWeb.UserAuth, :mount_current_scope}] do
+      live "/users/register", UserLive.Registration, :new
+      live "/users/log-in", UserLive.Login, :new
+      live "/users/log-in/:token", UserLive.Confirmation, :new
+    end
+
+    post "/users/log-in", UserSessionController, :create
+    delete "/users/log-out", UserSessionController, :delete
+  end
 end

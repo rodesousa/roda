@@ -5,10 +5,10 @@ defmodule Roda.Questions.QuestionResponse do
 
   @primary_key {:id, Uniq.UUID, autogenerate: true, version: 7}
   schema "question_responses" do
-    field :response_text, :string
+    field :narrative_response, :string
+    field :structured_response, :map, default: %{}
     field :period_start, :date
     field :period_end, :date
-    field :conversations_analyzed_count, :integer, default: 0
 
     belongs_to :question, Question, type: :binary_id
 
@@ -16,16 +16,19 @@ defmodule Roda.Questions.QuestionResponse do
   end
 
   def changeset(attrs) do
-    %__MODULE__{}
+    changeset(%__MODULE__{}, attrs)
+  end
+
+  def changeset(%__MODULE__{} = response, attrs) do
+    response
     |> cast(attrs, [
-      :response_text,
       :period_start,
       :period_end,
-      :conversations_analyzed_count,
-      :question_id
+      :question_id,
+      :narrative_response,
+      :structured_response
     ])
-    |> validate_required([:response_text, :period_start, :period_end, :question_id])
-    # |> unique_constraint([:question_id, :analyse_id, :period_start])
+    |> validate_required([:period_start, :period_end, :question_id])
     |> foreign_key_constraint(:question_id)
   end
 end

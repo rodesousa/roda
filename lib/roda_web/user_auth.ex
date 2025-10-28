@@ -4,8 +4,10 @@ defmodule RodaWeb.UserAuth do
   import Plug.Conn
   import Phoenix.Controller
 
-  alias Roda.Accounts
+  alias Roda.{Accounts, Organizations}
   alias Roda.Accounts.Scope
+
+  use Gettext, backend: RodaWeb.Gettext
 
   # Make the remember me cookie valid for 14 days. This should match
   # the session validity setting in UserToken.
@@ -56,7 +58,7 @@ defmodule RodaWeb.UserAuth do
     conn
     |> renew_session(nil)
     |> delete_resp_cookie(@remember_me_cookie)
-    |> redirect(to: ~p"/")
+    |> redirect(to: ~p"/users/log-in")
   end
 
   @doc """
@@ -215,10 +217,11 @@ defmodule RodaWeb.UserAuth do
     {:cont, mount_current_scope(socket, session)}
   end
 
-  def on_mount(:require_authenticated, _params, session, socket) do
+  def on_mount(:require_authenticated, params, session, socket) do
     socket = mount_current_scope(socket, session)
+    ass = socket.assigns
 
-    if socket.assigns.current_scope && socket.assigns.current_scope.user do
+    if ass.current_scope && ass.current_scope.user do
       {:cont, socket}
     else
       socket =
@@ -242,6 +245,65 @@ defmodule RodaWeb.UserAuth do
         |> Phoenix.LiveView.redirect(to: ~p"/users/log-in")
 
       {:halt, socket}
+    end
+  end
+
+  def on_mount(:mount_organization_context, %{"orga_id" => orga_id}, session, socket) do
+    socket = mount_current_scope(socket, session)
+
+    case socket.assigns.current_scope do
+      %{user: user} when not is_nil(user) ->
+        case Organizations.get_user_membership(user.id, orga_id) do
+          {:ok, org, membership} ->
+            scope = Accounts.Scope.for_user_in_organization(user, org, membership)
+            {:cont, Phoenix.Component.assign(socket, :current_scope, scope)}
+
+          {:error, :not_found} ->
+            socket =
+              socket
+              |> Phoenix.LiveView.put_flash(:error, "Organization not found or access denied.")
+              |> Phoenix.LiveView.redirect(to: "/")
+
+            {:halt, socket}
+        end
+
+      _ ->
+        socket =
+          socket
+          |> Phoenix.LiveView.put_flash(:error, "You must log in to access this page.")
+          |> Phoenix.LiveView.redirect(to: ~p"/users/log-in")
+
+        {:halt, socket}
+    end
+  end
+
+  def on_mount(:require_platform_admin, _params, session, socket) do
+    socket = mount_current_scope(socket, session)
+
+    case socket.assigns.current_scope do
+      %{user: user} = s when not is_nil(user) ->
+        # Vérifier si l'user est platform admin
+        if Accounts.platform_admin?(s) do
+          {:cont, socket}
+        else
+          socket =
+            socket
+            |> Phoenix.LiveView.put_flash(
+              :error,
+              "Access denied. Platform admin privileges required."
+            )
+            |> Phoenix.LiveView.redirect(to: ~p"/")
+
+          {:halt, socket}
+        end
+
+      _ ->
+        socket =
+          socket
+          |> Phoenix.LiveView.put_flash(:error, "You must log in to access this page.")
+          |> Phoenix.LiveView.redirect(to: ~p"/users/log-in")
+
+        {:halt, socket}
     end
   end
 

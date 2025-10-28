@@ -85,4 +85,9 @@ if (process.env.NODE_ENV === "development") {
     window.liveReloader = reloader
   })
 }
+window.addEventListener("phx:close:modal", (event) => {
+  const id = document.getElementById(event.detail.id)
+  console.log(id)
+  id.dispatchEvent(new Event("click", { bubbles: true }));
+});
 

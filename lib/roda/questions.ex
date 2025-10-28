@@ -26,13 +26,13 @@ defmodule Roda.Questions do
     Repo.all(QuestionResponse)
   end
 
-  def get_response(project_id, %Date{} = begin_at, %Date{} = end_at) do
+  def get_response(question_id, %Date{} = begin_at, %Date{} = end_at) do
     QuestionResponse
     |> join(
       :inner,
       [q],
       question in Question,
-      on: q.question_id == question.id and question.project_id == ^project_id
+      on: q.question_id == question.id and question.id == ^question_id
     )
     |> where(
       [q],

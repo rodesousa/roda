@@ -8,14 +8,9 @@ defmodule RodaWeb.Orga.ProjectsLive do
   alias Roda.{Organizations, Questions}
 
   @impl true
-  def mount(
-        %{"orga_id" => orga_id},
-        _session,
-        socket
-      ) do
+  def mount(_p, _session, socket) do
     socket =
       socket
-      |> assign(organization: Organizations.get_orga_by_id(orga_id))
       |> assign_projects()
 
     {:ok, socket}
@@ -27,12 +22,15 @@ defmodule RodaWeb.Orga.ProjectsLive do
     <.page
       current="projects"
       sidebar_type={:organization}
-      sidebar_params={%{orga_id: @organization.id}}
+      sidebar_params={%{orga_id: @current_scope.organization.id}}
     >
       <.page_content>
-      <div id="projects" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+        <div id="projects" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
           <%= for p <- @projects do %>
-            <.card link={~p"/orgas/#{@organization.id}/projects/#{p.id}/testify"} name={p.name} />
+            <.card
+              link={~p"/orgas/#{@current_scope.organization.id}/projects/#{p.id}/testify"}
+              name={p.name}
+            />
           <% end %>
         </div>
       </.page_content>
@@ -42,7 +40,7 @@ defmodule RodaWeb.Orga.ProjectsLive do
 
   defp assign_projects(socket) do
     ass = socket.assigns
-    projects = Organizations.list_project_by_orga_id(ass.organization.id)
+    projects = Organizations.list_project_by_orga(ass.current_scope)
 
     assign(socket, projects: projects)
   end

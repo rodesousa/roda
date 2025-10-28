@@ -13,11 +13,11 @@ defmodule Roda.Repo.Migrations.AddQuestion do
 
     create table(:question_responses, primary_key: false) do
       add :id, :uuid, primary_key: true
-      add :response_text, :text, null: false
+      add :narrative_response, :text
+      add :structured_response, :map
 
       add :period_start, :date, null: false
       add :period_end, :date, null: false
-      add :conversations_analyzed_count, :integer, default: 0
 
       add :question_id, references(:questions, type: :uuid, on_delete: :delete_all), null: false
 

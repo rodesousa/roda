@@ -5,8 +5,9 @@ defmodule Roda.Accounts do
 
   import Ecto.Query, warn: false
   alias Roda.Repo
+  require Logger
 
-  alias Roda.Accounts.{User, UserToken, UserNotifier}
+  alias Roda.Accounts.{User, UserToken, UserNotifier, PlatformAdmin, Scope}
 
   ## Database getters
 
@@ -58,7 +59,14 @@ defmodule Roda.Accounts do
       ** (Ecto.NoResultsError)
 
   """
-  def get_user!(id), do: Repo.get!(User, id)
+  def get_user(id) do
+    Repo.get(User, id)
+  end
+
+  def get_user!(id) do
+    {:ok, user} = get_user(id)
+    user
+  end
 
   ## User registration
 
@@ -270,7 +278,9 @@ defmodule Roda.Accounts do
       when is_function(magic_link_url_fun, 1) do
     {encoded_token, user_token} = UserToken.build_email_token(user, "login")
     Repo.insert!(user_token)
-    UserNotifier.deliver_login_instructions(user, magic_link_url_fun.(encoded_token))
+    url = magic_link_url_fun.(encoded_token)
+    Logger.debug(url)
+    UserNotifier.deliver_login_instructions(user, url)
   end
 
   @doc """
@@ -293,5 +303,11 @@ defmodule Roda.Accounts do
         {:ok, {user, tokens_to_expire}}
       end
     end)
+  end
+
+  def platform_admin?(%Scope{} = s) do
+    PlatformAdmin
+    |> where([p], p.user_id == ^s.user.id)
+    |> Repo.one()
   end
 end

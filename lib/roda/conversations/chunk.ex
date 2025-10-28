@@ -19,4 +19,11 @@ defmodule Roda.Conversations.Chunk do
     |> cast(attrs, __schema__(:fields))
     |> validate_required([:conversation_id, :position, :text])
   end
+
+  def update_changeset(%__MODULE__{} = chunk, attrs) do
+    chunk
+    |> cast(attrs, __schema__(:fields))
+    |> validate_required([:conversation_id, :position, :text])
+  end
+
 end

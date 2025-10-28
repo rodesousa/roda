@@ -1,6 +1,7 @@
 defmodule Roda.Organizations.Organization do
   use Ecto.Schema
   import Ecto.Changeset
+  alias Roda.Accounts.Scope
 
   @primary_key {:id, Uniq.UUID, autogenerate: true, version: 7}
 
@@ -14,6 +15,9 @@ defmodule Roda.Organizations.Organization do
     field :embedding_api_base_url, :string
     field :embedding_model, :string
     field :embedding_encrypted_api_key, Roda.Encrypted.Binary
+
+    many_to_many :users, Roda.Accounts.User,
+      join_through: Roda.Organizations.OrganizationMembership
 
     timestamps(type: :utc_datetime)
   end
