@@ -28,7 +28,6 @@ defmodule Roda.Organizations do
   end
 
   def get_membership_by_organization(%Scope{} = s) do
-    query =
       OrganizationMembership
       |> where([m], m.organization_id == ^s.organization.id)
       |> preload([:user])
@@ -147,4 +146,15 @@ defmodule Roda.Organizations do
     |> where([p], p.organization_id == ^s.organization.id and p.is_active == true)
     |> Repo.all()
   end
+
+  def get_project(orga_id, project_id) do
+    Project
+    |> where([p], p.id == ^project_id and p.organization_id == ^orga_id)
+    |> Repo.one()
+    |> case do
+      nil -> {:error, :not_found}
+      project -> {:ok, project}
+    end
+  end
+
 end

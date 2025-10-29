@@ -92,7 +92,8 @@ defmodule Roda.MixProject do
       # date
       {:timex, "~> 3.7"},
       # qrcode
-      {:eqrcode, "~> 0.2.1"}
+      {:eqrcode, "~> 0.2.1"},
+      {:floki, "~> 0.38.0"}
     ]
   end
 

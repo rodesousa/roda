@@ -4,100 +4,62 @@ defmodule RodaWeb.Orga.TestifyLive do
   """
   use RodaWeb, :live_view
 
-  alias Roda.Conversations
-  alias Roda.{Organizations, Questions}
+  alias Roda.{Organizations, Questions, Conversations}
+  alias RodaWeb.Testify
 
   @impl true
-  def mount(
-        %{"orga_id" => orga_id, "project_id" => project_id},
-        _session,
-        socket
-      ) do
+  def mount(%{"token" => token}, _session, socket) do
     socket =
       socket
-      |> assign(
-        project: Organizations.get_project_by_id(project_id),
-        orga: Organizations.get_orga_by_id(orga_id)
-      )
-      |> init_assigns()
+      |> Testify.init_assigns()
+      |> assign(url: url(~p"/testify/token"))
 
     {:ok, socket}
   end
 
-  defp init_assigns(socket) do
-    ass = socket.assigns
+  @impl true
+  def mount(_, _session, socket) do
+    %{current_scope: scope} = socket.assigns
 
-    socket
-    |> assign(
-      recording_state: :idle,
-      text_content: "",
-      chunks: [],
-      conversation_id: nil
-    )
+    socket =
+      socket
+      |> Testify.init_assigns()
+      |> assign(
+        url: url(~p"/orgas/#{scope.organization.id}/projects/#{scope.project.id}/testify")
+      )
+
+    {:ok, socket}
   end
 
   @impl true
   def handle_params(params, _, socket) do
-    mode =
-      case Map.get(params, "mode") do
-        mode when mode in ["vocal", "text"] -> mode
-        _ -> "vocal"
-      end
-
-    socket =
-      socket
-      |> assign(
-        mode: mode,
-        text_form: to_form(%{"text" => ""})
-      )
+    socket = Testify.handle_table(params, socket)
 
     {:noreply, socket}
   end
 
-  # Vocal mode events (from test_live.ex)
   @impl true
   def handle_event("start_recording", _params, socket) do
-    ass = socket.assigns
-    conversation = Conversations.add_conversation!(%{project_id: ass.project.id})
-
-    {:noreply,
-     socket
-     |> assign(
-       recording_state: :recording,
-       conversation_id: conversation.id
-     )
-     |> push_event(
-       "start_recording",
-       %{id: conversation.id}
-     )}
+    socket = Testify.start_recording(socket)
+    {:noreply, socket}
   end
 
   @impl true
   def handle_event("pause_recording", _params, socket) do
-    {:noreply,
-     socket
-     |> assign(:recording_state, :paused)
-     |> push_event("pause_recording", %{})}
+    socket = Testify.pause_recording(socket)
+    {:noreply, socket}
   end
 
   @impl true
   def handle_event("resume_recording", _params, socket) do
-    ass = socket.assigns
-
-    {:noreply,
-     socket
-     |> assign(:recording_state, :recording)
-     |> push_event("resume_recording", %{id: ass.conversation_id})}
+    socket = Testify.resume_recording(socket)
+    {:noreply, socket}
   end
 
   @impl true
   def handle_event("stop_recording", _params, socket) do
-    ass = socket.assigns
-
-    {:noreply,
-     socket
-     |> assign(:recording_state, :idle)
-     |> push_event("stop_recording", %{id: ass.conversation_id})}
+    socket = Testify.stop_recording(socket)
+    {:noreply, socket}
   end
 
   @impl true
@@ -117,80 +79,38 @@ defmodule RodaWeb.Orga.TestifyLive do
 
   @impl true
   def handle_event("recording_stopped", _params, socket) do
-    ass = socket.assigns
-
-    %{conversation_id: ass.conversation_id}
-    |> Roda.Workers.TranscribeWorker.new()
-    |> Oban.insert()
-
-    {:noreply,
-     socket
-     |> put_flash(:info, "Recording saved successfully! Processing your testimony...")
-     |> assign(conversation_id: nil, chunks: [])}
+    socket = Testify.recording_stopped(socket)
+    {:noreply, socket}
   end
 
   @impl true
-  def handle_event("chunk_uploaded", %{"path" => path}, socket) do
-    {:noreply, socket |> update(:chunks, fn chunks -> [path | chunks] end)}
+  def handle_event("chunk_uploaded", %{"path" => _} = params, socket) do
+    socket = Testify.chunk_uploaded(socket, params)
+    {:noreply, socket}
   end
 
   @impl true
-  def handle_event("chunk_upload_error", %{"error" => error}, socket) do
-    {:noreply, socket |> put_flash(:error, "Upload error: #{error}")}
+  def handle_event("chunk_upload_error", %{"error" => _} = params, socket) do
+    socket = Testify.chunk_upload_error(socket, params)
+    {:noreply, socket}
   end
 
   @impl true
-  def handle_event("recording_error", %{"error" => error}, socket) do
-    {:noreply, socket |> put_flash(:error, "Recording error: #{error}")}
-  end
-
-  # Text mode events
-  @impl true
-  def handle_event("update_text", %{"text" => text}, socket) do
-    {:noreply, assign(socket, :text_content, text)}
+  def handle_event("recording_error", %{"error" => _} = params, socket) do
+    socket = Testify.recording_error(socket, params)
+    {:noreply, socket}
   end
 
   @impl true
-  def handle_event("submit_text", %{"text" => text}, socket) do
-    ass = socket.assigns
+  def handle_event("update_text", %{"text" => _} = params, socket) do
+    socket = Testify.update_text(socket, params)
+    {:noreply, socket}
+  end
 
-    case String.trim(text) do
-      "" ->
-        {:noreply, put_flash(socket, :error, "Please enter your testimony before submitting")}
-
-      text ->
-        conversation =
-          Conversations.add_conversation!(%{project_id: ass.project_id, fully_transcribed: true})
-
-        Conversations.add_chunk!(%{
-          position: 0,
-          conversation_id: conversation.id,
-          path: nil,
-          text: text
-        })
-
-        # %{
-        #   organization_id: ass.organization_id,
-        #   conversation_id: conversation.id
-        # }
-        # |> Roda.Workers.EmbeddingWorker.new()
-        # |> Oban.insert!()
-
-        # %{
-        #   organization_id: ass.organization_id,
-        #   conversation_id: conversation.id
-        # }
-        # |> Roda.Workers.EntityExtractionWorker.new()
-        # |> Oban.insert!()
-
-        socket =
-          socket
-          |> put_flash(:info, "Testimony submitted successfully! Processing your content...")
-          |> assign(text_content: "")
-          |> push_event("reset-form", %{})
-
-        {:noreply, socket}
-    end
+  @impl true
+  def handle_event("submit_text", %{"text" => text} = params, socket) do
+    socket = Testify.submit_text(socket, params)
+    {:noreply, socket}
   end
 
   @impl true
@@ -198,8 +118,7 @@ defmodule RodaWeb.Orga.TestifyLive do
     ~H"""
     <.page
       current="testify"
-      sidebar_type={:project}
-      sidebar_params={%{orga_id: @orga.id, project_id: @project.id}}
+      scope={@current_scope}
     >
       <.page_content>
         <div class="card w-full max-w-2xl bg-base-100 shadow-xl">
@@ -213,7 +132,7 @@ defmodule RodaWeb.Orga.TestifyLive do
             
     <!-- Tabs -->
             <div role="tablist" class="tabs tabs-boxed mb-6">
-              <.link patch={~p"/orgas/#{@orga.id}/projects/#{@project.id}/testify?mode=vocal"}>
+              <.link patch={ "#{@url}?mode=vocal"}>
                 <button
                   role="tab"
                   class={["tab", @mode == "vocal" && "tab-active"]}
@@ -221,8 +140,7 @@ defmodule RodaWeb.Orga.TestifyLive do
                   Vocal
                 </button>
               </.link>
-
-              <.link patch={~p"/orgas/#{@orga.id}/projects/#{@project.id}/testify?mode=text"}>
+              <.link patch={ "#{@url}?mode=text"}>
                 <button
                   role="tab"
                   class={["tab", @mode == :text && "tab-active"]}

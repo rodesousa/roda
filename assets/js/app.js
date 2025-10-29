@@ -91,3 +91,10 @@ window.addEventListener("phx:close:modal", (event) => {
   id.dispatchEvent(new Event("click", { bubbles: true }));
 });
 
+window.addEventListener("phx:clipcopy", (event) => {
+  if ("clipboard" in navigator) {
+    navigator.clipboard.writeText(event.detail.id);
+  } else {
+    alert("Sorry, your browser does not support clipboard copy.");
+  }
+});

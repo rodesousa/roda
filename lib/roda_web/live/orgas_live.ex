@@ -7,8 +7,19 @@ defmodule RodaWeb.OrgasLive do
   @impl true
   def mount(_, _session, socket) do
     ass = socket.assigns
-    members = Organizations.list_organisation_by_user(ass.current_scope)
-    socket = assign(socket, members: members)
+
+    socket =
+      case Organizations.list_organisation_by_user(ass.current_scope) do
+        [member] ->
+          push_navigate(socket, to: ~p"/orgas/#{member.organization.id}/projects")
+
+        [] ->
+          assign(socket, members: [])
+
+        members ->
+          assign(socket, members: members)
+      end
+
     {:ok, socket}
   end
 

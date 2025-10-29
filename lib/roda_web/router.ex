@@ -20,6 +20,12 @@ defmodule RodaWeb.Router do
   scope "/", RodaWeb do
     pipe_through :browser
 
+    live_session :mount_token_context,
+      on_mount: [{RodaWeb.UserAuth, :mount_token_context}] do
+      live "/testify/:token", Orga.TestifyLive
+      live "/testimonies/:token", Orga.TestimoniesLive
+    end
+
     live_session :mount_organization_context,
       on_mount: [{RodaWeb.UserAuth, :mount_organization_context}] do
       live "/orgas/:orga_id/projects", Orga.ProjectsLive
@@ -27,16 +33,14 @@ defmodule RodaWeb.Router do
       live "/orgas/:orga_id/projects/:project_id/questions", Orga.QuestionsLive
     end
 
-    # project view
-    # live "/orgas/:orga_id/projects/:project_id/settings", Orga.ProjectSettingsLive
-
-    # testimonies
-    live "/orgas/:orga_id/projects/:project_id/testify", Orga.TestifyLive
-    live "/orgas/:orga_id/projects/:project_id/testimonies", Orga.TestimoniesLive
-
-    # Question
-    live "/orgas/:orga_id/projects/:project_id/questions/new", Orga.NewQuestionLive
-    live "/orgas/:orga_id/projects/:project_id/questions/:question_id", Orga.QuestionLive
+    live_session :mount_project_context,
+      on_mount: [{RodaWeb.UserAuth, :mount_project_context}] do
+      live "/orgas/:orga_id/projects/:project_id/testify", Orga.TestifyLive
+      live "/orgas/:orga_id/projects/:project_id/testimonies", Orga.TestimoniesLive
+      live "/orgas/:orga_id/projects/:project_id/questions/new", Orga.NewQuestionLive
+      live "/orgas/:orga_id/projects/:project_id/questions/:question_id", Orga.QuestionLive
+      live "/orgas/:orga_id/projects/:project_id/settings", Orga.ProjectSettingsLive
+    end
   end
 
   scope "/", RodaWeb do

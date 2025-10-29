@@ -17,18 +17,22 @@ defmodule Roda.Accounts.Scope do
   """
 
   alias Roda.Accounts.User
-  alias Roda.Organizations.{Organization, OrganizationMembership}
+  alias Roda.Repo
+  alias Roda.Organizations.{Organization, OrganizationMembership, Project}
 
   @type t :: %__MODULE__{
-    user: %User{},
-    organization: %Organization{},
-    membership: %OrganizationMembership{}
-  }
+          user: %User{},
+          organization: %Organization{},
+          membership: %OrganizationMembership{},
+          project: %Project{},
+          invite_token: String.t()
+        }
 
   defstruct user: nil,
             organization: nil,
-            # contient le role de l'user dans l'orga
-            membership: nil
+            membership: nil,
+            project: nil,
+            invite_token: nil
 
   @doc """
   Creates a scope for the given user.
@@ -37,6 +41,10 @@ defmodule Roda.Accounts.Scope do
   """
   def for_user(%User{} = user) do
     %__MODULE__{user: user}
+  end
+
+  def for_token(%Project{} = project, token) do
+    %__MODULE__{project: project, invite_token: token}
   end
 
   def for_user(nil), do: nil
@@ -53,6 +61,23 @@ defmodule Roda.Accounts.Scope do
       user: user,
       organization: org,
       membership: membership
+    }
+  end
+
+  @doc """
+  Creates a scope for a user within a specific project.
+  """
+  def for_user_in_project(
+        %User{} = user,
+        %Organization{} = org,
+        %OrganizationMembership{} = membership,
+        %Project{} = project
+      ) do
+    %__MODULE__{
+      user: user,
+      organization: org,
+      membership: membership,
+      project: project
     }
   end
 

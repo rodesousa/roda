@@ -32,6 +32,7 @@ defmodule Roda.Conversations do
     Conversation
     |> where([c], c.project_id == ^project_id)
     |> preload(:chunks)
+    |> order_by(desc: :inserted_at)
     |> Repo.all()
   end
 

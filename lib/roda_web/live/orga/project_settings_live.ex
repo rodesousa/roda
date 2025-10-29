@@ -4,23 +4,16 @@ defmodule RodaWeb.Orga.ProjectSettingsLive do
   """
   use RodaWeb, :live_view
 
-  alias Roda.Conversations
+  alias Roda.{Conversations, Invite}
   alias Roda.{Organizations, Questions}
 
-  @tabs ["general", "users"]
+  @tabs ["invite", "users"]
 
   @impl true
-  def mount(
-        %{"orga_id" => orga_id, "project_id" => project_id},
-        _session,
-        socket
-      ) do
+  def mount(_, _session, socket) do
     socket =
       socket
-      |> assign(
-        project: Organizations.get_project_by_id(project_id),
-        organization: Organizations.get_orga_by_id(orga_id)
-      )
+      |> assign_invitation_link()
 
     {:ok, socket}
   end
@@ -30,7 +23,7 @@ defmodule RodaWeb.Orga.ProjectSettingsLive do
     tab =
       case Map.get(params, "tab") in @tabs do
         true -> Map.get(params, "tab")
-        false -> "general"
+        false -> "invite"
       end
 
     socket =
@@ -60,8 +53,7 @@ defmodule RodaWeb.Orga.ProjectSettingsLive do
     ~H"""
     <.page
       current="settings"
-      sidebar_type={:project}
-      sidebar_params={%{orga_id: @organization.id, project_id: @project.id}}
+      scope={@current_scope}
     >
       <.page_content>
         <div class="tabs tabs-lift">
@@ -69,13 +61,21 @@ defmodule RodaWeb.Orga.ProjectSettingsLive do
             type="radio"
             name="my_tabs_3"
             class="tab"
-            aria-label={gettext("General")}
+            aria-label={gettext("Invite")}
             phx-click="tab"
-            phx-value-tab="general"
-            checked={@tab == "general"}
+            phx-value-tab="invite"
+            checked={@tab == "invite"}
           />
           <div class="tab-content bg-base-100 border-base-300 p-6">
-            general
+            <div>
+              {get_qrcode(url(~p"/testify/#{@token}"))}
+            </div>
+
+            <.button phx-click={
+              JS.dispatch("phx:clipcopy", detail: %{id: url(~p"/testify/#{@token}")})
+            }>
+              {gettext("Copy url")}
+            </.button>
           </div>
           <input
             type="radio"
@@ -93,5 +93,28 @@ defmodule RodaWeb.Orga.ProjectSettingsLive do
       </.page_content>
     </.page>
     """
+  end
+
+  def get_qrcode(url) do
+    url
+    |> EQRCode.encode()
+    |> EQRCode.svg()
+    |> Floki.parse_document!()
+    |> Floki.find("svg")
+    |> Floki.raw_html()
+    |> raw()
+  end
+
+  defp assign_invitation_link(socket) do
+    %{current_scope: scope} = socket.assigns
+
+    token =
+      case Invite.get_projet_token_by_project(scope) do
+        {:ok, token} -> token
+        _ -> Invite.generate_project_token(scope)
+      end
+
+    socket
+    |> assign(token: token)
   end
 end

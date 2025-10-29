@@ -257,8 +257,7 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
     ~H"""
     <.page
       current="settings"
-      sidebar_type={:organization}
-      sidebar_params={%{orga_id: @current_scope.organization.id}}
+      scope={@current_scope}
     >
       <.page_content>
         <div class="tabs tabs-lift">
@@ -534,7 +533,7 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
     )
   end
 
-  def assign_new_member(socket) do
+  defp assign_new_member(socket) do
     user = User.email_changeset(%User{}, %{})
     assign(socket, user_form: to_form(user))
   end

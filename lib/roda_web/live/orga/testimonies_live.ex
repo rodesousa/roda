@@ -8,17 +8,9 @@ defmodule RodaWeb.Orga.TestimoniesLive do
   alias Roda.{Organizations, Questions}
 
   @impl true
-  def mount(
-        %{"orga_id" => orga_id, "project_id" => project_id},
-        _session,
-        socket
-      ) do
+  def mount(_p, _session, socket) do
     socket =
       socket
-      |> assign(
-        project: Organizations.get_project_by_id(project_id),
-        orga: Organizations.get_orga_by_id(orga_id)
-      )
       |> assign_testimonies()
 
     {:ok, socket}
@@ -29,8 +21,7 @@ defmodule RodaWeb.Orga.TestimoniesLive do
     ~H"""
     <.page
       current="testimonies"
-      sidebar_type={:project}
-      sidebar_params={%{orga_id: @orga.id, project_id: @project.id}}
+      scope={@current_scope}
     >
       <.page_content>
         <div class="">
@@ -55,10 +46,10 @@ defmodule RodaWeb.Orga.TestimoniesLive do
   end
 
   defp assign_testimonies(socket) do
-    ass = socket.assigns
+    %{current_scope: scope} = socket.assigns
 
     conversation =
-      Conversations.list_conversations_by_project_id(ass.project.id)
+      Conversations.list_conversations_by_project_id(scope.project.id)
       |> Enum.map(fn %{chunks: chunks, inserted_at: date} ->
         text =
           Enum.sort_by(chunks, & &1.position)

@@ -4,7 +4,7 @@ defmodule RodaWeb.UserAuth do
   import Plug.Conn
   import Phoenix.Controller
 
-  alias Roda.{Accounts, Organizations}
+  alias Roda.{Accounts, Organizations, Invite}
   alias Roda.Accounts.Scope
 
   use Gettext, backend: RodaWeb.Gettext
@@ -224,12 +224,7 @@ defmodule RodaWeb.UserAuth do
     if ass.current_scope && ass.current_scope.user do
       {:cont, socket}
     else
-      socket =
-        socket
-        |> Phoenix.LiveView.put_flash(:error, "You must log in to access this page.")
-        |> Phoenix.LiveView.redirect(to: ~p"/users/log-in")
-
-      {:halt, socket}
+      must_log(socket)
     end
   end
 
@@ -259,21 +254,50 @@ defmodule RodaWeb.UserAuth do
             {:cont, Phoenix.Component.assign(socket, :current_scope, scope)}
 
           {:error, :not_found} ->
-            socket =
-              socket
-              |> Phoenix.LiveView.put_flash(:error, "Organization not found or access denied.")
-              |> Phoenix.LiveView.redirect(to: "/")
-
-            {:halt, socket}
+            access_denied(socket)
         end
 
       _ ->
-        socket =
-          socket
-          |> Phoenix.LiveView.put_flash(:error, "You must log in to access this page.")
-          |> Phoenix.LiveView.redirect(to: ~p"/users/log-in")
+        must_log(socket)
+    end
+  end
 
-        {:halt, socket}
+  def on_mount(
+        :mount_token_context,
+        %{"token" => token},
+        session,
+        socket
+      ) do
+    with {:ok, invite} <- Invite.get_projet_token_by_token(token) do
+      scope = Scope.for_token(invite.project, token)
+      {:cont, Phoenix.Component.assign(socket, :current_scope, scope)}
+    else
+      _ ->
+        invalid_token(socket)
+    end
+  end
+
+  def on_mount(
+        :mount_project_context,
+        %{"orga_id" => orga_id, "project_id" => project_id},
+        session,
+        socket
+      ) do
+    socket = mount_current_scope(socket, session)
+
+    case socket.assigns.current_scope do
+      %{user: user} when not is_nil(user) ->
+        with {:ok, org, membership} <- Organizations.get_user_membership(user.id, orga_id),
+             {:ok, project} <- Organizations.get_project(orga_id, project_id) do
+          scope = Accounts.Scope.for_user_in_project(user, org, membership, project)
+          {:cont, Phoenix.Component.assign(socket, :current_scope, scope)}
+        else
+          {:error, :not_found} ->
+            access_denied(socket)
+        end
+
+      _ ->
+        must_log(socket)
     end
   end
 
@@ -286,24 +310,11 @@ defmodule RodaWeb.UserAuth do
         if Accounts.platform_admin?(s) do
           {:cont, socket}
         else
-          socket =
-            socket
-            |> Phoenix.LiveView.put_flash(
-              :error,
-              "Access denied. Platform admin privileges required."
-            )
-            |> Phoenix.LiveView.redirect(to: ~p"/")
-
-          {:halt, socket}
+          access_denied(socket)
         end
 
       _ ->
-        socket =
-          socket
-          |> Phoenix.LiveView.put_flash(:error, "You must log in to access this page.")
-          |> Phoenix.LiveView.redirect(to: ~p"/users/log-in")
-
-        {:halt, socket}
+        must_log(socket)
     end
   end
 
@@ -346,4 +357,37 @@ defmodule RodaWeb.UserAuth do
   end
 
   defp maybe_store_return_to(conn), do: conn
+
+  defp access_denied(socket) do
+    socket =
+      socket
+      |> Phoenix.LiveView.put_flash(
+        :error,
+        gettext("Organization or Project not found or access denied.")
+      )
+      |> Phoenix.LiveView.redirect(to: "/")
+
+    {:halt, socket}
+  end
+
+  defp invalid_token(socket) do
+    socket =
+      socket
+      |> Phoenix.LiveView.put_flash(
+        :error,
+        gettext("Invalid token")
+      )
+      |> Phoenix.LiveView.redirect(to: "/")
+
+    {:halt, socket}
+  end
+
+  defp must_log(socket) do
+    socket =
+      socket
+      |> Phoenix.LiveView.put_flash(:error, gettext("You must log in to access this page."))
+      |> Phoenix.LiveView.redirect(to: ~p"/users/log-in")
+
+    {:halt, socket}
+  end
 end
