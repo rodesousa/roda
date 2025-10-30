@@ -176,7 +176,7 @@ defmodule RodaWeb.Page do
       %{
         id: "ask",
         name: gettext("Prompt"),
-        link: ~p"/orgas/#{orga.id}/projects/#{project.id}/ask",
+        link: ~p"/orgas/#{orga.id}/projects/#{project.id}/prompt",
         icon: "hero-question-mark-circle"
       }
       # ,

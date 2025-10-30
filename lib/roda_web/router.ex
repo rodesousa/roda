@@ -34,6 +34,7 @@ defmodule RodaWeb.Router do
 
     live_session :mount_project_context,
       on_mount: [{RodaWeb.UserAuth, :mount_project_context}] do
+      live "/orgas/:orga_id/projects/:project_id/prompt", Orga.PromptLive
       live "/orgas/:orga_id/projects/:project_id/testify", Orga.TestifyLive
       live "/orgas/:orga_id/projects/:project_id/testimonies", Orga.TestimoniesLive
       live "/orgas/:orga_id/projects/:project_id/questions/new", Orga.NewQuestionLive
