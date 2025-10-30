@@ -17,7 +17,6 @@ defmodule Roda.Accounts.Scope do
   """
 
   alias Roda.Accounts.User
-  alias Roda.Repo
   alias Roda.Organizations.{Organization, OrganizationMembership, Project}
 
   @type t :: %__MODULE__{
@@ -43,11 +42,11 @@ defmodule Roda.Accounts.Scope do
     %__MODULE__{user: user}
   end
 
+  def for_user(nil), do: nil
+
   def for_token(%Project{} = project, token) do
     %__MODULE__{project: project, invite_token: token}
   end
-
-  def for_user(nil), do: nil
 
   @doc """
   Creates a scope for a user within a specific organization.

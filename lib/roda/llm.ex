@@ -3,14 +3,15 @@ defmodule Roda.LLM do
   alias Roda.LLM.Provider
   require Logger
 
-  def models(%Provider{provider_type: "openai"} = provider) do
+  def models(%Provider{} = provider) do
     "#{provider.api_base_url}/v1/models"
     |> Req.get(
-      headers: [{"authorization", "Bearer #{provider.api_key}"}],
+      headers: headers(provider),
       receive_timeout: 60_000
     )
     |> case do
       {:ok, %{status: 200, body: body}} -> {:ok, body["data"]}
+      {:ok, %{status: 429}} -> {:error, :capacity_exceeded}
       {:ok, %{status: 401}} -> {:error, :bad_api_key}
       {:ok, %{body: %{"detail" => detail}}} -> {:error, detail}
       {:ok, _} -> {:error, :unknown}
@@ -18,15 +19,15 @@ defmodule Roda.LLM do
     end
   end
 
-  def chat_completion2(%Provider{} = provider, content) do
+  def chat_completion2(%Provider{provider_type: "openai"} = provider, content) do
     Logger.debug("Begin")
 
     response =
       provider
       |> get_chat_url()
       |> Req.post(
-        headers: [{"authorization", "Bearer #{provider.api_key}"}],
-        receive_timeout: 60_000,
+        headers: headers(provider),
+        receive_timeout: 600_000,
         json: %{model: provider.model, messages: [%{role: "user", content: content}]}
       )
 
@@ -41,21 +42,30 @@ defmodule Roda.LLM do
     end
   end
 
-  def chat_completion(%Provider{} = provider, content) do
+  def chat_completion2(%Provider{provider_type: "anthropic"} = provider, content) do
+    Logger.debug("Begin")
+
     response =
       provider
       |> get_chat_url()
       |> Req.post(
-        headers: [{"authorization", "Bearer #{provider.api_key}"}],
-        receive_timeout: 60_000,
-        json: %{model: provider.model, messages: [%{role: "user", content: content}]}
+        headers: headers(provider),
+        receive_timeout: 600_000,
+        json: %{
+          model: provider.model,
+          max_tokens: 64000,
+          messages: [%{role: "user", content: content}]
+        }
       )
 
+    Logger.debug("Request done #{inspect(response)}")
+
     with {:ok, %{body: body}} <- response,
-         %{"choices" => [%{"message" => %{"content" => content}}]} <- body do
-      content
+         %{"content" => [%{"text" => text}]} <- body do
+      {:ok, text}
     else
-      {:ok, %{body: body}} -> {:error, body}
+      {:ok, %{body: body}} -> {:api_error, body}
+      error -> {:error, error}
     end
   end
 
@@ -115,6 +125,14 @@ defmodule Roda.LLM do
       {:error, reason} ->
         {:error, reason}
     end
+  end
+
+  defp headers(%{provider_type: "openai"} = provider) do
+    [{"authorization", "Bearer #{provider.api_key}"}]
+  end
+
+  defp headers(%{provider_type: "anthropic"} = provider) do
+    [{"x-api-key", "#{provider.api_key}"}, {"anthropic-version", "2023-06-01"}]
   end
 
   def get_embeddings_url(%{provider_type: "openai"} = provider) do

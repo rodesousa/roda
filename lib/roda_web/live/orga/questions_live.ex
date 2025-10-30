@@ -1,18 +1,16 @@
 defmodule RodaWeb.Orga.QuestionsLive do
   use RodaWeb, :live_view
 
-  alias Roda.{Organizations, Questions}
+  alias Roda.{Questions}
 
   @impl true
-  def mount(%{"project_id" => project_id}, _session, socket) do
-    questions = Questions.list_questions_by_project_id(project_id)
+  def mount(_, _session, socket) do
+    %{current_scope: scope} = socket.assigns
+    questions = Questions.list_questions_by_project_id(scope.project.id)
 
     socket =
       socket
-      |> assign(
-        project: Organizations.get_project_by_id(project_id),
-        questions: questions
-      )
+      |> assign(questions: questions)
 
     {:ok, socket}
   end
@@ -22,8 +20,7 @@ defmodule RodaWeb.Orga.QuestionsLive do
     ~H"""
     <.page
       current="questions"
-      sidebar_type={:project}
-      sidebar_params={%{orga_id: @current_scope.organization.id, project_id: @project.id}}
+      scope={@current_scope}
     >
       <.page_content>
         <div id="questions" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -31,14 +28,14 @@ defmodule RodaWeb.Orga.QuestionsLive do
             <.card
               name={question.name}
               link={
-                ~p"/orgas/#{@current_scope.organization.id}/projects/#{@project.id}/questions/#{question.id}"
+                ~p"/orgas/#{@current_scope.organization.id}/projects/#{@current_scope.project.id}/questions/#{question.id}"
               }
             />
           <% end %>
           <.link
             :if={length(@questions) < 4}
             navigate={
-              ~p"/orgas/#{@current_scope.organization.id}/projects/#{@project.id}/questions/new"
+              ~p"/orgas/#{@current_scope.organization.id}/projects/#{@current_scope.project.id}/questions/new"
             }
           >
             <h3 class="text-lg font-semibold text-cohortes-black group-hover:text-cohortes-red transition-colors text-center">

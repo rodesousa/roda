@@ -1,7 +1,6 @@
 defmodule Roda.Organizations.Organization do
   use Ecto.Schema
   import Ecto.Changeset
-  alias Roda.Accounts.Scope
 
   @primary_key {:id, Uniq.UUID, autogenerate: true, version: 7}
 

@@ -358,7 +358,7 @@ defmodule RodaWeb.UserAuth do
 
   defp maybe_store_return_to(conn), do: conn
 
-  defp access_denied(socket) do
+  def access_denied(socket) do
     socket =
       socket
       |> Phoenix.LiveView.put_flash(

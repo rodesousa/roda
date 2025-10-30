@@ -1,33 +1,27 @@
 defmodule RodaWeb.Orga.NewQuestionLive do
   use RodaWeb, :live_view
-  alias Roda.{Analyses}
-  alias Roda.Questions.Analyse
-  alias Roda.{Organizations, Questions}
+  alias Roda.{Questions}
   alias Roda.Questions.Question
-  alias Roda.Repo
 
-  def mount(%{"orga_id" => orga_id, "project_id" => project_id}, _session, socket) do
+  @impl true
+  def mount(_, _session, socket) do
     socket =
       socket
-      |> assign(
-        project: Organizations.get_project_by_id(project_id),
-        orga: Organizations.get_orga_by_id(orga_id),
-        question_form: to_form(Question.changeset(%{}))
-      )
+      |> assign(question_form: to_form(Question.changeset(%{})))
 
     {:ok, socket}
   end
 
   @impl true
   def handle_event("create_question", %{"question" => params}, socket) do
-    ass = socket.assigns
-    params = Map.put(params, "project_id", ass.project.id)
+    %{current_scope: scope} = socket.assigns
+    params = Map.put(params, "project_id", scope.project.id)
 
     socket =
       case Questions.add(params) do
         {:ok, question} ->
           push_navigate(socket,
-            to: ~p"/orgas/#{ass.orga.id}/projects/#{ass.project.id}/questions"
+            to: ~p"/orgas/#{scope.organization.id}/projects/#{scope.project.id}/questions"
           )
 
         {:error, changeset} ->
@@ -43,8 +37,7 @@ defmodule RodaWeb.Orga.NewQuestionLive do
     ~H"""
     <.page
       current="questions"
-      sidebar_type={:project}
-      sidebar_params={%{orga_id: @orga.id, project_id: @project.id}}
+      scope={@current_scope}
     >
       <.page_content>
         <.form :let={f} for={@question_form} phx-submit="create_question">

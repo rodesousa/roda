@@ -147,7 +147,7 @@ defmodule RodaWeb.Page do
     ]
   end
 
-  defp sidebar_links(%{project: project, organization: orga} = q) do
+  defp sidebar_links(%{project: project, organization: orga}) do
     [
       %{
         id: "projects",

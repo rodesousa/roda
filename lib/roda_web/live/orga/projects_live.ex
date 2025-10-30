@@ -4,8 +4,7 @@ defmodule RodaWeb.Orga.ProjectsLive do
   """
   use RodaWeb, :live_view
 
-  alias Roda.{Conversations, Date}
-  alias Roda.{Organizations, Questions}
+  alias Roda.{Organizations}
 
   @impl true
   def mount(_p, _session, socket) do

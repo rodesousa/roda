@@ -1,7 +1,7 @@
 defmodule Roda.Organizations.Project do
   use Ecto.Schema
   import Ecto.Changeset
-  alias Roda.Organization.Organization
+  alias Roda.Organizations.Organization
 
   @primary_key {:id, Uniq.UUID, autogenerate: true, version: 7}
   schema "projects" do

@@ -28,10 +28,10 @@ defmodule Roda.Organizations do
   end
 
   def get_membership_by_organization(%Scope{} = s) do
-      OrganizationMembership
-      |> where([m], m.organization_id == ^s.organization.id)
-      |> preload([:user])
-      |> Repo.all()
+    OrganizationMembership
+    |> where([m], m.organization_id == ^s.organization.id)
+    |> preload([:user])
+    |> Repo.all()
   end
 
   def add_organization(args) do
@@ -49,7 +49,7 @@ defmodule Roda.Organizations do
     |> Repo.insert()
   end
 
-  def add_project(%Scope{} = s, project_args) do
+  def add_project(%Scope{} = _s, project_args) do
     Project.changeset(project_args)
     |> Repo.insert()
   end
@@ -63,6 +63,16 @@ defmodule Roda.Organizations do
   def get_conversations(project_id) do
     Conversation
     |> where([c], c.project_id == ^project_id)
+    |> preload([:chunks])
+    |> Repo.all()
+  end
+
+  def get_conversations(%Scope{} = s, %NaiveDateTime{} = begin_at, %NaiveDateTime{} = end_at) do
+    Conversation
+    |> where(
+      [c],
+      c.project_id == ^s.project.id and c.inserted_at >= ^begin_at and c.inserted_at <= ^end_at
+    )
     |> preload([:chunks])
     |> Repo.all()
   end
@@ -156,5 +166,4 @@ defmodule Roda.Organizations do
       project -> {:ok, project}
     end
   end
-
 end

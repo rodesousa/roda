@@ -30,7 +30,6 @@ defmodule RodaWeb.Router do
       on_mount: [{RodaWeb.UserAuth, :mount_organization_context}] do
       live "/orgas/:orga_id/projects", Orga.ProjectsLive
       live "/orgas/:orga_id/settings", Orga.OrganizationSettingsLive
-      live "/orgas/:orga_id/projects/:project_id/questions", Orga.QuestionsLive
     end
 
     live_session :mount_project_context,
@@ -40,6 +39,13 @@ defmodule RodaWeb.Router do
       live "/orgas/:orga_id/projects/:project_id/questions/new", Orga.NewQuestionLive
       live "/orgas/:orga_id/projects/:project_id/questions/:question_id", Orga.QuestionLive
       live "/orgas/:orga_id/projects/:project_id/settings", Orga.ProjectSettingsLive
+      live "/orgas/:orga_id/projects/:project_id/questions", Orga.QuestionsLive
+
+      live "/orgas/:orga_id/projects/:project_id/questions/:question_id/show/:question_response_id",
+           Orga.Question.QuestionResponseLive
+
+      live "/orgas/:orga_id/projects/:project_id/questions/:question_id/themes",
+           Orga.Question.ThemesEvolutionLive
     end
   end
 

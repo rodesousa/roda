@@ -41,6 +41,9 @@ defmodule Roda.LLM.Provider do
   def changeset(%__MODULE__{} = provider, attrs) do
     provider
     |> cast(attrs, __schema__(:fields))
+    |> update_change(:api_base_url, &String.trim/1)
+    |> update_change(:model, &String.trim/1)
+    |> update_change(:api_key, &String.trim/1)
     |> validate_required(required())
     |> validate_inclusion(:type, ["chat", "audio"])
   end

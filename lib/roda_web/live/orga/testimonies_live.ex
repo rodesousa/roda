@@ -5,7 +5,6 @@ defmodule RodaWeb.Orga.TestimoniesLive do
   use RodaWeb, :live_view
 
   alias Roda.{Conversations, Date}
-  alias Roda.{Organizations, Questions}
 
   @impl true
   def mount(_p, _session, socket) do

@@ -23,11 +23,12 @@ defmodule RodaWeb.OrgasLive do
     {:ok, socket}
   end
 
+  @impl true
   def render(assigns) do
     ~H"""
     <.page
       current="orgas"
-      sidebar_type={:user}
+      scope={@current_scope}
     >
       <.page_content>
         <div id="orgas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

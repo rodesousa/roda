@@ -76,22 +76,22 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
   end
 
   @impl true
-  def handle_event("regenerate_invite", p, socket) do
+  def handle_event("regenerate_invite", _p, socket) do
     {:noreply, socket}
   end
 
   @impl true
-  def handle_event("copy_invite_link", p, socket) do
+  def handle_event("copy_invite_link", _p, socket) do
     {:noreply, socket}
   end
 
   @impl true
-  def handle_event("delete", p, socket) do
+  def handle_event("delete", _p, socket) do
     {:noreply, socket}
   end
 
   @impl true
-  def handle_event("set_role", p, socket) do
+  def handle_event("set_role", _p, socket) do
     {:noreply, socket}
   end
 
@@ -566,6 +566,9 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
          {:model, :ok} <- {:model, model_exists?.(response)} do
       {:ok, gettext("The configuration works, don't forget to save it!")}
     else
+      {:error, :bad_api_key} ->
+        {:error, gettext("Invalid API KEY")}
+
       {:model, :no_lo_se} ->
         {:warn, gettext("The configuration is ok but the model couldn’t be verified.")}
     end

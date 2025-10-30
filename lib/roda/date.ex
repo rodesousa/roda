@@ -4,6 +4,41 @@ defmodule Roda.Date do
   def end_of_week(), do: Date.end_of_week(Date.utc_today())
 
   @doc """
+  Returns a list of the last N complete weeks as {start_date, end_date} tuples.
+  Excludes the current week.
+
+  ## Examples
+
+      iex> last_complete_weeks(3)
+      [
+        {~D[2025-10-21], ~D[2025-10-27]},
+        {~D[2025-10-14], ~D[2025-10-20]},
+        {~D[2025-10-07], ~D[2025-10-13]}
+      ]
+  """
+  def last_complete_weeks(count) do
+    today = Date.utc_today()
+    current_week_start = Date.beginning_of_week(today)
+
+    # Start from last week (current_week_start - 1 day)
+    last_week_end = Date.add(current_week_start, -1)
+
+    Enum.map(0..(count - 1), fn week_offset ->
+      week_end = Date.add(last_week_end, -week_offset * 7)
+      week_start = Date.beginning_of_week(week_end)
+      {week_start, week_end}
+    end)
+  end
+
+  @doc """
+  Returns the ISO week number for a given date.
+  """
+  def week_number(%Date{} = date) do
+    {_, week} = Timex.iso_week(date)
+    week
+  end
+
+  @doc """
   iex> display_date(~N[2023-09-13 13:03:47])
   "13 September 2023"
 
