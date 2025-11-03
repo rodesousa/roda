@@ -13,7 +13,7 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
     Application.get_env(:roda, :llm)
   end
 
-  @tabs ["users", "embedding", "audio", "chat", "projects"]
+  @tabs ["users", "embedding", "audio", "chat"]
 
   @impl true
   def mount(_, _session, socket) do
@@ -56,7 +56,6 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
       )
       |> assign_users()
       |> assign_new_member()
-      |> assign_projects()
 
     {:ok, socket}
   end
@@ -261,35 +260,6 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
     >
       <.page_content>
         <div class="tabs tabs-lift">
-          <input
-            type="radio"
-            name="my_tabs_3"
-            class="tab"
-            aria-label={gettext("Projects")}
-            phx-click="tab"
-            phx-value-tab="projects"
-            checked={@tab == "projects"}
-          />
-          <div class="tab-content bg-base-100 border-base-300 p-6">
-            <div class="overflow-x-auto">
-              <table class="table">
-                <thead>
-                  <tr>
-                    <th>{gettext("Name")}</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <%= for p <- @projects do %>
-                    <tr>
-                      <td>{p.name}</td>
-                      <td></td>
-                    </tr>
-                  <% end %>
-                </tbody>
-              </table>
-            </div>
-          </div>
           <input
             type="radio"
             name="my_tabs_3"
@@ -523,14 +493,6 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
       end)
 
     assign(socket, users: users)
-  end
-
-  defp assign_projects(socket) do
-    %{current_scope: scope} = socket.assigns
-
-    assign(socket,
-      projects: Organizations.list_project_by_orga(scope)
-    )
   end
 
   defp assign_new_member(socket) do

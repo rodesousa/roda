@@ -26,7 +26,6 @@ defmodule RodaWeb.Card do
 
   attr :project, :map, required: true
   attr :conversations_count, :integer, default: 0
-  attr :days_since_creation, :integer, default: 0
   attr :view_link, :string, required: true
   attr :share_link, :string, default: nil
 
@@ -55,6 +54,44 @@ defmodule RodaWeb.Card do
             <button class="btn btn-primary btn-sm gap-1">
               <.icon name="hero-microphone" class="w-4 h-4" />
               {gettext("Testify")}
+            </button>
+          </.link>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  attr :question, :map, required: true
+  attr :count, :integer, default: 0
+  attr :view_link, :string, required: true
+  attr :share_link, :string, default: nil
+
+  def question_card(assigns) do
+    ~H"""
+    <div class="card bg-base-100 shadow-md hover:shadow-2xl transition-all duration-300 border border-base-300 w-full">
+      <div class="card-body p-5">
+        <!-- Header with status badge -->
+        <div class="flex justify-between items-start">
+          <h2 class="card-title text-lg break-words flex-1 pr-2">{@question.name}</h2>
+        </div>
+
+        <div class="flex flex-col gap-2 mt-2 text-sm text-base-content/70">
+          <div class="flex items-center gap-2">
+            <.icon name="hero-presentation-chart-line" class="w-4 h-4" />
+            <span>
+              {@count} {if @count <= 1,
+                do: gettext("analyse"),
+                else: gettext("analyses")}
+            </span>
+          </div>
+        </div>
+
+        <div class="card-actions justify-end mt-4 gap-2">
+          <.link navigate={@view_link}>
+            <button class="btn btn-primary gap-1">
+              <.icon name="hero-presentation-chart-line" class="w-5 h-5" />
+              {gettext("View")}
             </button>
           </.link>
         </div>

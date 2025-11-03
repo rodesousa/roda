@@ -34,6 +34,8 @@ defmodule Roda.OrganizationFixtures do
       |> Repo.insert()
 
     scope = Scope.for_user_in_organization(user, orga, membership)
+    {:ok, project} = Organizations.add_project(scope, %{"name" => "coucou"})
+    scope = Scope.for_user_in_project(user, orga, membership, project)
 
     Roda.Accounts.PlatformAdmin.add_super_admin(scope.user.id)
 
@@ -60,8 +62,6 @@ defmodule Roda.OrganizationFixtures do
           type: "chat"
         }
       )
-
-    {:ok, project} = Organizations.add_project(scope, %{"name" => "coucou"})
 
     %{project: project, scope: scope}
   end

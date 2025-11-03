@@ -12,7 +12,7 @@ defmodule RodaWeb.Orga.GroupsLive do
       socket
       |> assign_projects_with_metrics()
       |> assign_organization_stats()
-      |> assign_group_form
+      |> assign_group_form()
 
     {:ok, socket}
   end
@@ -56,8 +56,7 @@ defmodule RodaWeb.Orga.GroupsLive do
     <.page current="projects" scope={@current_scope}>
       <.page_content>
         <.breadcrumb scope={@current_scope} i={gettext("Groups")} />
-        
-    <!-- Global Stats -->
+
         <div class="stats stats-vertical sm:stats-horizontal shadow w-full mb-6">
           <div class="stat">
             <div class="stat-figure text-primary">

@@ -37,7 +37,6 @@ defmodule RodaWeb.Router do
       live "/orgas/:orga_id/projects/:project_id/prompt", Orga.PromptLive
       live "/orgas/:orga_id/projects/:project_id/testify", Orga.TestifyLive
       live "/orgas/:orga_id/projects/:project_id/testimonies", Orga.TestimoniesLive
-      live "/orgas/:orga_id/projects/:project_id/questions/new", Orga.NewQuestionLive
       live "/orgas/:orga_id/projects/:project_id/questions/:question_id", Orga.QuestionLive
       live "/orgas/:orga_id/projects/:project_id/settings", Orga.ProjectSettingsLive
       live "/orgas/:orga_id/projects/:project_id/questions", Orga.QuestionsLive

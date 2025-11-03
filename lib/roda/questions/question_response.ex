@@ -1,7 +1,7 @@
 defmodule Roda.Questions.QuestionResponse do
   use Ecto.Schema
   import Ecto.Changeset
-  alias Roda.Questions.{Question}
+  alias Roda.Questions.Question
 
   @primary_key {:id, Uniq.UUID, autogenerate: true, version: 7}
   schema "question_responses" do

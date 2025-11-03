@@ -58,7 +58,6 @@ defmodule RodaWeb.Orga.QuestionLive do
     ~H"""
     <.page current="questions" scope={@current_scope}>
       <.page_content>
-        <!-- En-tête avec progression -->
         <div class="card bg-base-100 shadow-xl mb-6">
           <div class="card-body">
             <div class="flex items-start justify-between">

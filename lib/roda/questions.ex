@@ -4,14 +4,41 @@ defmodule Roda.Questions do
   alias Roda.Accounts.Scope
   import Ecto.Query
 
+  def add_question(%Scope{} = s, args) do
+    args =
+      Map.merge(
+        args,
+        %{
+          "project_id" => s.project.id,
+          "prompt" => args["name"]
+        }
+      )
+
+    case Question.changeset(args) do
+      %{valid?: true} = changeset ->
+        Repo.insert(changeset)
+
+      changeset ->
+        changeset
+    end
+  end
+
   def add(params) do
     Question.changeset(params)
     |> Repo.insert()
   end
 
-  def list_questions_by_project_id(project_id) do
+  def list_questions_by_project_id(%Scope{} = s) do
     Question
-    |> where([q], q.project_id == ^project_id)
+    |> where([q], q.project_id == ^s.project.id)
+    |> join(
+      :left,
+      [q],
+      r in QuestionResponse,
+      on: q.id == r.question_id
+    )
+    |> group_by([q], q.id)
+    |> select([q, r], %{id: q.id, name: q.name, count_responses: fragment("count(?)", r)})
     |> Repo.all()
   end
 

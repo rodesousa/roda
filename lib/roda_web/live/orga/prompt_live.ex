@@ -28,7 +28,7 @@ defmodule RodaWeb.Orga.PromptLive do
   end
 
   @impl true
-  def handle_event("delete", p, socket) do
+  def handle_event("delete", _p, socket) do
     %{current_scope: scope} = ass = socket.assigns
 
     Prompts.delete_conversation(scope, ass.current_conversation.id)
