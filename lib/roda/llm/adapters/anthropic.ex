@@ -19,6 +19,10 @@ defmodule Roda.LLM.Adapters.Anthropic do
     "#{p.api_base_url}/v1/models"
   end
 
+  def chat_url(%Provider{} = p) do
+    "#{p.api_base_url}/v1/messages"
+  end
+
   defp build_stream_body(%Provider{model: model}, messages) do
     %{
       model: model,
@@ -37,7 +41,7 @@ defmodule Roda.LLM.Adapters.Anthropic do
   end
 
   def parse_response_for_mode(:raw, %{"content" => [%{"text" => text}]}) do
-    text
+    {:ok, text}
   end
 
   def parse_stream_chunk_for_mode(mode, %{"type" => event})

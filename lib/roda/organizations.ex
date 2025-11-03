@@ -34,6 +34,32 @@ defmodule Roda.Organizations do
     |> Repo.all()
   end
 
+  def add_project(%Scope{} = s, args) do
+    args = Map.put(args, "organization_id", s.organization.id)
+
+    case Project.changeset(args) do
+      %{valid?: true} = changeset ->
+        {:ok, project} = Repo.insert(changeset)
+
+        :telemetry.execute(
+          [:roda, :organizations, :group, :created],
+          %{count: 1},
+          %{
+            user_id: s.user.id,
+            organization_id: s.organization.id,
+            resource_type: "Project",
+            resource_id: project.id,
+            resource_name: project.name
+          }
+        )
+
+        {:ok, project}
+
+      changeset ->
+        changeset
+    end
+  end
+
   def add_organization(args) do
     Organization.changeset(args)
     |> Repo.insert()
@@ -46,11 +72,6 @@ defmodule Roda.Organizations do
 
   def add_project(args \\ %{}) do
     Project.changeset(args)
-    |> Repo.insert()
-  end
-
-  def add_project(%Scope{} = _s, project_args) do
-    Project.changeset(project_args)
     |> Repo.insert()
   end
 
@@ -165,5 +186,77 @@ defmodule Roda.Organizations do
       nil -> {:error, :not_found}
       project -> {:ok, project}
     end
+  end
+
+  @doc """
+  Counts conversations (testimonies) for a given project.
+
+  ## Example
+
+      iex> count_conversations_by_project(project_id)
+      12
+  """
+  def count_conversations_by_project(project_id, date) do
+    Conversation
+    |> where([c], c.project_id == ^project_id and c.inserted_at >= ^date)
+    |> Repo.aggregate(:count, :id)
+  end
+
+  @doc """
+  Lists projects with enriched metrics for an organization.
+
+  Returns projects with additional fields:
+  - conversations_count: number of testimonies
+  - days_since_creation: days since project creation
+
+  ## Example
+
+      iex> list_projects_with_metrics(scope)
+      [%{project: %Project{}, conversations_count: 12, days_since_creation: 5}]
+  """
+  def list_projects_with_metrics(%Scope{} = s) do
+    projects = list_project_by_orga(s)
+    one_week_ago = DateTime.utc_now() |> DateTime.add(-7, :day)
+
+    Enum.map(projects, fn project ->
+      conversations_count = count_conversations_by_project(project.id, one_week_ago)
+      days_ago = DateTime.diff(DateTime.utc_now(), project.inserted_at, :day)
+
+      %{
+        project: project,
+        conversations_count: conversations_count,
+        days_since_creation: days_ago
+      }
+    end)
+  end
+
+  @doc """
+  Calculates global statistics for an organization's projects.
+
+  Returns a map with:
+  - active_projects_count: number of active projects
+  - total_conversations: total conversations across all projects
+  - conversations_this_week: conversations created in the last 7 days
+
+  ## Example
+
+      iex> get_organization_stats(scope)
+      %{active_projects_count: 3, total_conversations: 45, conversations_this_week: 12}
+  """
+  def get_organization_stats(%Scope{} = s) do
+    projects = list_project_by_orga(s)
+    project_ids = Enum.map(projects, & &1.id)
+
+    one_week_ago = DateTime.utc_now() |> DateTime.add(-7, :day)
+
+    conversations_this_week =
+      Conversation
+      |> where([c], c.project_id in ^project_ids and c.inserted_at >= ^one_week_ago)
+      |> Repo.aggregate(:count, :id)
+
+    %{
+      active_projects_count: length(projects),
+      conversations_this_week: conversations_this_week
+    }
   end
 end

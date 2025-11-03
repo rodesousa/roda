@@ -32,73 +32,24 @@ defmodule Roda.LLM do
     end
   end
 
-  def get_adapter(provider) do
-    list_adapter()
-    |> Enum.find(&(Map.get(&1, :id) == provider.provider_type))
-  end
+  def chat_completion(%Provider{} = provider, message) do
+    adapter = get_adapter(provider)
 
-  def list_adapter() do
-    adapters()
-    |> Enum.map(fn module ->
-      module.default_config()
-    end)
-  end
-
-  defp adapters() do
-    :application.get_key(:roda, :modules)
-    |> then(fn
-      {:ok, all_modules} -> all_modules
-      _ -> []
-    end)
-    |> Enum.filter(fn module ->
-      String.starts_with?("#{module}", "Elixir.Roda.LLM.Adapters")
-    end)
-  end
-
-  def chat_completion2(%Provider{provider_type: "openai"} = provider, content) do
     Logger.debug("Begin")
 
     response =
-      provider
-      |> get_chat_url()
+      adapter.module.chat_url(provider)
       |> Req.post(
-        headers: headers(provider),
+        headers: adapter.module.headers(provider),
         receive_timeout: 600_000,
-        json: %{model: provider.model, messages: [%{role: "user", content: content}]}
+        json: %{model: provider.model, max_tokens: 64000, messages: message}
       )
+      |> IO.inspect(label: " ")
 
     Logger.debug("Request done #{inspect(response)}")
 
-    with {:ok, %{body: body}} <- response,
-         %{"choices" => [%{"message" => %{"content" => content}}]} <- body do
-      {:ok, content}
-    else
-      {:ok, %{body: body}} -> {:api_error, body}
-      error -> {:error, error}
-    end
-  end
-
-  def chat_completion2(%Provider{provider_type: "anthropic"} = provider, content) do
-    Logger.debug("Begin")
-
-    response =
-      provider
-      |> get_chat_url()
-      |> Req.post(
-        headers: headers(provider),
-        receive_timeout: 600_000,
-        json: %{
-          model: provider.model,
-          max_tokens: 64000,
-          messages: [%{role: "user", content: content}]
-        }
-      )
-
-    Logger.debug("Request done #{inspect(response)}")
-
-    with {:ok, %{body: body}} <- response,
-         %{"content" => [%{"text" => text}]} <- body do
-      {:ok, text}
+    with {:ok, %{body: body}} <- response do
+      adapter.module.parse_response_for_mode(:raw, body)
     else
       {:ok, %{body: body}} -> {:api_error, body}
       error -> {:error, error}
@@ -310,6 +261,29 @@ defmodule Roda.LLM do
         {:error, _} ->
           []
       end
+    end)
+  end
+
+  def get_adapter(provider) do
+    list_adapter()
+    |> Enum.find(&(Map.get(&1, :id) == provider.provider_type))
+  end
+
+  def list_adapter() do
+    adapters()
+    |> Enum.map(fn module ->
+      module.default_config()
+    end)
+  end
+
+  defp adapters() do
+    :application.get_key(:roda, :modules)
+    |> then(fn
+      {:ok, all_modules} -> all_modules
+      _ -> []
+    end)
+    |> Enum.filter(fn module ->
+      String.starts_with?("#{module}", "Elixir.Roda.LLM.Adapters")
     end)
   end
 end

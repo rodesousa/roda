@@ -24,18 +24,41 @@ defmodule RodaWeb.Card do
     """
   end
 
-  attr :icon, :string
-  slot :inner_block
+  attr :project, :map, required: true
+  attr :conversations_count, :integer, default: 0
+  attr :days_since_creation, :integer, default: 0
+  attr :view_link, :string, required: true
+  attr :share_link, :string, default: nil
 
-  def icon_card(assigns) do
+  def project_card(assigns) do
     ~H"""
-    <div class="p-4 rounded-lg shadow-md cursor-pointer transition-all duration-200 hover:shadow-lg border-2 border-dashed border-gray-300 bg-white h-32 flex flex-col items-center justify-center group">
-      <div class="flex items-center justify-center mb-2">
-        <.icon name={@icon} class="text-cohortes-black h-6 w-6 group-hover:text-cohortes-red" />
+    <div class="card bg-base-100 shadow-md hover:shadow-2xl transition-all duration-300 border border-base-300 w-full">
+      <div class="card-body p-5">
+        <!-- Header with status badge -->
+        <div class="flex justify-between items-start">
+          <h2 class="card-title text-lg break-words flex-1 pr-2">{@project.name}</h2>
+        </div>
+
+        <div class="flex flex-col gap-2 mt-2 text-sm text-base-content/70">
+          <div class="flex items-center gap-2">
+            <.icon name="hero-chat-bubble-left-right" class="w-4 h-4" />
+            <span>
+              {@conversations_count} {if @conversations_count <= 1,
+                do: gettext("testimony last week"),
+                else: gettext("testimonies last week")}
+            </span>
+          </div>
+        </div>
+
+        <div class="card-actions justify-end mt-4 gap-2">
+          <.link navigate={@view_link}>
+            <button class="btn btn-primary btn-sm gap-1">
+              <.icon name="hero-microphone" class="w-4 h-4" />
+              {gettext("Testify")}
+            </button>
+          </.link>
+        </div>
       </div>
-      <h3 class="text-lg font-semibold text-cohortes-black group-hover:text-cohortes-red transition-colors text-center">
-        {render_slot(@inner_block)}
-      </h3>
     </div>
     """
   end

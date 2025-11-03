@@ -27,6 +27,7 @@ import { ResetForm } from "./hooks/reset"
 import { Recorder } from "./hooks/recorder"
 import { Markdown } from "./hooks/markdown"
 import { Citations } from "./hooks/citations"
+import { Flatpickr } from "./hooks/flatpickr"
 import { MarkdownCitations } from "./hooks/markdown_citations"
 import topbar from "../vendor/topbar"
 
@@ -34,7 +35,7 @@ const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: { _csrf_token: csrfToken },
-  hooks: { ...colocatedHooks, Recorder, Markdown, Citations, MarkdownCitations, ResetForm },
+  hooks: { ...colocatedHooks, Recorder, Markdown, Citations, MarkdownCitations, ResetForm, Flatpickr },
 })
 
 // Show progress bar on live navigation and form submits

@@ -13,6 +13,7 @@ defmodule RodaWeb.Page do
   slot :inner_block
   attr :scope, :map, default: %{}
   attr :current, :string, default: ""
+  slot :extends_sidebar
 
   def page(assigns) do
     ~H"""
@@ -26,7 +27,8 @@ defmodule RodaWeb.Page do
         <label for="my-drawer-4" aria-label="close sidebar" class="drawer-overlay"></label>
         <div class="is-drawer-close:w-14 is-drawer-open:w-64 bg-base-200 flex flex-col items-start min-h-full">
           <!-- Sidebar content here -->
-          <ul class="menu w-full grow">
+          <!-- <ul class="menu w-full grow"> -->
+          <ul class="menu w-full">
             <!-- list item -->
             <%= for s <- sidebar_links(@scope) do %>
               <.link navigate={s.link}>
@@ -45,6 +47,10 @@ defmodule RodaWeb.Page do
               </.link>
             <% end %>
           </ul>
+
+          <div class="flex-1 w-full overflow-y-auto">
+            {render_slot(@extends_sidebar)}
+          </div>
 
           <div class="my-2 mx-4 flex flex-col space-y-2">
             <.button

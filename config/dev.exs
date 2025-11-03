@@ -76,8 +76,20 @@ config :roda, RodaWeb.Endpoint,
 # Enable dev routes for dashboard and mailbox
 config :roda, dev_routes: true
 
-# Do not include metadata nor timestamps in development logs
-config :logger, :default_formatter, format: "[$level] $message\n"
+# Include metadata for audit events in development logs
+config :logger, :default_formatter,
+  format: "\n[$level] $message $metadata\n",
+  metadata: [
+    :event,
+    :user_id,
+    :organization_id,
+    :project_id,
+    :resource_type,
+    :resource_id,
+    :resource_name,
+    :additional_data,
+    :timestamp
+  ]
 
 # Set a higher stacktrace during development. Avoid configuring such
 # in production as building large stacktraces may be expensive.

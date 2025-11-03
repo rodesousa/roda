@@ -21,10 +21,30 @@ defmodule Roda.Application do
       RodaWeb.Endpoint
     ]
 
+    # Attach telemetry handlers for audit logging
+    attach_telemetry_handlers()
+
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Roda.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  defp attach_telemetry_handlers do
+    :telemetry.attach_many(
+      "roda-audit-logger",
+      [
+        [:roda, :organizations, :group, :created],
+        [:roda, :organizations, :group, :deleted],
+        [:roda, :organizations, :group, :creation_failed],
+        [:roda, :organizations, :member, :added],
+        [:roda, :organizations, :member, :removed],
+        [:roda, :organizations, :member, :role_changed],
+        [:roda, :security, :access_denied]
+      ],
+      &Roda.Telemetry.AuditHandler.handle_event/4,
+      nil
+    )
   end
 
   # Tell Phoenix to update the endpoint configuration

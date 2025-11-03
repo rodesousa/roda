@@ -1,39 +1,68 @@
 defmodule Roda.OrganizationFixtures do
-  alias Roda.Repo
-  alias Roda.LLM.Provider
-  alias Roda.Organizations.{Organization, Project}
+  alias Roda.{Repo, Accounts, Organizations}
+  alias Roda.Accounts.Scope
+  alias Roda.Organizations.{OrganizationMembership}
 
-  def init_organization() do
-    org =
-      %Organization{name: "Test Org", embedding_dimension: 1024, embedding_model: "test"}
-      |> Repo.insert!()
+  def init_organization(args \\ []) do
+    email = Keyword.get(args, :email, "admin@cohortes.co")
+    role = Keyword.get(args, :role, "admin")
 
-    project =
-      %Project{name: "Test Project", organization_id: org.id}
-      |> Repo.insert!()
+    orga =
+      Organizations.add_organization!(%{
+        name: "Orga test",
+        embedding_dimension: 1024,
+        embedding_provider_type: "openai",
+        embedding_api_base_url: "https://api.mistral.ai",
+        embedding_model: "mistral-embed",
+        embedding_encrypted_api_key: "WaI5foGtA6c8EizOmT4LsZhgfG50ZhEq"
+      })
 
-    Provider.changeset(%{
-      name: "mistral medium",
-      provider_type: "openai",
-      api_key: "Ambroise",
-      api_base_url: "https://api.mistral.ai",
-      model: "mistral-medium-2508",
-      organization_id: org.id,
-      type: "chat"
-    })
-    |> Repo.insert!()
+    {:ok, user} =
+      Accounts.register_user(%{
+        email: email
+      })
 
-    Provider.changeset(%{
-      name: "mistral audio",
-      provider_type: "openai",
-      api_key: "Rakam",
-      api_base_url: "https://api.mistral.ai",
-      model: "voxtral-mini-2507",
-      organization_id: org.id,
-      type: "audio"
-    })
-    |> Repo.insert!()
+    {:ok, _} = Accounts.update_user_password(user, %{password: "Password123456"})
 
-    %{org: org, project: project}
+    {:ok, membership} =
+      %OrganizationMembership{}
+      |> OrganizationMembership.changeset(%{
+        organization_id: orga.id,
+        user_id: user.id,
+        role: role
+      })
+      |> Repo.insert()
+
+    scope = Scope.for_user_in_organization(user, orga, membership)
+
+    Roda.Accounts.PlatformAdmin.add_super_admin(scope.user.id)
+
+    _audio =
+      Organizations.add_provider(
+        scope,
+        %{
+          provider_type: "openai",
+          api_key: "WaI5foGtA6c8EizOmT4LsZhgfG50ZhEq",
+          api_base_url: "https://api.mistral.ai",
+          model: "voxtral-mini-2507",
+          type: "audio"
+        }
+      )
+
+    _chat =
+      Organizations.add_provider(
+        scope,
+        %{
+          provider_type: "mistral",
+          api_key: "WaI5foGtA6c8EizOmT4LsZhgfG50ZhEq",
+          api_base_url: "https://api.mistral.ai",
+          model: "mistral-medium-2508",
+          type: "chat"
+        }
+      )
+
+    {:ok, project} = Organizations.add_project(scope, %{"name" => "coucou"})
+
+    %{project: project, scope: scope}
   end
 end

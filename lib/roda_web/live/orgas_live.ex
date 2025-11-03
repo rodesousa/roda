@@ -1,6 +1,4 @@
 defmodule RodaWeb.OrgasLive do
-  @moduledoc """
-  """
   use RodaWeb, :live_view
   alias Roda.Organizations
 
@@ -11,7 +9,7 @@ defmodule RodaWeb.OrgasLive do
     socket =
       case Organizations.list_organisation_by_user(ass.current_scope) do
         [member] ->
-          push_navigate(socket, to: ~p"/orgas/#{member.organization.id}/projects")
+          push_navigate(socket, to: ~p"/orgas/#{member.organization.id}/groups")
 
         [] ->
           assign(socket, members: [])
@@ -35,7 +33,7 @@ defmodule RodaWeb.OrgasLive do
           <%= for  member <- @members  do %>
             <.card
               name={member.organization.name}
-              link={~p"/orgas/#{member.organization.id}/projects"}
+              link={~p"/orgas/#{member.organization.id}/groups"}
             />
           <% end %>
         </div>

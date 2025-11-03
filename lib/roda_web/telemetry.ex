@@ -79,7 +79,25 @@ defmodule RodaWeb.Telemetry do
       summary("vm.memory.total", unit: {:byte, :kilobyte}),
       summary("vm.total_run_queue_lengths.total"),
       summary("vm.total_run_queue_lengths.cpu"),
-      summary("vm.total_run_queue_lengths.io")
+      summary("vm.total_run_queue_lengths.io"),
+
+      # Audit Metrics
+      counter("roda.organizations.group.created.count",
+        description: "Total number of groups created"
+      ),
+      counter("roda.organizations.group.deleted.count",
+        description: "Total number of groups deleted"
+      ),
+      counter("roda.organizations.group.creation_failed.count",
+        description: "Total number of failed group creation attempts"
+      ),
+      counter("roda.security.access_denied.count",
+        tags: [:action],
+        description: "Total number of access denied events by action"
+      ),
+      last_value("roda.organizations.group.created.timestamp",
+        description: "Last time a group was created"
+      )
     ]
   end
 

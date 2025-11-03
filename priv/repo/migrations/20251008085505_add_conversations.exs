@@ -67,5 +67,9 @@ defmodule Roda.Repo.Migrations.AddConversations do
     create index(:llm_providers, [:is_active])
 
     create unique_index(:llm_providers, [:organization_id, :type], where: "is_active = true")
+
+    create unique_index(:projects, [:organization_id, :name],
+             name: :projects_organization_id_name_index
+           )
   end
 end

@@ -28,7 +28,7 @@ defmodule RodaWeb.Router do
 
     live_session :mount_organization_context,
       on_mount: [{RodaWeb.UserAuth, :mount_organization_context}] do
-      live "/orgas/:orga_id/projects", Orga.ProjectsLive
+      live "/orgas/:orga_id/groups", Orga.GroupsLive
       live "/orgas/:orga_id/settings", Orga.OrganizationSettingsLive
     end
 
@@ -108,7 +108,7 @@ defmodule RodaWeb.Router do
 
     live_session :current_user,
       on_mount: [{RodaWeb.UserAuth, :mount_current_scope}] do
-      live "/users/register", UserLive.Registration, :new
+      # live "/users/register", UserLive.Registration, :new
       live "/users/log-in", UserLive.Login, :new
       live "/users/log-in/:token", UserLive.Confirmation, :new
     end

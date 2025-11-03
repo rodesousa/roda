@@ -316,6 +316,7 @@ defmodule RodaWeb.Orga.Question.ThemesEvolutionLive do
           end)
           |> Enum.map(fn week ->
             theme_in_week = Enum.find(week.themes, &(&1["hashed_name"] == hashed_name))
+
             %{
               week_number: week.number,
               description: theme_in_week["description"]

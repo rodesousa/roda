@@ -48,7 +48,7 @@ defmodule Roda.LLM.Adapters.Openai do
   end
 
   def parse_response_for_mode(:raw, %{"choices" => [%{"message" => %{"content" => content}}]}) do
-    content
+    {:ok, content}
   end
 
   def parse_response_for_mode(_mode, _response) do

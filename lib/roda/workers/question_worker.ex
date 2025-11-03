@@ -66,9 +66,11 @@ defmodule Roda.Workers.QuestionWorker do
       narrative_prompt = narrative_prompt(question.prompt, text)
       all_themes = Questions.get_all_themes(question_id)
 
-      with {:ok, narrative} <- llm().chat_completion2(provider, narrative_prompt),
+      with {:ok, narrative} <-
+             llm().chat_completion(provider, [%{role: "user", content: narrative_prompt}]),
            structured_prompt <- structured_prompt(narrative, all_themes),
-           {:ok, structured_response} <- llm().chat_completion2(provider, structured_prompt) do
+           {:ok, structured_response} <-
+             llm().chat_completion(provider, [%{role: "user", content: structured_prompt}]) do
         structured_response =
           structured_response
           |> clean_json_response()
@@ -87,7 +89,7 @@ defmodule Roda.Workers.QuestionWorker do
         :ok
       else
         {:api_error, body} ->
-          Logger.error("Error: #{body}")
+          Logger.error("api_error Error: #{body}")
           :ok
 
         error ->
