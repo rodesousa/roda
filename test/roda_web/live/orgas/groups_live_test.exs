@@ -25,7 +25,7 @@ defmodule RodaWeb.GroupsLiveTest do
       |> log_in_user(scope.user)
       |> live(~p"/orgas/#{scope.organization.id}/groups")
 
-    assert length(Repo.all(Project)) == 1
+    assert length(Repo.all(Projectn) == 1
 
     lv
     |> form("#group-form", %{"project" => %{"name" => "couscous"}})

@@ -55,34 +55,9 @@ defmodule RodaWeb.Orga.GroupsLive do
     </.modal>
     <.page current="projects" scope={@current_scope}>
       <.page_content>
-        <!-- Breadcrumb -->
-        <div class="breadcrumbs text-sm mb-6">
-          <ul>
-            <li>
-              <a class="flex items-center gap-2">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  class="w-4 h-4 stroke-current"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
-                  >
-                  </path>
-                </svg>
-                {@current_scope.organization.name}
-              </a>
-            </li>
-            <li>
-              <span class="font-semibold">{gettext("Groups")}</span>
-            </li>
-          </ul>
-        </div>
-        <!-- Global Stats -->
+        <.breadcrumb scope={@current_scope} i={gettext("Groups")} />
+        
+    <!-- Global Stats -->
         <div class="stats stats-vertical sm:stats-horizontal shadow w-full mb-6">
           <div class="stat">
             <div class="stat-figure text-primary">
@@ -197,7 +172,7 @@ defmodule RodaWeb.Orga.GroupsLive do
                 conversations_count={project_data.conversations_count}
                 days_since_creation={project_data.days_since_creation}
                 view_link={
-                  ~p"/orgas/#{@current_scope.organization.id}/projects/#{project_data.project.id}/testimonies"
+                  ~p"/orgas/#{@current_scope.organization.id}/projects/#{project_data.project.id}/testify"
                 }
               />
             <% end %>

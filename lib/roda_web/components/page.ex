@@ -1,5 +1,6 @@
 defmodule RodaWeb.Page do
   use Phoenix.Component
+  alias Phoenix.LiveView.JS
   use Gettext, backend: RodaWeb.Gettext
 
   use Phoenix.VerifiedRoutes,
@@ -17,19 +18,39 @@ defmodule RodaWeb.Page do
 
   def page(assigns) do
     ~H"""
-    <div class="drawer drawer-open">
-      <input id="my-drawer-4" type="checkbox" class="drawer-toggle" />
+    <div id="sidebar" class="drawer lg:drawer-open">
+      <input id="my-drawer-1" type="checkbox" class="drawer-toggle" />
       <div class="drawer-content">
+        <button
+          phx-click={
+            JS.add_class("lg:drawer-open", to: "#sidebar")
+            |> JS.set_attribute({"checked", "true"}, to: "#my-drawer-1")
+          }
+          class="absolute top-4 left-4 btn btn-ghost btn-circle"
+        >
+          <.icon class="w-5 h-5" name="hero-bars-3-bottom-left" />
+        </button>
         {render_slot(@inner_block)}
       </div>
+      <div class="drawer-side">
+        <label
+          for="my-drawer-1"
+          aria-label="close sidebar"
+          class="drawer-overlay lg:hidden"
+        >
+        </label>
+        <div class="bg-base-200 w-64 flex flex-col min-h-full">
+          <button
+            phx-click={
+              JS.remove_class("lg:drawer-open", to: "#sidebar")
+              |> JS.remove_attribute("checked", to: "#my-drawer-1")
+            }
+            class="absolute top-4 right-4 z-50 btn btn-ghost btn-circle"
+          >
+            <.icon class="w-5 h-5" name="hero-bars-3-bottom-left" />
+          </button>
 
-      <div class="drawer-side is-drawer-close:overflow-visible">
-        <label for="my-drawer-4" aria-label="close sidebar" class="drawer-overlay"></label>
-        <div class="is-drawer-close:w-14 is-drawer-open:w-64 bg-base-200 flex flex-col items-start min-h-full">
-          <!-- Sidebar content here -->
-          <!-- <ul class="menu w-full grow"> -->
-          <ul class="menu w-full">
-            <!-- list item -->
+          <ul class="menu p-4">
             <%= for s <- sidebar_links(@scope) do %>
               <.link navigate={s.link}>
                 <li>
@@ -40,63 +61,84 @@ defmodule RodaWeb.Page do
                     ]}
                     data-tip={s.name}
                   >
-                    <.icon name={s.icon} />
-                    <span class="is-drawer-close:hidden">{s.name}</span>
+                    <div class="flex items-center space-x-2">
+                      <.icon name={s.icon} class="w-5 h-5" />
+                      <div>
+                        {s.name}
+                      </div>
+                    </div>
                   </button>
                 </li>
               </.link>
             <% end %>
           </ul>
 
-          <div class="flex-1 w-full overflow-y-auto">
+          <div class="flex-1 w-full overflow-y-auto px-4">
             {render_slot(@extends_sidebar)}
           </div>
 
-          <div class="my-2 mx-4 flex flex-col space-y-2">
-            <.button
-              :if={@scope.membership && @scope.membership.role == "admin" && @scope.project}
-              navigate={~p"/orgas/#{@scope.organization.id}/projects/#{@scope.project.id}/settings"}
-              class="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-            >
-              <.icon name="hero-cog-6-tooth" />
-              <span class="is-drawer-close:hidden">{gettext("Project Settings")}</span>
-            </.button>
+          <ul class="menu">
+            <li>
+              <.button
+                :if={@scope.membership && @scope.membership.role == "admin" && @scope.project}
+                navigate={~p"/orgas/#{@scope.organization.id}/projects/#{@scope.project.id}/settings"}
+                class="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+              >
+                <div class="flex items-center space-x-2">
+                  <.icon name="hero-qr-code" class="w-5 h-5" />
+                  <div>
+                    {gettext("Group Settings")}
+                  </div>
+                </div>
+              </.button>
+            </li>
 
-            <.button
-              :if={@scope.membership && @scope.membership.role == "admin"}
-              navigate={~p"/orgas/#{@scope.organization.id}/settings"}
-              class="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-            >
-              <.icon name="hero-cog-6-tooth" />
-              <span class="is-drawer-close:hidden">{gettext("Organization Settings")}</span>
-            </.button>
-            <.button
-              :if={@scope.user}
-              navigate={~p"/users/settings"}
-              class="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-            >
-              <.icon name="hero-cog-6-tooth" />
-              <span class="is-drawer-close:hidden">{gettext("User settings")}</span>
-            </.button>
-            <.button
-              :if={@scope.user}
-              href={~p"/users/log-out"}
-              method="delete"
-              class="is-drawer-close:tooltip is-drawer-close:tooltip-right"
-            >
-              <.icon name="hero-arrow-left-start-on-rectangle" />
-              <span class="is-drawer-close:hidden">{gettext("Log out")}</span>
-            </.button>
-          </div>
-
-          <div class="m-2 is-drawer-close:tooltip is-drawer-close:tooltip-right" data-tip="Open">
-            <label
-              for="my-drawer-4"
-              class="btn btn-ghost btn-circle drawer-button is-drawer-open:rotate-y-180"
-            >
-              <.icon name="sidebar" />
-            </label>
-          </div>
+            <li>
+              <.button
+                :if={@scope.membership && @scope.membership.role == "admin"}
+                class={[
+                  "is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                ]}
+                navigate={~p"/orgas/#{@scope.organization.id}/settings"}
+              >
+                <div class="flex items-center space-x-2">
+                  <.icon name="hero-cog-6-tooth" class="w-5 h-5" />
+                  <div>
+                    {gettext("Organization Settings")}
+                  </div>
+                </div>
+              </.button>
+            </li>
+            <li>
+              <.button
+                :if={@scope.user}
+                navigate={~p"/users/settings"}
+                class="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+              >
+                <div class="flex items-center space-x-2">
+                  <.icon name="hero-user-circle" class="w-5 h-5" />
+                  <div>
+                    {gettext("User settings")}
+                  </div>
+                </div>
+              </.button>
+            </li>
+            <li>
+              <.button
+                :if={@scope.user}
+                href={~p"/users/log-out"}
+                method="delete"
+                class="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+              >
+                <div class="flex items-center space-x-2">
+                  <.icon name="hero-arrow-left-start-on-rectangle" class="w-5 h-5" />
+                  <div>
+                    {gettext("Log out")}
+                  </div>
+                </div>
+              </.button>
+            </li>
+          </ul>
         </div>
       </div>
     </div>
@@ -128,9 +170,9 @@ defmodule RodaWeb.Page do
     [
       %{
         id: "projects",
-        name: gettext("Projects"),
-        link: ~p"/orgas/#{orga.id}/projects",
-        icon: "hero-question-mark-circle"
+        name: gettext("Groups"),
+        link: ~p"/orgas/#{orga.id}/groups",
+        icon: "hero-folder"
       }
     ]
   end
@@ -142,13 +184,13 @@ defmodule RodaWeb.Page do
         id: "testify",
         name: gettext("Testify"),
         link: ~p"/testify/#{token}",
-        icon: "hero-question-mark-circle"
+        icon: "hero-microphone"
       },
       %{
         id: "testimonies",
         name: gettext("Testimonies"),
         link: ~p"/testimonies/#{token}",
-        icon: "hero-question-mark-circle"
+        icon: "hero-inbox-stack"
       }
     ]
   end
@@ -157,33 +199,33 @@ defmodule RodaWeb.Page do
     [
       %{
         id: "projects",
-        name: gettext("Projects"),
-        link: ~p"/orgas/#{orga.id}/projects",
-        icon: "hero-question-mark-circle"
+        name: gettext("Groups"),
+        link: ~p"/orgas/#{orga.id}/groups",
+        icon: "hero-folder"
       },
       %{
         id: "testify",
         name: gettext("Testify"),
         link: ~p"/orgas/#{orga.id}/projects/#{project.id}/testify",
-        icon: "hero-question-mark-circle"
+        icon: "hero-microphone"
       },
       %{
         id: "testimonies",
         name: gettext("Testimonies"),
         link: ~p"/orgas/#{orga.id}/projects/#{project.id}/testimonies",
-        icon: "hero-question-mark-circle"
+        icon: "hero-inbox-stack"
       },
       %{
         id: "questions",
         name: gettext("Ask"),
         link: ~p"/orgas/#{orga.id}/projects/#{project.id}/questions",
-        icon: "hero-question-mark-circle"
+        icon: "hero-presentation-chart-line"
       },
       %{
         id: "ask",
         name: gettext("Prompt"),
         link: ~p"/orgas/#{orga.id}/projects/#{project.id}/prompt",
-        icon: "hero-question-mark-circle"
+        icon: "hero-pencil-square"
       }
       # ,
       # %{

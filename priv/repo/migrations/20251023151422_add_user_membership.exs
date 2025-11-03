@@ -18,9 +18,9 @@ defmodule Roda.Repo.Migrations.AddUserMembership do
     # create index(:organization_memberships, [:organization_id])
     # create index(:organization_memberships, [:user_id])
 
-  create table(:platform_admins) do
-    add :user_id, references(:users, on_delete: :delete_all), null: false
-    timestamps(type: :utc_datetime)
-  end
+    create table(:platform_admins) do
+      add :user_id, references(:users, on_delete: :delete_all), null: false
+      timestamps(type: :utc_datetime)
+    end
   end
 end
