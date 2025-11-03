@@ -1,6 +1,5 @@
 defmodule RodaWeb.Orga.TestifyLive do
   @moduledoc """
-  Provides an interface for users to share their testimony either vocally or through text.
   """
   use RodaWeb, :live_view
 
@@ -11,7 +10,7 @@ defmodule RodaWeb.Orga.TestifyLive do
     socket =
       socket
       |> Testify.init_assigns()
-      |> assign(url: url(~p"/testify/token"))
+      |> assign(url: url(~p"/testify/#{token}"))
 
     {:ok, socket}
   end
@@ -107,7 +106,7 @@ defmodule RodaWeb.Orga.TestifyLive do
   end
 
   @impl true
-  def handle_event("submit_text", %{"text" => text} = params, socket) do
+  def handle_event("submit_text", %{"text" => _text} = params, socket) do
     socket = Testify.submit_text(socket, params)
     {:noreply, socket}
   end
@@ -120,6 +119,7 @@ defmodule RodaWeb.Orga.TestifyLive do
       scope={@current_scope}
     >
       <.page_content>
+        <.breadcrumb scope={@current_scope} i={gettext("Testify")} />
         <div class="card w-full max-w-2xl bg-base-100 shadow-xl">
           <div class="card-body">
             <h1 class="card-title text-3xl font-bold text-center justify-center mb-2">

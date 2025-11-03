@@ -1,7 +1,27 @@
 defmodule Roda.Conversations do
   alias Roda.Repo
+  alias Roda.Accounts.Scope
   alias Roda.Conversations.{Chunk, Conversation}
   import Ecto.Query
+
+  def delete_conversation(id) do
+    Repo.get(Conversation, id)
+    |> Repo.delete()
+  end
+
+  def can_delete_conversation?(%Scope{} = s, conversation_id) do
+    Conversation
+    |> where([c], c.id == ^conversation_id and c.project_id == ^s.project.id)
+    |> preload([:project])
+    |> Repo.one()
+    |> case do
+      nil ->
+        false
+
+      conversation ->
+        conversation.project.organization_id == s.organization.id and s.membership.role == "admin"
+    end
+  end
 
   def add_chunk!(attrs) do
     Chunk.changeset(attrs)
@@ -26,6 +46,47 @@ defmodule Roda.Conversations do
     |> preload(:project)
     |> preload(:chunks)
     |> Repo.one()
+  end
+
+  def list_conversations_by_range(
+        %Scope{} = scope,
+        %NaiveDateTime{} = begin_at,
+        %NaiveDateTime{} = end_at
+      ) do
+    Conversation
+    |> where(
+      [c],
+      c.project_id == ^scope.project.id and c.inserted_at >= ^begin_at and
+        c.inserted_at <= ^end_at
+    )
+    |> preload(:chunks)
+    |> order_by(desc: :inserted_at)
+    |> Repo.all()
+  end
+
+  def list_conversations_paginate(%Scope{} = s, params \\ []) do
+    Conversation
+    |> where([c], c.project_id == ^s.project.id)
+    |> query_paginate(params)
+    |> preload(:chunks)
+    |> order_by(desc: :inserted_at)
+    |> query_limit(params)
+    |> Repo.all()
+  end
+
+  defp query_limit(query, params) do
+    case Keyword.get(params, :limit) do
+      :nolimit -> query
+      number when is_number(number) -> limit(query, ^number)
+      _ -> limit(query, 10)
+    end
+  end
+
+  defp query_paginate(query, params) do
+    case Keyword.get(params, :last_id) do
+      nil -> query
+      id -> where(query, [q], q.id > ^id)
+    end
   end
 
   def list_conversations_by_project_id(project_id) do
