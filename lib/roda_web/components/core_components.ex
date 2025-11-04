@@ -478,7 +478,7 @@ defmodule RodaWeb.CoreComponents do
 
   def modal(assigns) do
     ~H"""
-    <div
+    <dialog
       id={@id}
       phx-mounted={@show && show_modal(@id)}
       phx-remove={hide_modal(@id)}
@@ -524,7 +524,7 @@ defmodule RodaWeb.CoreComponents do
           </div>
         </div>
       </div>
-    </div>
+    </dialog>
     """
   end
 

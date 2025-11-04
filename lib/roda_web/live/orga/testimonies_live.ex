@@ -6,8 +6,6 @@ defmodule RodaWeb.Orga.TestimoniesLive do
 
   alias Roda.{Conversations, Date}
 
-  @params_to_store ["page"]
-
   @impl true
   def mount(_p, _session, socket) do
     socket =
@@ -61,10 +59,26 @@ defmodule RodaWeb.Orga.TestimoniesLive do
   def render(assigns) do
     ~H"""
     <.modal id="delete-conversation">
-      {gettext("DELETE?!")}
-      <.button phx-click="conversation:delete">
-        OUI
-      </.button>
+      <div class="space-y-4">
+        <h2 class="text-xl font-bold">
+          {gettext("Delete testimony")}
+        </h2>
+
+        <p class="text-sm text-base-content/70">
+          {gettext(
+            "Are you sure you want to remove the testimony from the organization? This action cannot be undone."
+          )}
+        </p>
+
+        <div class="flex justify-end gap-2 pt-4">
+          <.button phx-click={hide_modal("delete-conversation")} class="btn btn-ghost">
+            {gettext("Cancel")}
+          </.button>
+          <.button phx-click="conversation:delete" class="btn btn-error">
+            {gettext("Delete")}
+          </.button>
+        </div>
+      </div>
     </.modal>
     <.page
       current="testimonies"
@@ -75,13 +89,15 @@ defmodule RodaWeb.Orga.TestimoniesLive do
         <%= for c <- @conversations do %>
           <div class="border-b pt-4">
             <div class="flex justify-between items-center">
-              <div class="flex gap-x-2">
+              <div class="flex gap-x-2 items-center">
                 <div class="font-light text-cohortes-gray-placeholder">
                   {c.date}
                 </div>
                 <.button
+                  :if={@current_scope.membership.role == "admin"}
                   phx-click={JS.push("conversation:delete:set") |> show_modal("delete-conversation")}
                   phx-value-id={c.id}
+                  class="btn btn-error btn-outline btn-sm"
                 >
                   {gettext("Delete")}
                 </.button>

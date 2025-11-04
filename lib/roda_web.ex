@@ -86,7 +86,7 @@ defmodule RodaWeb do
       import Phoenix.HTML
       # Core UI components
       import RodaWeb.CoreComponents
-      import RodaWeb.{Button, Card, Page, Dropdown}
+      import RodaWeb.{Button, Card, Page, Dropdown, Breadcrumb}
 
       # Common modules used in templates
       alias Phoenix.LiveView.JS

@@ -1,11 +1,9 @@
 defmodule RodaWeb.Orga.ProjectSettingsLive do
   @moduledoc """
-  Provides an interface for users to share their testimony either vocally or through text.
   """
   use RodaWeb, :live_view
 
-  alias Roda.{Conversations, Invite}
-  alias Roda.{Organizations, Questions}
+  alias Roda.Invite
 
   @tabs ["invite", "users"]
 
@@ -33,6 +31,15 @@ defmodule RodaWeb.Orga.ProjectSettingsLive do
   end
 
   @impl true
+  def handle_event("copy_link", _, socket) do
+    socket =
+      socket
+      |> put_flash(:info, gettext("Invitation link copied to clipboard"))
+
+    {:noreply, socket}
+  end
+
+  @impl true
   def handle_event("tab", %{"tab" => tab}, socket) do
     tab =
       case tab in @tabs do
@@ -51,11 +58,13 @@ defmodule RodaWeb.Orga.ProjectSettingsLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page
-      current="settings"
+    <RodaWeb.Layouts.page
+      flash={@flash}
+      current="group_settings"
       scope={@current_scope}
     >
-      <.page_content>
+      <RodaWeb.Layouts.page_content>
+        <.breadcrumb scope={@current_scope} i={gettext("Group Settings")} />
         <div class="tabs tabs-lift">
           <input
             type="radio"
@@ -67,17 +76,65 @@ defmodule RodaWeb.Orga.ProjectSettingsLive do
             checked={@tab == "invite"}
           />
           <div class="tab-content bg-base-100 border-base-300 p-6">
-            <div>
-              {get_qrcode(url(~p"/testify/#{@token}"))}
+            <div class="alert mb-6">
+              <div class="flex flex-col gap-2">
+                <p>
+                  {gettext(
+                    "Share this invitation link or QR code to allow participants to submit testimonies to this project."
+                  )}
+                </p>
+                <div class="text-sm space-y-1">
+                  <p>
+                    <strong>{gettext("QR Code:")}</strong>
+                    {" "}
+                    {gettext("Scan with a mobile device to quickly access the testimony form.")}
+                  </p>
+                  <p>
+                    <strong>{gettext("Link:")}</strong>
+                    {" "}
+                    {gettext("Copy and share the direct URL via email, messaging, or social media.")}
+                  </p>
+                </div>
+              </div>
             </div>
 
-            <.button phx-click={
-              JS.dispatch("phx:clipcopy", detail: %{id: url(~p"/testify/#{@token}")})
-            }>
-              {gettext("Copy url")}
-            </.button>
+            <div class="space-y-6">
+              <div class="card bg-base-200 shadow-sm">
+                <div class="card-body items-center">
+                  <h3 class="card-title text-base mb-2">{gettext("QR Code")}</h3>
+                  <div class="p-4 bg-white rounded-lg">
+                    {get_qrcode(url(~p"/testify/#{@token}"))}
+                  </div>
+                  <p class="text-sm text-base-content/70 text-center mt-2">
+                    {gettext("Scan this code to access the testimony form")}
+                  </p>
+                </div>
+              </div>
+
+              <div class="card bg-base-200 shadow-sm">
+                <div class="card-body">
+                  <h3 class="card-title text-base mb-2">{gettext("Invitation Link")}</h3>
+                  <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
+                    <input
+                      type="text"
+                      class="input input-bordered flex-1"
+                      value={url(~p"/testify/#{@token}")}
+                      readonly
+                      onclick="this.select()"
+                    />
+                    <.button phx-click={
+                      JS.dispatch("phx:clipcopy", detail: %{id: url(~p"/testify/#{@token}")})
+                      |> JS.push("copy_link")
+                    }>
+                      {gettext("Copy link")}
+                    </.button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <input
+            :if={false}
             type="radio"
             name="my_tabs_3"
             class="tab"
@@ -90,8 +147,8 @@ defmodule RodaWeb.Orga.ProjectSettingsLive do
             users
           </div>
         </div>
-      </.page_content>
-    </.page>
+      </RodaWeb.Layouts.page_content>
+    </RodaWeb.Layouts.page>
     """
   end
 

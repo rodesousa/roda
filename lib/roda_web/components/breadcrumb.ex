@@ -21,6 +21,12 @@ defmodule RodaWeb.Breadcrumb do
             {@scope.organization.name}
           </.link>
         </li>
+        <li :if={@scope.project}>
+          <.link navigate={~p"/orgas/#{@scope.organization.id}/projects/#{@scope.project.id}/testify"}>
+            <.icon name="hero-folder" class="w-5 h-5" />
+            {@scope.project.name}
+          </.link>
+        </li>
         <li>
           <span class="font-semibold">{@i}</span>
         </li>

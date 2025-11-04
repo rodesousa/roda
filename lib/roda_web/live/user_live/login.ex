@@ -21,6 +21,7 @@ defmodule RodaWeb.UserLive.Login do
 
         <.form
           :let={f}
+          :if={false}
           for={@form}
           id="login_form_magic"
           action={~p"/users/log-in"}
@@ -40,7 +41,7 @@ defmodule RodaWeb.UserLive.Login do
           </.button>
         </.form>
 
-        <div class="divider">or</div>
+        <div :if={false} class="divider">or</div>
 
         <.form
           :let={f}
@@ -65,9 +66,9 @@ defmodule RodaWeb.UserLive.Login do
             autocomplete="current-password"
           />
           <.button class="btn btn-primary w-full" name={@form[:remember_me].name} value="true">
-            Log in and stay logged in <span aria-hidden="true">→</span>
+            {gettext("Log in")}<span aria-hidden="true">→</span>
           </.button>
-          <.button class="btn btn-primary btn-soft w-full mt-2">
+          <.button :if={false} class="btn btn-primary btn-soft w-full mt-2">
             Log in only this time
           </.button>
         </.form>
