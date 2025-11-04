@@ -169,7 +169,6 @@ defmodule RodaWeb.Orga.GroupsLive do
               <.project_card
                 project={project_data.project}
                 conversations_count={project_data.conversations_count}
-                days_since_creation={project_data.days_since_creation}
                 view_link={
                   ~p"/orgas/#{@current_scope.organization.id}/projects/#{project_data.project.id}/testify"
                 }

@@ -3,7 +3,7 @@ defmodule Roda.LLM.Adapters.Anthropic do
 
   def default_config(),
     do: %{
-      api_base_url: "https://api.anthropic.com/",
+      api_base_url: "https://api.anthropic.com",
       id: "anthropic",
       module: __MODULE__
     }
@@ -32,12 +32,8 @@ defmodule Roda.LLM.Adapters.Anthropic do
     }
   end
 
-  def parse_response_for_mode(:model, data) do
-    data
-  end
-
   def parse_response_for_mode(:model, %{"data" => data}) do
-    Jason.encode!(data)
+    {:ok, data}
   end
 
   def parse_response_for_mode(:raw, %{"content" => [%{"text" => text}]}) do

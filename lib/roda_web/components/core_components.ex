@@ -113,7 +113,7 @@ defmodule RodaWeb.CoreComponents do
   attr :type, :string,
     default: "text",
     values: ~w(checkbox color date datetime-local email file month number password
-               search select tel text textarea time url week)
+               search select tel text textarea time url week hidden)
 
   attr :field, Phoenix.HTML.FormField,
     doc: "a form field struct retrieved from the form, for example: @form[:email]"
@@ -191,7 +191,7 @@ defmodule RodaWeb.CoreComponents do
 
   def input(%{type: "textarea"} = assigns) do
     ~H"""
-    <div class="fieldset mb-2">
+    <div class="fieldset mb-2 flex-1">
       <label>
         <span :if={@label} class="label mb-1">{@label}</span>
         <textarea
@@ -392,7 +392,7 @@ defmodule RodaWeb.CoreComponents do
       stroke-width="2"
       fill="none"
       stroke="currentColor"
-      class="inline-block size-4 my-1.5"
+      class=""
     >
       <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z">
       </path>

@@ -16,7 +16,7 @@ defmodule Roda.LLM do
 
     with {:ok, %{status: 200, body: body}} <- response,
          content <- adapter.module.parse_response_for_mode(:model, body) do
-      {:ok, response, content}
+      content
     else
       {:ok, %{status: 429}} ->
         {:error, :capacity_exceeded}
@@ -24,7 +24,7 @@ defmodule Roda.LLM do
       {:ok, %{status: 401}} ->
         {:error, :bad_api_key}
 
-      {:ok, %{status: status, body: body}} ->
+      {:ok, %{status: status}} ->
         {:error, status}
 
       _ ->
@@ -44,7 +44,6 @@ defmodule Roda.LLM do
         receive_timeout: 600_000,
         json: %{model: provider.model, max_tokens: 64000, messages: message}
       )
-      |> IO.inspect(label: " ")
 
     Logger.debug("Request done #{inspect(response)}")
 

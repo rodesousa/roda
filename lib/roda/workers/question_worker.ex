@@ -235,7 +235,6 @@ defmodule Roda.Workers.QuestionWorker do
         end)
         |> Enum.join("\n")
       end
-      |> IO.inspect(label: " tt")
 
     """
     Voici une analyse détaillée basée sur des témoignages. Ta mission est d'extraire les données structurées au format JSON pour permettre le suivi de l'évolution des thèmes dans le temps.

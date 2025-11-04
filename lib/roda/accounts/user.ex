@@ -1,6 +1,7 @@
 defmodule Roda.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
+  # use Gettext, backend: RodaWeb.Gettext
 
   schema "users" do
     field :email, :string
@@ -57,6 +58,14 @@ defmodule Roda.Accounts.User do
     else
       changeset
     end
+  end
+
+  def email_password_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:email, :password])
+    |> validate_confirmation(:password, message: "does not match password")
+    |> validate_password([])
+    |> validate_email([])
   end
 
   @doc """

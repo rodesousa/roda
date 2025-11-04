@@ -29,13 +29,14 @@ import { Markdown } from "./hooks/markdown"
 import { Citations } from "./hooks/citations"
 import { Flatpickr } from "./hooks/flatpickr"
 import { MarkdownCitations } from "./hooks/markdown_citations"
+import { DrawerInit } from "./hooks/drawer"
 import topbar from "../vendor/topbar"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: { _csrf_token: csrfToken },
-  hooks: { ...colocatedHooks, Recorder, Markdown, Citations, MarkdownCitations, ResetForm, Flatpickr },
+  hooks: { ...colocatedHooks, Recorder, Markdown, Citations, MarkdownCitations, ResetForm, Flatpickr, DrawerInit },
 })
 
 // Show progress bar on live navigation and form submits
@@ -86,10 +87,16 @@ if (process.env.NODE_ENV === "development") {
     window.liveReloader = reloader
   })
 }
+
 window.addEventListener("phx:close:modal", (event) => {
   const id = document.getElementById(event.detail.id)
-  console.log(id)
   id.dispatchEvent(new Event("click", { bubbles: true }));
+});
+
+// only when there are a select into a modal because sometimes the rendering of the dom is too fast
+window.addEventListener("phx:open:modal", (event) => {
+  const modal = document.getElementById(event.detail.id)
+  liveSocket.execJS(modal, modal.getAttribute("data-show"))
 });
 
 window.addEventListener("phx:clipcopy", (event) => {

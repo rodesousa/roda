@@ -88,6 +88,16 @@ defmodule Roda.Accounts do
     |> Repo.insert()
   end
 
+  def register_user_email_password(attrs) do
+    case User.email_password_changeset(%User{}, attrs) do
+      %{valid?: true} = changeset ->
+        Repo.insert(changeset)
+
+      changeset ->
+        changeset
+    end
+  end
+
   ## Settings
 
   @doc """
@@ -309,5 +319,10 @@ defmodule Roda.Accounts do
     PlatformAdmin
     |> where([p], p.user_id == ^s.user.id)
     |> Repo.one()
+  end
+
+  def delete_user(%Scope{} = _s, user_id) do
+    Repo.get(User, user_id)
+    |> Repo.delete!()
   end
 end

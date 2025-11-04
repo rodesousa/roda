@@ -1,18 +1,18 @@
 defmodule Roda.LLM.Adapters.Openai do
   alias Roda.LLM.Provider
 
-  def headers(%Provider{} = p) do
-    [
-      {"authorization", "Bearer #{p.api_key}"}
-    ]
-  end
-
   def default_config() do
     %{
       api_base_url: "https://api.openai.com",
       id: "openai",
       module: __MODULE__
     }
+  end
+
+  def headers(%Provider{} = p) do
+    [
+      {"authorization", "Bearer #{p.api_key}"}
+    ]
   end
 
   def models(%Provider{} = p) do
@@ -32,7 +32,7 @@ defmodule Roda.LLM.Adapters.Openai do
   end
 
   def parse_response_for_mode(:model, %{"data" => data}) do
-    data
+    {:ok, data}
   end
 
   def parse_response_for_mode(:tools, %{

@@ -1,0 +1,234 @@
+<.modal id="member-role">
+  <div class="space-y-4">
+    <h2 class="text-xl font-bold">{gettext("Change user role")}</h2>
+
+    <div class="text-sm text-base-content/70 space-y-1">
+      <p>
+        <strong>{gettext("Manager:")}</strong>
+        {" "}
+        {gettext("Can prompt, add questions, run evaluations, and add testimonies.")}
+      </p>
+      <p>
+        <strong>{gettext("Admin:")}</strong>
+        {" "}
+        {gettext(
+          "Has all Manager permissions plus the ability to invite users, delete users, change user roles, and configure providers."
+        )}
+      </p>
+    </div>
+
+    <.form
+      :let={f}
+      id="group-form"
+      for={@role_form}
+      phx-submit="member:change_role"
+      class="space-y-4"
+    >
+      <div class="fieldset">
+        <% role = Map.get(f, :params, %{}) |> Map.get(:role, "") %>
+        <span class="label mb-1">{gettext("Role")}</span>
+        <select
+          class="select"
+          name={@role_form[:role].name}
+          id="select-role"
+        >
+          <%= for id <- OrganizationMembership.roles() do %>
+            <option value={id} selected={id == role}>{id}</option>
+          <% end %>
+        </select>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-4">
+        <.button phx-click={hide_modal("group-creation")} type="button" class="btn btn-ghost">
+          {gettext("Cancel")}
+        </.button>
+        <.button type="submit" class="btn btn-primary">
+          {gettext("Set")}
+        </.button>
+      </div>
+    </.form>
+  </div>
+</.modal>
+<.modal id="delete-member">
+  <div class="space-y-4">
+    <h2 class="text-xl font-bold">
+      {gettext("Delete member: %{email}", %{
+        email: (@user_to_delete && @user_to_delete.email) || ""
+      })}
+    </h2>
+
+    <p class="text-sm text-base-content/70">
+      {gettext(
+        "Are you sure you want to remove %{email} from the organization? This action cannot be undone.",
+        %{email: if(@user_to_delete, do: @user_to_delete.email, else: "")}
+      )}
+    </p>
+
+    <div class="flex justify-end gap-2 pt-4">
+      <.button phx-click={hide_modal("delete-member")} class="btn btn-ghost">
+        {gettext("Cancel")}
+      </.button>
+      <.button phx-click="member:delete" class="btn btn-error">
+        {gettext("Delete")}
+      </.button>
+    </div>
+  </div>
+</.modal>
+<.modal id="new-member">
+  <div class="space-y-4">
+    <h2 class="text-xl font-bold">{gettext("Create new member")}</h2>
+
+    <div class="text-sm text-base-content/70 space-y-1">
+      <p>
+        <strong>{gettext("Manager:")}</strong>
+        {" "}
+        {gettext("Can prompt, add questions, run evaluations, and add testimonies.")}
+      </p>
+      <p>
+        <strong>{gettext("Admin:")}</strong>
+        {" "}
+        {gettext(
+          "Has all Manager permissions plus the ability to invite users, delete users, change user roles, and configure providers."
+        )}
+      </p>
+    </div>
+
+    <.form :let={f} for={@user_form} phx-submit="invite_member">
+      <div class="flex-col space-y-4 py-4">
+        <.input field={f[:email]} label={gettext("Email")} />
+        <.input
+          type="password"
+          field={f[:password]}
+          label={gettext("Password")}
+          autocomplete="new-password"
+        />
+        <.input
+          type="password"
+          field={f[:password_confirmation]}
+          label={gettext("Password confifrmation")}
+          autocomplete="new-password"
+        />
+        <div class="fieldset">
+          <span class="label mb-1">{gettext("Provider type")}</span>
+          <select
+            class="select"
+            name={f[:role].name}
+            id="select-role-provider"
+          >
+            <%= for id <- OrganizationMembership.roles() do %>
+              <option value={id} selected={id == f[:role].value}>{id}</option>
+            <% end %>
+          </select>
+        </div>
+      </div>
+      <div class="modal-action">
+        <.button type="button" phx-click={hide_modal("new-member")}>
+          {gettext("Cancel")}
+        </.button>
+        <.button type="submit">
+          {gettext("Create")}
+        </.button>
+      </div>
+    </.form>
+  </div>
+</.modal>
+<.page
+  current="settings"
+  scope={@current_scope}
+>
+  <.page_content>
+    <.breadcrumb scope={@current_scope} i={gettext("Organization Settings")} />
+    <div class="tabs tabs-lift">
+      <input
+        type="radio"
+        name="my_tabs_3"
+        class="tab"
+        aria-label={gettext("Users")}
+        phx-click="tab"
+        phx-value-tab="users"
+        checked={@tab == "users"}
+      />
+      <div class="tab-content bg-base-100 border-base-300 p-6">
+        <div class="alert mb-6">
+          <div class="flex flex-col gap-2">
+            <p>
+              {gettext("Manage your organization members and their roles.")}
+            </p>
+            <div class="text-sm space-y-1">
+              <p>
+                <strong>{gettext("Manager:")}</strong>
+                {" "}
+                {gettext("Can prompt, add questions, run evaluations, and add testimonies.")}
+              </p>
+              <p>
+                <strong>{gettext("Admin:")}</strong>
+                {" "}
+                {gettext(
+                  "Has all Manager permissions plus the ability to invite users, delete users, change user roles, and configure providers."
+                )}
+              </p>
+            </div>
+          </div>
+        </div>
+        <.button phx-click={show_modal("new-member")}>
+          {gettext("New member")}
+        </.button>
+        <.users_component users={@users} scope={@current_scope} />
+      </div>
+
+      <input
+        :if={@current_scope.membership.role == "admin"}
+        type="radio"
+        name="my_tabs_3"
+        class="tab"
+        aria-label={gettext("Audio")}
+        phx-click="tab"
+        phx-value-tab="audio"
+        checked={@tab == "audio"}
+      />
+      <div class="tab-content bg-base-100 border-base-300 p-6">
+        <div class="alert alert-info mb-6">
+          <span>
+            {gettext(
+              "Audio provider is used to transcribe audio recordings into text in the Testify section."
+            )}
+          </span>
+        </div>
+        <.provider_form
+          provider={@audio_provider}
+          options={@adapters_option}
+          form={@audio_form}
+          error={@test_errors.audio}
+          submit="save_audio"
+        />
+      </div>
+
+      <input
+        :if={@current_scope.membership.role == "admin"}
+        type="radio"
+        name="my_tabs_3"
+        class="tab"
+        aria-label={gettext("Chat")}
+        phx-click="tab"
+        phx-value-tab="chat"
+        checked={@tab == "chat"}
+      />
+      <div class="tab-content bg-base-100 border-base-300 p-6">
+        <div class="alert alert-info mb-6">
+          <span>
+            {gettext(
+              "Chat provider is used for AI-powered conversations in the Prompt and Questions sections."
+            )}
+          </span>
+        </div>
+        <.provider_form
+          provider={@chat_provider}
+          options={@adapters_option}
+          form={@chat_form}
+          error={@test_errors.chat}
+          submit="save_chat"
+        />
+      </div>
+    </div>
+  </.page_content>
+</.page>

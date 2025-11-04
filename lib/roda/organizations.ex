@@ -131,14 +131,14 @@ defmodule Roda.Organizations do
     |> Repo.insert()
   end
 
-  def register_user_and_invite(%Scope{} = s, user_attrs) do
-    case Accounts.register_user(user_attrs) do
+  def register_user(%Scope{} = s, user_attrs) do
+    case Accounts.register_user_email_password(user_attrs) do
       {:ok, user} ->
-        {:ok, member} = add_member(s, user.id, "invite")
+        {:ok, member} = add_member(s, user.id, user_attrs["role"])
         {:ok, %{user: user, member: member}}
 
-      {_, changeset} ->
-        {:error, changeset}
+      changeset ->
+        changeset
     end
   end
 
@@ -258,5 +258,19 @@ defmodule Roda.Organizations do
       active_projects_count: length(projects),
       conversations_this_week: conversations_this_week
     }
+  end
+
+  def set_membership_role(user_id, role) do
+    OrganizationMembership
+    |> where([q], q.user_id == ^user_id)
+    |> Repo.one()
+    |> case do
+      nil ->
+        {:error, :not_found}
+
+      member ->
+        OrganizationMembership.changeset(member, %{role: role})
+        |> Repo.update()
+    end
   end
 end

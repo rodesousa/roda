@@ -4,7 +4,7 @@ defmodule Roda.Organizations.OrganizationMembership do
 
   @primary_key {:id, Uniq.UUID, autogenerate: true, version: 7}
 
-  @roles ~w(admin manager member invite)
+  @roles ~w(admin manager)
 
   schema "organization_memberships" do
     belongs_to :user, Roda.Accounts.User

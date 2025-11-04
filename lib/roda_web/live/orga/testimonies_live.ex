@@ -109,9 +109,6 @@ defmodule RodaWeb.Orga.TestimoniesLive do
   end
 
   defp list_conversation(scope, params \\ []) do
-    params
-    |> IO.inspect(label: "1")
-
     Conversations.list_conversations_paginate(scope, params)
     |> Enum.map(fn %{chunks: chunks, inserted_at: date, id: id} ->
       text =
