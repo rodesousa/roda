@@ -223,8 +223,8 @@ defmodule RodaWeb.Page do
       },
       %{
         id: "ask",
-        name: gettext("Prompt"),
-        link: ~p"/orgas/#{orga.id}/projects/#{project.id}/prompt",
+        name: gettext("Prompts"),
+        link: ~p"/orgas/#{orga.id}/projects/#{project.id}/prompts",
         icon: "hero-pencil-square"
       }
       # ,

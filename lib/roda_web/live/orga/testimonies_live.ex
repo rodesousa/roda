@@ -80,11 +80,12 @@ defmodule RodaWeb.Orga.TestimoniesLive do
         </div>
       </div>
     </.modal>
-    <.page
+    <RodaWeb.Layouts.page
+      flash={@flash}
       current="testimonies"
       scope={@current_scope}
     >
-      <.page_content>
+      <RodaWeb.Layouts.page_content>
         <.breadcrumb scope={@current_scope} i={gettext("Testimonies")} />
         <%= for c <- @conversations do %>
           <div class="border-b pt-4">
@@ -113,8 +114,8 @@ defmodule RodaWeb.Orga.TestimoniesLive do
             {gettext("See more")}
           </.button>
         </div>
-      </.page_content>
-    </.page>
+      </RodaWeb.Layouts.page_content>
+    </RodaWeb.Layouts.page>
     """
   end
 

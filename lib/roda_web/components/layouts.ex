@@ -165,13 +165,7 @@ defmodule RodaWeb.Layouts do
         {render_slot(@inner_block)}
       </div>
       <div class="drawer-side">
-        <label
-          for="my-drawer-1"
-          aria-label="close sidebar"
-          class="drawer-overlay lg:hidden"
-        >
-        </label>
-        <div class="bg-base-200 w-64 flex flex-col min-h-full">
+        <div class="bg-base-200 w-64 flex flex-col h-full overflow-hidden">
           <button
             phx-click={
               JS.remove_class("lg:drawer-open", to: "#sidebar")
@@ -182,7 +176,7 @@ defmodule RodaWeb.Layouts do
             <.icon class="w-5 h-5" name="hero-bars-3-bottom-left" />
           </button>
 
-          <ul class="menu p-4">
+          <ul class="menu p-4 flex-shrink-0">
             <%= for s <- sidebar_links(@scope) do %>
               <.link navigate={s.link}>
                 <li>
@@ -209,7 +203,7 @@ defmodule RodaWeb.Layouts do
             {render_slot(@extends_sidebar)}
           </div>
 
-          <ul class="menu">
+          <ul class="menu flex-shrink-0">
             <li>
               <.button
                 :if={@scope.membership && @scope.membership.role == "admin" && @scope.project}
@@ -248,7 +242,7 @@ defmodule RodaWeb.Layouts do
             <li>
               <.button
                 :if={@scope.user}
-                navigate={~p"/users/settings"}
+                href={~p"/users/settings"}
                 class={[
                   "is-drawer-close:tooltip is-drawer-close:tooltip-right",
                   "user_settings" == @current && "bg-gray-200"
@@ -290,7 +284,7 @@ defmodule RodaWeb.Layouts do
 
   def page_content(assigns) do
     ~H"""
-    <div class="w-full max-w-screen-lg mx-auto px-4 py-6">
+    <div class="w-full max-w-screen-xl mx-auto px-4 py-6">
       {render_slot(@inner_block)}
     </div>
     """
@@ -365,7 +359,7 @@ defmodule RodaWeb.Layouts do
       %{
         id: "ask",
         name: gettext("Prompt"),
-        link: ~p"/orgas/#{orga.id}/projects/#{project.id}/prompt",
+        link: ~p"/orgas/#{orga.id}/projects/#{project.id}/prompts",
         icon: "hero-pencil-square"
       }
       # ,

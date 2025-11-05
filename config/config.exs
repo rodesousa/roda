@@ -7,6 +7,8 @@
 # General application configuration
 import Config
 
+config :roda, RodaWeb.Gettext, default_locale: "fr", locales: ~w(en fr)
+
 config :roda, :scopes,
   user: [
     default: true,

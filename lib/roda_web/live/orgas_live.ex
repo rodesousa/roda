@@ -24,11 +24,12 @@ defmodule RodaWeb.OrgasLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page
+    <RodaWeb.Layouts.page
+      flash={@flash}
       current="orgas"
       scope={@current_scope}
     >
-      <.page_content>
+      <RodaWeb.Layouts.page_content>
         <div id="orgas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <%= for  member <- @members  do %>
             <.card
@@ -37,8 +38,8 @@ defmodule RodaWeb.OrgasLive do
             />
           <% end %>
         </div>
-      </.page_content>
-    </.page>
+      </RodaWeb.Layouts.page_content>
+    </RodaWeb.Layouts.page>
     """
   end
 end

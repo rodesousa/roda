@@ -13,7 +13,7 @@ defmodule RodaWeb.Breadcrumb do
 
   def breadcrumb(assigns) do
     ~H"""
-    <div class="breadcrumbs text-sm mb-6">
+    <div class="breadcrumbs text-sm mb-6 mt-6 lg:mt-0">
       <ul>
         <li>
           <.link navigate={~p"/orgas/#{@scope.organization.id}/groups"}>

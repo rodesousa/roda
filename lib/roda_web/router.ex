@@ -34,7 +34,8 @@ defmodule RodaWeb.Router do
 
     live_session :mount_project_context,
       on_mount: [{RodaWeb.UserAuth, :mount_project_context}] do
-      live "/orgas/:orga_id/projects/:project_id/prompt", Orga.PromptLive
+      live "/orgas/:orga_id/projects/:project_id/prompts", Orga.Prompt.PromptsLive
+      live "/orgas/:orga_id/projects/:project_id/prompts/:prompt_id", Orga.Prompt.PromptLive
       live "/orgas/:orga_id/projects/:project_id/testify", Orga.TestifyLive
       live "/orgas/:orga_id/projects/:project_id/testimonies", Orga.TestimoniesLive
       live "/orgas/:orga_id/projects/:project_id/questions/:question_id", Orga.QuestionLive
@@ -84,26 +85,23 @@ defmodule RodaWeb.Router do
 
   ## Authentication routes
 
-  # scope "/", RodaWeb do
-  #   pipe_through [:browser, :require_authenticated_user]
-  #
-  #   live_session :require_authenticated_user,
-  #     on_mount: [{RodaWeb.UserAuth, :require_authenticated}] do
-  #     live "/users/settings", UserLive.Settings, :edit
-  #     live "/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email
-  #   end
-  #
-  #   post "/users/update-password", UserSessionController, :update_password
-  # end
+  scope "/", RodaWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    live_session :require_authenticated_user,
+      on_mount: [{RodaWeb.UserAuth, :require_authenticated}] do
+      # live "/users/settings", UserLive.Settings, :edit
+
+      live "/", OrgasLive
+      live "/users/settings", UserLive.Settings, :edit
+      # live "/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email
+    end
+
+    post "/users/update-password", UserSessionController, :update_password
+  end
 
   scope "/", RodaWeb do
     pipe_through [:browser]
-
-    live_session :require_authenticated,
-      on_mount: [{RodaWeb.UserAuth, :require_authenticated}] do
-      live "/", OrgasLive
-      live "/users/settings", UserLive.Settings, :edit
-    end
 
     live_session :current_user,
       on_mount: [{RodaWeb.UserAuth, :mount_current_scope}] do

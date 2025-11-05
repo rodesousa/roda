@@ -114,11 +114,12 @@ defmodule RodaWeb.Orga.TestifyLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page
+    <RodaWeb.Layouts.page
+      flash={@flash}
       current="testify"
       scope={@current_scope}
     >
-      <.page_content>
+      <RodaWeb.Layouts.page_content>
         <.breadcrumb scope={@current_scope} i={gettext("Testify")} />
         <div class="card w-full max-w-2xl bg-base-100 shadow-xl">
           <div class="card-body">
@@ -243,8 +244,8 @@ defmodule RodaWeb.Orga.TestifyLive do
             </p>
           </div>
         </div>
-      </.page_content>
-    </.page>
+      </RodaWeb.Layouts.page_content>
+    </RodaWeb.Layouts.page>
     """
   end
 

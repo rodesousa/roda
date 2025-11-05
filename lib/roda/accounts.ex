@@ -325,4 +325,9 @@ defmodule Roda.Accounts do
     Repo.get(User, user_id)
     |> Repo.delete!()
   end
+
+  def set_lang(%Scope{} = s, lang) do
+    User.lang_changeset(s.user, %{prefered_lang: lang})
+    |> Repo.update!()
+  end
 end

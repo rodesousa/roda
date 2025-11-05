@@ -53,8 +53,8 @@ defmodule RodaWeb.Orga.GroupsLive do
     <.modal id="group-creation">
       <.group_creation form={@group_form} />
     </.modal>
-    <.page current="projects" scope={@current_scope}>
-      <.page_content>
+    <RodaWeb.Layouts.page current="projects" scope={@current_scope} flash={@flash}>
+      <RodaWeb.Layouts.page_content>
         <.breadcrumb scope={@current_scope} i={gettext("Groups")} />
 
         <div class="stats stats-vertical sm:stats-horizontal shadow w-full mb-6">
@@ -176,8 +176,8 @@ defmodule RodaWeb.Orga.GroupsLive do
             <% end %>
           </div>
         <% end %>
-      </.page_content>
-    </.page>
+      </RodaWeb.Layouts.page_content>
+    </RodaWeb.Layouts.page>
     """
   end
 

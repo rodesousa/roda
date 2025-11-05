@@ -24,8 +24,8 @@ defmodule RodaWeb.Orga.Question.ThemesEvolutionLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page current="questions" scope={@current_scope}>
-      <.page_content>
+    <RodaWeb.Layouts.page current="questions" scope={@current_scope} flash={@flash}>
+      <RodaWeb.Layouts.page_content>
         <!-- Header -->
         <div class="mb-6">
           <div class="breadcrumbs text-sm">
@@ -234,8 +234,8 @@ defmodule RodaWeb.Orga.Question.ThemesEvolutionLive do
             </div>
           </div>
         </div>
-      </.page_content>
-    </.page>
+      </RodaWeb.Layouts.page_content>
+    </RodaWeb.Layouts.page>
     """
   end
 

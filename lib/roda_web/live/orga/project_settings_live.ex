@@ -115,13 +115,6 @@ defmodule RodaWeb.Orga.ProjectSettingsLive do
                 <div class="card-body">
                   <h3 class="card-title text-base mb-2">{gettext("Invitation Link")}</h3>
                   <div class="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
-                    <input
-                      type="text"
-                      class="input input-bordered flex-1"
-                      value={url(~p"/testify/#{@token}")}
-                      readonly
-                      onclick="this.select()"
-                    />
                     <.button phx-click={
                       JS.dispatch("phx:clipcopy", detail: %{id: url(~p"/testify/#{@token}")})
                       |> JS.push("copy_link")

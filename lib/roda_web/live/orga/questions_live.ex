@@ -55,11 +55,12 @@ defmodule RodaWeb.Orga.QuestionsLive do
     <.modal id="question-creation">
       <.question_creation form={@question_form} />
     </.modal>
-    <.page
+    <RodaWeb.Layouts.page
+      flash={@flash}
       current="questions"
       scope={@current_scope}
     >
-      <.page_content>
+      <RodaWeb.Layouts.page_content>
         <.breadcrumb scope={@current_scope} i={gettext("Ask")} />
         <div class="mb-6">
           <div class="flex items-center justify-between mb-2">
@@ -92,8 +93,8 @@ defmodule RodaWeb.Orga.QuestionsLive do
             />
           <% end %>
         </div>
-      </.page_content>
-    </.page>
+      </RodaWeb.Layouts.page_content>
+    </RodaWeb.Layouts.page>
     """
   end
 

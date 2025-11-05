@@ -29,14 +29,14 @@ import { Markdown } from "./hooks/markdown"
 import { Citations } from "./hooks/citations"
 import { Flatpickr } from "./hooks/flatpickr"
 import { MarkdownCitations } from "./hooks/markdown_citations"
-import { DrawerInit } from "./hooks/drawer"
+import { DrawerInit, DrawerOverlay } from "./hooks/drawer"
 import topbar from "../vendor/topbar"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: { _csrf_token: csrfToken },
-  hooks: { ...colocatedHooks, Recorder, Markdown, Citations, MarkdownCitations, ResetForm, Flatpickr, DrawerInit },
+  hooks: { ...colocatedHooks, Recorder, Markdown, Citations, MarkdownCitations, ResetForm, Flatpickr, DrawerInit, DrawerOverlay },
 })
 
 // Show progress bar on live navigation and form submits

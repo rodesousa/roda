@@ -27,3 +27,6 @@ extract_chunk:
 
 ecto_rollback:
 	@echo "mix ecto.rollback OR mix ecto.rollback --step 2 OR mix ecto.rollback -to ID_TIMESPAMP"
+
+gettext:
+	@mix gettext.extract --merge --no-fuzzy

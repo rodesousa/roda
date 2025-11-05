@@ -175,3 +175,14 @@
     list-style-type: disc !important;
     padding-left: 1.5rem !important;
   }
+
+/* Messages container responsive height */
+#messages-container {
+  max-height: calc(100vh - 280px);
+}
+
+@media (min-width: 1024px) {
+  #messages-container {
+    max-height: calc(100vh - 250px);
+  }
+}

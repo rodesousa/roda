@@ -9,11 +9,17 @@ defmodule Roda.Accounts.User do
     field :hashed_password, :string, redact: true
     field :confirmed_at, :utc_datetime
     field :authenticated_at, :utc_datetime, virtual: true
+    field :prefered_lang, :string, default: "fr"
 
     many_to_many :organizations, Roda.Organizations.Organization,
       join_through: Roda.Organizations.OrganizationMembership
 
     timestamps(type: :utc_datetime)
+  end
+
+  def lang_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:prefered_lang])
   end
 
   @doc """

@@ -23,13 +23,17 @@ defmodule Roda.LLM.Adapters.Anthropic do
     "#{p.api_base_url}/v1/messages"
   end
 
-  defp build_stream_body(%Provider{model: model}, messages) do
+  def build_stream_body(%Provider{model: model}, messages) do
     %{
       model: model,
       messages: messages,
       stream: true,
       max_tokens: 64000
     }
+  end
+
+  def parse_response_for_mode(:tools, %{"content" => [%{"input" => args, "type" => "tool_use"}]}) do
+    args
   end
 
   def parse_response_for_mode(:model, %{"data" => data}) do
@@ -66,9 +70,5 @@ defmodule Roda.LLM.Adapters.Anthropic do
         "delta" => %{"partial_json" => delta, "type" => "input_json_delta"}
       }) do
     delta
-  end
-
-  def parse_response_for_mode(:tools, %{"content" => [%{"input" => args, "type" => "tool_use"}]}) do
-    args
   end
 end

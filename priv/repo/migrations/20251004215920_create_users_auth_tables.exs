@@ -8,6 +8,7 @@ defmodule Roda.Repo.Migrations.CreateUsersAuthTables do
       add :email, :citext, null: false
       add :hashed_password, :string
       add :confirmed_at, :utc_datetime
+      add :prefered_lang, :string, default: "fr"
 
       timestamps(type: :utc_datetime)
     end

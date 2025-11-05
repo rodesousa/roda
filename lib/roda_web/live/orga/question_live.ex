@@ -56,8 +56,8 @@ defmodule RodaWeb.Orga.QuestionLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page current="questions" scope={@current_scope}>
-      <.page_content>
+    <RodaWeb.Layouts.page flash={@flash} current="questions" scope={@current_scope}>
+      <RodaWeb.Layouts.page_content>
         <div class="card bg-base-100 shadow-xl mb-6">
           <div class="card-body">
             <div class="flex items-start justify-between">
@@ -191,8 +191,8 @@ defmodule RodaWeb.Orga.QuestionLive do
             </li>
           <% end %>
         </ul>
-      </.page_content>
-    </.page>
+      </RodaWeb.Layouts.page_content>
+    </RodaWeb.Layouts.page>
     """
   end
 

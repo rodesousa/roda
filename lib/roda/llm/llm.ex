@@ -172,23 +172,42 @@ defmodule Roda.LLM do
       fn ->
         Task.async(fn ->
           try do
-            url
-            |> Req.post(
-              headers: adapter.module.headers(provider),
-              json: body,
-              receive_timeout: 600_000,
-              into: fn
-                {:data, data}, {req, resp} ->
-                  send(pid, {ref, :data, data})
-                  {:cont, {req, resp}}
+            result =
+              url
+              |> Req.post(
+                headers: adapter.module.headers(provider),
+                json: body,
+                receive_timeout: 600_000,
+                into: fn
+                  {:data, data}, {req, resp} ->
+                    send(pid, {ref, :data, data})
+                    {:cont, {req, resp}}
 
-                other, acc ->
-                  send(pid, {ref, :other, other})
-                  {:cont, acc}
-              end
-            )
+                  other, acc ->
+                    send(pid, {ref, :other, other})
+                    {:cont, acc}
+                end
+              )
 
-            send(pid, {ref, :done})
+            case result do
+              {:ok, %{status: 200}} ->
+                send(pid, {ref, :done})
+
+              {:ok, %{status: 429}} ->
+                send(pid, {ref, :error, :rate_limit_exceeded})
+
+              {:ok, %{status: 401}} ->
+                send(pid, {ref, :error, :bad_api_key})
+
+              {:ok, %{status: status}} when status >= 500 ->
+                send(pid, {ref, :error, :server_error})
+
+              {:ok, %{status: status}} ->
+                send(pid, {ref, :error, {:http_error, status}})
+
+              {:error, reason} ->
+                send(pid, {ref, :error, reason})
+            end
           rescue
             e ->
               Logger.error("Stream error: #{inspect(e)}")

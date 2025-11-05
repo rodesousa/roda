@@ -1,0 +1,858 @@
+## "msgid"s in this file come from POT (.pot) files.
+###
+### Do not add, change, or remove "msgid"s manually here as
+### they're tied to the ones in the corresponding POT file
+### (with the same domain).
+###
+### Use "mix gettext.extract --merge" or "mix gettext.merge"
+### to merge POT files into PO files.
+msgid ""
+msgstr ""
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: lib/roda_web/live/orga/prompt_live.ex:370
+#, elixir-autogen, elixir-format
+msgid "%{s} conversations"
+msgstr ""
+
+#: lib/roda/organizations/project.ex:23
+#: lib/roda/organizations/project.ex:27
+#, elixir-autogen, elixir-format
+msgid "A group with this name already exists in this organization"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.ex:488
+#, elixir-autogen, elixir-format
+msgid "API KEY"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.ex:478
+#, elixir-autogen, elixir-format
+msgid "API base url"
+msgstr ""
+
+#: lib/roda_web/live/user_live/settings.ex:15
+#, elixir-autogen, elixir-format
+msgid "Account Settings"
+msgstr ""
+
+#: lib/roda_web/components/core_components.ex:305
+#, elixir-autogen, elixir-format
+msgid "Actions"
+msgstr ""
+
+#: lib/roda_web/live/orga/groups_live.ex:65
+#, elixir-autogen, elixir-format
+msgid "Active Groups"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:12
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:88
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:164
+#, elixir-autogen, elixir-format
+msgid "Admin:"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.ex:170
+#, elixir-autogen, elixir-format
+msgid "An email was sent to %{email}"
+msgstr ""
+
+#: lib/roda/date.ex:99
+#, elixir-autogen, elixir-format
+msgid "April"
+msgstr ""
+
+#: lib/roda_web/live/orga/prompt_live.ex:305
+#, elixir-autogen, elixir-format
+msgid "Are you sur to delete ?"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:61
+#, elixir-autogen, elixir-format
+msgid "Are you sure you want to remove %{email} from the organization? This action cannot be undone."
+msgstr ""
+
+#: lib/roda_web/live/orga/testimonies_live.ex:68
+#, elixir-autogen, elixir-format
+msgid "Are you sure you want to remove the testimony from the organization? This action cannot be undone."
+msgstr ""
+
+#: lib/roda_web/components/layouts.ex:361
+#: lib/roda_web/components/page.ex:220
+#: lib/roda_web/live/orga/questions_live.ex:63
+#: lib/roda_web/live/orga/questions_live.ex:67
+#, elixir-autogen, elixir-format
+msgid "Ask"
+msgstr ""
+
+#: lib/roda_web/components/layouts.ex:86
+#: lib/roda_web/components/layouts.ex:98
+#, elixir-autogen, elixir-format
+msgid "Attempting to reconnect"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:184
+#, elixir-autogen, elixir-format
+msgid "Audio"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:192
+#, elixir-autogen, elixir-format
+msgid "Audio provider is used to transcribe audio recordings into text in the Testify section."
+msgstr ""
+
+#: lib/roda/date.ex:103
+#, elixir-autogen, elixir-format
+msgid "August"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:9
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:85
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:161
+#, elixir-autogen, elixir-format
+msgid "Can prompt, add questions, run evaluations, and add testimonies."
+msgstr ""
+
+#: lib/roda_web/live/orga/groups_live.ex:203
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:43
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:69
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:126
+#: lib/roda_web/live/orga/questions_live.ex:119
+#: lib/roda_web/live/orga/testimonies_live.ex:75
+#, elixir-autogen, elixir-format
+msgid "Cancel"
+msgstr ""
+
+#: lib/roda_web/live/user_live/settings.ex:223
+#, elixir-autogen, elixir-format
+msgid "Change Email"
+msgstr ""
+
+#: lib/roda_web/live/user_live/settings.ex:159
+#, elixir-autogen, elixir-format
+msgid "Change Password"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:3
+#, elixir-autogen, elixir-format
+msgid "Change user role"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:211
+#, elixir-autogen, elixir-format
+msgid "Chat"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:219
+#, elixir-autogen, elixir-format
+msgid "Chat provider is used for AI-powered conversations in the Prompt and Questions sections."
+msgstr ""
+
+#: lib/roda_web/live/user_live/settings.ex:69
+#, elixir-autogen, elixir-format
+msgid "Choose between light and dark mode"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.ex:275
+#: lib/roda_web/live/orga/organization_settings_live.ex:302
+#, elixir-autogen, elixir-format
+msgid "Configuration saved!"
+msgstr ""
+
+#: lib/roda_web/live/user_live/settings.ex:191
+#, elixir-autogen, elixir-format
+msgid "Confirm new password"
+msgstr ""
+
+#: lib/roda_web/live/orga/prompt_live.ex:145
+#, elixir-autogen, elixir-format
+msgid "Conversation not found"
+msgstr ""
+
+#: lib/roda_web/live/orga/project_settings_live.ex:95
+#, elixir-autogen, elixir-format
+msgid "Copy and share the direct URL via email, messaging, or social media."
+msgstr ""
+
+#: lib/roda_web/live/orga/project_settings_live.ex:129
+#, elixir-autogen, elixir-format
+msgid "Copy link"
+msgstr ""
+
+#: lib/roda_web/live/admin/orgas_live.ex:40
+#: lib/roda_web/live/admin/projects_live.ex:54
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:129
+#, elixir-autogen, elixir-format
+msgid "Create"
+msgstr ""
+
+#: lib/roda_web/live/orga/groups_live.ex:206
+#, elixir-autogen, elixir-format
+msgid "Create group"
+msgstr ""
+
+#: lib/roda_web/live/orga/groups_live.ex:157
+#, elixir-autogen, elixir-format
+msgid "Create my first group"
+msgstr ""
+
+#: lib/roda_web/live/orga/groups_live.ex:187
+#, elixir-autogen, elixir-format
+msgid "Create new group"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:79
+#, elixir-autogen, elixir-format
+msgid "Create new member"
+msgstr ""
+
+#: lib/roda_web/live/orga/questions_live.ex:103
+#, elixir-autogen, elixir-format
+msgid "Create new question"
+msgstr ""
+
+#: lib/roda_web/live/orga/questions_live.ex:122
+#, elixir-autogen, elixir-format
+msgid "Create question"
+msgstr ""
+
+#: lib/roda_web/live/orga/groups_live.ex:134
+#, elixir-autogen, elixir-format
+msgid "Create your first project to start collecting testimonies from your community. Each project can have its own questions and settings."
+msgstr ""
+
+#: lib/roda/date.ex:107
+#, elixir-autogen, elixir-format
+msgid "December"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:72
+#: lib/roda_web/live/orga/prompt_live.ex:374
+#: lib/roda_web/live/orga/testimonies_live.ex:78
+#: lib/roda_web/live/orga/testimonies_live.ex:102
+#, elixir-autogen, elixir-format
+msgid "Delete"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:55
+#, elixir-autogen, elixir-format
+msgid "Delete member: %{email}"
+msgstr ""
+
+#: lib/roda_web/live/orga/testimonies_live.ex:64
+#, elixir-autogen, elixir-format
+msgid "Delete testimony"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.ex:518
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:98
+#: lib/roda_web/live/user_live/settings.ex:218
+#, elixir-autogen, elixir-format
+msgid "Email"
+msgstr ""
+
+#: lib/roda_web/live/user_live/settings.ex:239
+#, elixir-autogen, elixir-format
+msgid "Email change link is invalid or it has expired."
+msgstr ""
+
+#: lib/roda_web/live/user_live/settings.ex:236
+#, elixir-autogen, elixir-format
+msgid "Email changed successfully."
+msgstr ""
+
+#: lib/roda_web/live/user_live/settings.ex:106
+#, elixir-autogen, elixir-format
+msgid "English"
+msgstr ""
+
+#: lib/roda/date.ex:97
+#, elixir-autogen, elixir-format
+msgid "February"
+msgstr ""
+
+#: lib/roda_web/live/user_live/settings.ex:105
+#, elixir-autogen, elixir-format
+msgid "French"
+msgstr ""
+
+#: lib/roda_web/components/layouts.ex:225
+#: lib/roda_web/components/page.ex:90
+#: lib/roda_web/live/orga/project_settings_live.ex:67
+#, elixir-autogen, elixir-format
+msgid "Group Settings"
+msgstr ""
+
+#: lib/roda_web/live/orga/groups_live.ex:196
+#: lib/roda_web/live/orga/questions_live.ex:112
+#, elixir-autogen, elixir-format
+msgid "Group name"
+msgstr ""
+
+#: lib/roda_web/components/layouts.ex:314
+#: lib/roda_web/components/layouts.ex:343
+#: lib/roda_web/components/page.ex:173
+#: lib/roda_web/components/page.ex:202
+#: lib/roda_web/live/orga/groups_live.ex:58
+#: lib/roda_web/live/orga/groups_live.ex:92
+#, elixir-autogen, elixir-format
+msgid "Groups"
+msgstr ""
+
+#: lib/roda_web/live/orga/groups_live.ex:105
+#: lib/roda_web/live/orga/questions_live.ex:79
+#, elixir-autogen, elixir-format
+msgid "Groups are spaces where you collect and organize testimonies from your community."
+msgstr ""
+
+#: lib/roda_web/live/orga/groups_live.ex:190
+#: lib/roda_web/live/orga/questions_live.ex:106
+#, elixir-autogen, elixir-format
+msgid "Groups help you organize and track testimonies from specific communities."
+msgstr ""
+
+#: lib/roda_web/live/orga/question_live.ex:162
+#, elixir-autogen, elixir-format
+msgid "Génération en cours..."
+msgstr ""
+
+#: lib/roda_web/live/orga/question_live.ex:171
+#, elixir-autogen, elixir-format
+msgid "Générer cette analyse"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:14
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:90
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:166
+#, elixir-autogen, elixir-format
+msgid "Has all Manager permissions plus the ability to invite users, delete users, change user roles, and configure providers."
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.ex:447
+#, elixir-autogen, elixir-format
+msgid "Invalid API KEY"
+msgstr ""
+
+#: lib/roda_web/user_auth.ex:384
+#, elixir-autogen, elixir-format
+msgid "Invalid token"
+msgstr ""
+
+#: lib/roda_web/live/orga/project_settings_live.ex:116
+#, elixir-autogen, elixir-format
+msgid "Invitation Link"
+msgstr ""
+
+#: lib/roda_web/live/orga/project_settings_live.ex:37
+#, elixir-autogen, elixir-format
+msgid "Invitation link copied to clipboard"
+msgstr ""
+
+#: lib/roda_web/live/orga/project_settings_live.ex:73
+#, elixir-autogen, elixir-format
+msgid "Invite"
+msgstr ""
+
+#: lib/roda/date.ex:96
+#, elixir-autogen, elixir-format
+msgid "January"
+msgstr ""
+
+#: lib/roda/date.ex:102
+#, elixir-autogen, elixir-format
+msgid "July"
+msgstr ""
+
+#: lib/roda/date.ex:101
+#, elixir-autogen, elixir-format
+msgid "June"
+msgstr ""
+
+#: lib/roda_web/live/user_live/settings.ex:96
+#, elixir-autogen, elixir-format
+msgid "Language"
+msgstr ""
+
+#: lib/roda_web/live/orga/project_settings_live.ex:93
+#, elixir-autogen, elixir-format
+msgid "Link:"
+msgstr ""
+
+#: lib/roda_web/live/user_live/login.ex:69
+#, elixir-autogen, elixir-format
+msgid "Log in"
+msgstr ""
+
+#: lib/roda_web/components/layouts.ex:275
+#: lib/roda_web/components/page.ex:136
+#, elixir-autogen, elixir-format
+msgid "Log out"
+msgstr ""
+
+#: lib/roda_web/live/user_live/settings.ex:17
+#, elixir-autogen, elixir-format
+msgid "Manage your account email address and password settings"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:155
+#, elixir-autogen, elixir-format
+msgid "Manage your organization members and their roles."
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:7
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:83
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:159
+#, elixir-autogen, elixir-format
+msgid "Manager:"
+msgstr ""
+
+#: lib/roda/date.ex:98
+#, elixir-autogen, elixir-format
+msgid "March"
+msgstr ""
+
+#: lib/roda/date.ex:100
+#, elixir-autogen, elixir-format
+msgid "May"
+msgstr ""
+
+#: lib/roda/date.ex:108
+#, elixir-autogen, elixir-format
+msgid "Michel !"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.ex:494
+#, elixir-autogen, elixir-format
+msgid "Model"
+msgstr ""
+
+#: lib/roda_web/live/orga/prompt_live.ex:449
+#, elixir-autogen, elixir-format
+msgid "New Conversation"
+msgstr ""
+
+#: lib/roda_web/live/orga/groups_live.ex:101
+#, elixir-autogen, elixir-format
+msgid "New Group"
+msgstr ""
+
+#: lib/roda_web/live/orga/prompt_live.ex:101
+#, elixir-autogen, elixir-format
+msgid "New conversation"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:174
+#, elixir-autogen, elixir-format
+msgid "New member"
+msgstr ""
+
+#: lib/roda_web/live/user_live/settings.ex:184
+#, elixir-autogen, elixir-format
+msgid "New password"
+msgstr ""
+
+#: lib/roda_web/live/orga/questions_live.ex:75
+#, elixir-autogen, elixir-format
+msgid "New question"
+msgstr ""
+
+#: lib/roda_web/live/orga/groups_live.ex:85
+#, elixir-autogen, elixir-format
+msgid "New testimonies"
+msgstr ""
+
+#: lib/roda_web/live/orga/groups_live.ex:131
+#, elixir-autogen, elixir-format
+msgid "No groups yet"
+msgstr ""
+
+#: lib/roda/date.ex:106
+#, elixir-autogen, elixir-format
+msgid "November"
+msgstr ""
+
+#: lib/roda/date.ex:105
+#, elixir-autogen, elixir-format
+msgid "October"
+msgstr ""
+
+#: lib/roda_web/components/layouts.ex:243
+#: lib/roda_web/components/page.ex:107
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:140
+#, elixir-autogen, elixir-format
+msgid "Organization Settings"
+msgstr ""
+
+#: lib/roda_web/live/admin/orgas_live.ex:37
+#, elixir-autogen, elixir-format
+msgid "Organization name"
+msgstr ""
+
+#: lib/roda_web/user_auth.ex:372
+#, elixir-autogen, elixir-format
+msgid "Organization or Project not found or access denied."
+msgstr ""
+
+#: lib/roda_web/components/layouts.ex:303
+#: lib/roda_web/components/page.ex:162
+#, elixir-autogen, elixir-format
+msgid "Organizations"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:102
+#, elixir-autogen, elixir-format
+msgid "Password"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:108
+#, elixir-autogen, elixir-format
+msgid "Password confifrmation"
+msgstr ""
+
+#: lib/roda_web/live/testify.ex:102
+#, elixir-autogen, elixir-format
+msgid "Please enter your testimony before submitting"
+msgstr ""
+
+#: lib/roda_web/live/user_live/settings.ex:329
+#, elixir-autogen, elixir-format
+msgid "Prefered lang changed successfully."
+msgstr ""
+
+#: lib/roda_web/live/user_live/settings.ex:43
+#, elixir-autogen, elixir-format
+msgid "Preferences"
+msgstr ""
+
+#: lib/roda_web/live/admin/projects_live.ex:51
+#, elixir-autogen, elixir-format
+msgid "Project name"
+msgstr ""
+
+#: lib/roda_web/components/layouts.ex:367
+#: lib/roda_web/components/page.ex:226
+#, elixir-autogen, elixir-format
+msgid "Prompt"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.ex:464
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:112
+#, elixir-autogen, elixir-format
+msgid "Provider type"
+msgstr ""
+
+#: lib/roda_web/live/orga/question/themes_evolution_live.ex:98
+#, elixir-autogen, elixir-format
+msgid "Présence du thème"
+msgstr ""
+
+#: lib/roda_web/live/orga/question/themes_evolution_live.ex:191
+#, elixir-autogen, elixir-format
+msgid "Présent dans"
+msgstr ""
+
+#: lib/roda_web/live/orga/project_settings_live.ex:104
+#, elixir-autogen, elixir-format
+msgid "QR Code"
+msgstr ""
+
+#: lib/roda_web/live/orga/project_settings_live.ex:88
+#, elixir-autogen, elixir-format
+msgid "QR Code:"
+msgstr ""
+
+#: lib/roda_web/live/orga/question/themes_evolution_live.ex:37
+#, elixir-autogen, elixir-format
+msgid "Questions"
+msgstr ""
+
+#: lib/roda_web/live/testify.ex:77
+#, elixir-autogen, elixir-format
+msgid "Recording saved successfully! Processing your testimony..."
+msgstr ""
+
+#: lib/roda_web/live/orga/prompt_live.ex:318
+#: lib/roda_web/live/orga/prompt_live.ex:373
+#, elixir-autogen, elixir-format
+msgid "Rename"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.ex:519
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:29
+#, elixir-autogen, elixir-format
+msgid "Role"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.ex:502
+#, elixir-autogen, elixir-format
+msgid "Save"
+msgstr ""
+
+#: lib/roda_web/live/user_live/settings.ex:196
+#, elixir-autogen, elixir-format
+msgid "Save Password"
+msgstr ""
+
+#: lib/roda_web/live/user_live/settings.ex:195
+#, elixir-autogen, elixir-format
+msgid "Saving..."
+msgstr ""
+
+#: lib/roda_web/live/orga/project_settings_live.ex:109
+#, elixir-autogen, elixir-format
+msgid "Scan this code to access the testimony form"
+msgstr ""
+
+#: lib/roda_web/live/orga/project_settings_live.ex:90
+#, elixir-autogen, elixir-format
+msgid "Scan with a mobile device to quickly access the testimony form."
+msgstr ""
+
+#: lib/roda_web/live/user_live/settings.ex:137
+#, elixir-autogen, elixir-format
+msgid "Security"
+msgstr ""
+
+#: lib/roda_web/live/orga/question_live.ex:156
+#, elixir-autogen, elixir-format
+msgid "See analayse"
+msgstr ""
+
+#: lib/roda_web/live/orga/testimonies_live.ex:113
+#, elixir-autogen, elixir-format
+msgid "See more"
+msgstr ""
+
+#: lib/roda_web/live/orga/prompt_live.ex:447
+#, elixir-autogen, elixir-format
+msgid "Select a conversation or create a new one"
+msgstr ""
+
+#: lib/roda_web/live/orga/prompt_live.ex:365
+#, elixir-autogen, elixir-format
+msgid "Select date range..."
+msgstr ""
+
+#: lib/roda_web/live/user_live/settings.ex:98
+#, elixir-autogen, elixir-format
+msgid "Select your preferred language"
+msgstr ""
+
+#: lib/roda_web/live/orga/question/themes_evolution_live.ex:140
+#: lib/roda_web/live/orga/question_live.ex:143
+#, elixir-autogen, elixir-format
+msgid "Semaine"
+msgstr ""
+
+#: lib/roda_web/live/orga/prompt_live.ex:439
+#, elixir-autogen, elixir-format
+msgid "Send"
+msgstr ""
+
+#: lib/roda/date.ex:104
+#, elixir-autogen, elixir-format
+msgid "September"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:46
+#, elixir-autogen, elixir-format
+msgid "Set"
+msgstr ""
+
+#: lib/roda_web/live/orga/project_settings_live.ex:82
+#, elixir-autogen, elixir-format
+msgid "Share this invitation link or QR code to allow participants to submit testimonies to this project."
+msgstr ""
+
+#: lib/roda_web/live/orga/testify_live.ex:263
+#, elixir-autogen, elixir-format
+msgid "Share your testimony here..."
+msgstr ""
+
+#: lib/roda_web/components/layouts.ex:93
+#, elixir-autogen, elixir-format
+msgid "Something went wrong!"
+msgstr ""
+
+#: lib/roda_web/live/orga/testify_live.ex:266
+#, elixir-autogen, elixir-format
+msgid "Submit Testimony"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.ex:498
+#, elixir-autogen, elixir-format
+msgid "Test"
+msgstr ""
+
+#: lib/roda_web/components/card.ex:56
+#: lib/roda_web/components/layouts.ex:326
+#: lib/roda_web/components/layouts.ex:349
+#: lib/roda_web/components/page.ex:185
+#: lib/roda_web/components/page.ex:208
+#: lib/roda_web/live/orga/testify_live.ex:122
+#, elixir-autogen, elixir-format
+msgid "Testify"
+msgstr ""
+
+#: lib/roda_web/components/layouts.ex:332
+#: lib/roda_web/components/layouts.ex:355
+#: lib/roda_web/components/page.ex:191
+#: lib/roda_web/components/page.ex:214
+#: lib/roda_web/live/orga/testimonies_live.ex:88
+#, elixir-autogen, elixir-format
+msgid "Testimonies"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.ex:450
+#, elixir-autogen, elixir-format
+msgid "The configuration is ok but the model couldn’t be verified."
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.ex:444
+#, elixir-autogen, elixir-format
+msgid "The configuration works, don't forget to save it!"
+msgstr ""
+
+#: lib/roda_web/live/user_live/settings.ex:67
+#, elixir-autogen, elixir-format
+msgid "Theme"
+msgstr ""
+
+#: lib/roda_web/live/orga/groups_live.ex:78
+#, elixir-autogen, elixir-format
+msgid "This Week"
+msgstr ""
+
+#: lib/roda_web/live/orga/question/themes_evolution_live.ex:63
+#, elixir-autogen, elixir-format
+msgid "Thèmes"
+msgstr ""
+
+#: lib/roda_web/live/orga/question/themes_evolution_live.ex:96
+#, elixir-autogen, elixir-format
+msgid "Timeline (sentiment majoritaire)"
+msgstr ""
+
+#: lib/roda_web/live/orga/prompt_live.ex:314
+#, elixir-autogen, elixir-format
+msgid "Title"
+msgstr ""
+
+#: lib/roda_web/live/orga/prompt_live.ex:426
+#, elixir-autogen, elixir-format
+msgid "Type your message..."
+msgstr ""
+
+#: lib/roda_web/live/user_live/settings.ex:161
+#, elixir-autogen, elixir-format
+msgid "Update your password to keep your account secure"
+msgstr ""
+
+#: lib/roda_web/components/layouts.ex:260
+#: lib/roda_web/components/page.ex:121
+#, elixir-autogen, elixir-format
+msgid "User settings"
+msgstr ""
+
+#: lib/roda_web/live/orga/organization_settings_live.html.heex:146
+#: lib/roda_web/live/orga/project_settings_live.ex:141
+#, elixir-autogen, elixir-format
+msgid "Users"
+msgstr ""
+
+#: lib/roda_web/components/card.ex:18
+#: lib/roda_web/components/card.ex:94
+#, elixir-autogen, elixir-format
+msgid "View"
+msgstr ""
+
+#: lib/roda_web/components/layouts.ex:81
+#, elixir-autogen, elixir-format
+msgid "We can't find the internet"
+msgstr ""
+
+#: lib/roda_web/components/layouts.ex:43
+#, elixir-autogen, elixir-format
+msgid "Website"
+msgstr ""
+
+#: lib/roda_web/user_auth.ex:394
+#, elixir-autogen, elixir-format
+msgid "You must log in to access this page."
+msgstr ""
+
+#: lib/roda_web/components/card.ex:84
+#, elixir-autogen, elixir-format
+msgid "analyse"
+msgstr ""
+
+#: lib/roda_web/live/orga/question_live.ex:123
+#, elixir-autogen, elixir-format
+msgid "analyse(s) en cours de génération"
+msgstr ""
+
+#: lib/roda_web/components/card.ex:85
+#, elixir-autogen, elixir-format
+msgid "analyses"
+msgstr ""
+
+#: lib/roda_web/live/orga/question_live.ex:103
+#, elixir-autogen, elixir-format
+msgid "analyses complétées"
+msgstr ""
+
+#: lib/roda_web/components/core_components.ex:74
+#: lib/roda_web/components/core_components.ex:515
+#, elixir-autogen, elixir-format
+msgid "close"
+msgstr ""
+
+#: lib/roda_web/live/orga/groups_live.ex:197
+#: lib/roda_web/live/orga/questions_live.ex:113
+#, elixir-autogen, elixir-format
+msgid "e.g., Marketing Team 2024"
+msgstr ""
+
+#: lib/roda_web/live/orga/prompt_live.ex:156
+#, elixir-autogen, elixir-format
+msgid "prompt empty and/or testimonies not selected"
+msgstr ""
+
+#: lib/roda_web/live/orga/question/themes_evolution_live.ex:193
+#, elixir-autogen, elixir-format
+msgid "semaines"
+msgstr ""
+
+#: lib/roda_web/components/card.ex:47
+#, elixir-autogen, elixir-format
+msgid "testimonies last week"
+msgstr ""
+
+#: lib/roda_web/components/card.ex:46
+#, elixir-autogen, elixir-format
+msgid "testimony last week"
+msgstr ""
+
+#: lib/roda_web/live/orga/question/themes_evolution_live.ex:140
+#, elixir-autogen, elixir-format
+msgid "thème(s) identifié(s)"
+msgstr ""
+
+#: lib/roda_web/live/orga/question/themes_evolution_live.ex:47
+#: lib/roda_web/live/orga/question/themes_evolution_live.ex:51
+#: lib/roda_web/live/orga/question_live.ex:90
+#, elixir-autogen, elixir-format
+msgid "Évolution des thèmes"
+msgstr ""
+
+#: lib/roda_web/live/orga/question/themes_evolution_live.ex:84
+#, elixir-autogen, elixir-format
+msgid "← Retour aux semaines"
+msgstr ""
+
+#: lib/roda_web/live/orga/groups_live.ex:139
+#, elixir-autogen, elixir-format
+msgid "💡 Tip: Groups help you organize testimonies by theme, campaign, or time period."
+msgstr ""

@@ -217,7 +217,7 @@ defmodule RodaWeb.UserAuth do
     {:cont, mount_current_scope(socket, session)}
   end
 
-  def on_mount(:require_authenticated, params, session, socket) do
+  def on_mount(:require_authenticated, _params, session, socket) do
     socket = mount_current_scope(socket, session)
     ass = socket.assigns
 
@@ -324,6 +324,12 @@ defmodule RodaWeb.UserAuth do
         if user_token = session["user_token"] do
           Accounts.get_user_by_session_token(user_token)
         end || {nil, nil}
+
+      if user && user.prefered_lang do
+        Gettext.put_locale(RodaWeb.Gettext, user.prefered_lang)
+      else
+        Gettext.put_locale(RodaWeb.Gettext, "fr")
+      end
 
       Scope.for_user(user)
     end)
