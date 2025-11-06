@@ -1,4 +1,8 @@
 defmodule Roda.Conversations do
+  @moduledoc """
+  Technical debt:
+  - Each functions using Conversation have to mentionned if active and fully_transcribed is used and why
+  """
   alias Roda.Repo
   alias Roda.Accounts.Scope
   alias Roda.Conversations.{Chunk, Conversation}
@@ -66,7 +70,7 @@ defmodule Roda.Conversations do
 
   def list_conversations_paginate(%Scope{} = s, params \\ []) do
     Conversation
-    |> where([c], c.project_id == ^s.project.id)
+    |> where([c], c.project_id == ^s.project.id and c.active == true)
     |> query_paginate(params)
     |> preload(:chunks)
     |> order_by(desc: :inserted_at)
@@ -114,4 +118,11 @@ defmodule Roda.Conversations do
     |> select([c], %{id: c.id, text: c.text})
     |> Repo.all()
   end
+
+  def set_convervation_active(%Conversation{active: false} = c) do
+    Conversation.update_changeset(c, %{active: true})
+    |> Repo.update!()
+  end
+
+  def set_convervation_active(c), do: c
 end

@@ -1,5 +1,10 @@
 defmodule RodaWeb.Orga.ProjectSettingsLive do
   @moduledoc """
+  Miss:
+  - Cannot rename
+  - Cannot delete
+  - Cannot archive
+  - When an user change the lang, he needs to reload the page
   """
   use RodaWeb, :live_view
 

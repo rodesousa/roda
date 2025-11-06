@@ -1,7 +1,5 @@
 defmodule RodaWeb.Orga.OrganizationSettingsLive do
   @moduledoc """
-  Technical Debt
-  - Avoid refactoring **just** to rename variables, your time is precious
   """
   use RodaWeb, :live_view
 
@@ -150,31 +148,30 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
   end
 
   @impl true
-  def handle_event("delete", _p, socket) do
-    {:noreply, socket}
-  end
-
-  @impl true
-  def handle_event("set_role", _p, socket) do
-    {:noreply, socket}
-  end
-
-  @impl true
   def handle_event("invite_member", %{"user" => user}, socket) do
     %{current_scope: scope} = socket.assigns
 
     socket =
-      case Organizations.register_user(scope, user) do
-        {:ok, %{user: user}} ->
-          socket
-          |> put_flash(:info, gettext("An email was sent to %{email}", %{email: user.email}))
-          |> assign_users()
-          |> assign_new_member()
-          |> push_event("close:modal", %{id: "new-member"})
+      with true <- scope.membership.role == "admin" do
+        case Organizations.register_user(scope, user) do
+          {:ok, %{user: _user}} ->
+            socket
+            # |> put_flash(
+            #   :info,
+            #   gettext("An email has been sent to %{email}", %{email: user.email})
+            # )
+            |> assign_users()
+            |> assign_new_member()
+            |> push_event("close:modal", %{id: "new-member"})
 
-        changeset ->
-          changeset = %{changeset | action: :validate}
-          assign(socket, user_form: to_form(changeset))
+          changeset ->
+            changeset = %{changeset | action: :validate}
+            assign(socket, user_form: to_form(changeset))
+        end
+      else
+        _ ->
+          socket
+          |> put_flash(:error, gettext("You are not authorized"))
       end
 
     {:noreply, socket}
@@ -203,27 +200,33 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
   def handle_event("save_audio", %{"provider" => provider, "action" => "test"}, socket) do
     %{current_scope: scope} = ass = socket.assigns
 
-    args =
-      Map.merge(
-        %{"organization_id" => scope.organization.id, "type" => "audio"},
-        provider
-      )
-
     socket =
-      case Provider.changeset(args) do
-        %{valid?: true} = changeset ->
-          msg =
-            changeset
-            |> Ecto.Changeset.apply_changes()
-            |> handle_llm_model_exists("audio")
+      with true <- scope.membership.role == "admin" do
+        args =
+          Map.merge(
+            %{"organization_id" => scope.organization.id, "type" => "audio"},
+            provider
+          )
 
-          test_errors = Map.put(ass.test_errors, :audio, msg)
-          changeset = %{changeset | action: :validate}
-          assign(socket, test_errors: test_errors, audio_form: to_form(changeset))
+        case Provider.changeset(args) do
+          %{valid?: true} = changeset ->
+            msg =
+              changeset
+              |> Ecto.Changeset.apply_changes()
+              |> handle_llm_model_exists("audio")
 
-        changeset ->
-          changeset = %{changeset | action: :validate}
-          assign(socket, audio_form: to_form(changeset))
+            test_errors = Map.put(ass.test_errors, :audio, msg)
+            changeset = %{changeset | action: :validate}
+            assign(socket, test_errors: test_errors, audio_form: to_form(changeset))
+
+          changeset ->
+            changeset = %{changeset | action: :validate}
+            assign(socket, audio_form: to_form(changeset))
+        end
+      else
+        _ ->
+          socket
+          |> put_flash(:error, gettext("You are not authorized"))
       end
 
     {:noreply, socket}
@@ -232,23 +235,31 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
   @impl true
   def handle_event("save_chat", %{"provider" => provider, "action" => "test"}, socket) do
     %{current_scope: scope} = ass = socket.assigns
-    args = Map.merge(%{"organization_id" => scope.organization.id, "type" => "chat"}, provider)
 
     socket =
-      case Provider.changeset(ass.chat_provider, args) do
-        %{valid?: true} = changeset ->
-          msg =
-            changeset
-            |> Ecto.Changeset.apply_changes()
-            |> handle_llm_model_exists("completion_chat")
+      with true <- scope.membership.role == "admin" do
+        args =
+          Map.merge(%{"organization_id" => scope.organization.id, "type" => "chat"}, provider)
 
-          test_errors = Map.put(ass.test_errors, :chat, msg)
-          changeset = %{changeset | action: :validate}
-          assign(socket, test_errors: test_errors, chat_form: to_form(changeset))
+        case Provider.changeset(ass.chat_provider, args) do
+          %{valid?: true} = changeset ->
+            msg =
+              changeset
+              |> Ecto.Changeset.apply_changes()
+              |> handle_llm_model_exists("completion_chat")
 
-        changeset ->
-          changeset = %{changeset | action: :validate}
-          assign(socket, chat_form: to_form(changeset))
+            test_errors = Map.put(ass.test_errors, :chat, msg)
+            changeset = %{changeset | action: :validate}
+            assign(socket, test_errors: test_errors, chat_form: to_form(changeset))
+
+          changeset ->
+            changeset = %{changeset | action: :validate}
+            assign(socket, chat_form: to_form(changeset))
+        end
+      else
+        _ ->
+          socket
+          |> put_flash(:error, gettext("You are not authorized"))
       end
 
     {:noreply, socket}
@@ -260,24 +271,36 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
   def handle_event("save_audio", %{"provider" => provider_args, "action" => "save"}, socket) do
     %{current_scope: scope} = ass = socket.assigns
 
-    args =
-      Map.merge(%{"organization_id" => scope.organization.id, "type" => "audio"}, provider_args)
-
     socket =
-      case Provider.changeset(ass.audio_provider, args) do
-        %{valid?: true} = changeset ->
-          provider =
-            if ass.audio_provider.id, do: Repo.update!(changeset), else: Repo.insert!(changeset)
-
-          assign(socket,
-            audio_provider: provider,
-            audio_form: to_form(changeset),
-            test_errors: %{ass.test_errors | audio: {:ok, gettext("Configuration saved!")}}
+      with true <- scope.membership.role == "admin" do
+        args =
+          Map.merge(
+            %{"organization_id" => scope.organization.id, "type" => "audio"},
+            provider_args
           )
 
-        changeset ->
-          changeset = %{changeset | action: :validate}
-          assign(socket, audio_form: to_form(changeset))
+        case Provider.changeset(ass.audio_provider, args) do
+          %{valid?: true} = changeset ->
+            provider =
+              if ass.audio_provider.id, do: Repo.update!(changeset), else: Repo.insert!(changeset)
+
+            assign(socket,
+              audio_provider: provider,
+              audio_form: to_form(changeset),
+              test_errors: %{
+                ass.test_errors
+                | audio: {:ok, gettext("Configuration successfully saved!")}
+              }
+            )
+
+          changeset ->
+            changeset = %{changeset | action: :validate}
+            assign(socket, audio_form: to_form(changeset))
+        end
+      else
+        _ ->
+          socket
+          |> put_flash(:error, gettext("You are not authorized"))
       end
 
     {:noreply, socket}
@@ -287,24 +310,33 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
   def handle_event("save_chat", %{"provider" => provider_args, "action" => "save"}, socket) do
     %{current_scope: scope} = ass = socket.assigns
 
-    args =
-      Map.merge(%{"organization_id" => scope.organization.id, "type" => "chat"}, provider_args)
-
     socket =
-      case Provider.changeset(ass.chat_provider, args) do
-        %{valid?: true} = changeset ->
-          provider =
-            if ass.chat_provider.id, do: Repo.update!(changeset), else: Repo.insert!(changeset)
-
-          assign(socket,
-            chat_provider: provider,
-            chat_form: to_form(changeset),
-            test_errors: %{ass.test_errors | chat: {:ok, gettext("Configuration saved!")}}
+      with true <- scope.membership.role == "admin" do
+        args =
+          Map.merge(
+            %{"organization_id" => scope.organization.id, "type" => "chat"},
+            provider_args
           )
 
-        changeset ->
-          changeset = %{changeset | action: :validate}
-          assign(socket, chat_form: to_form(changeset))
+        case Provider.changeset(ass.chat_provider, args) do
+          %{valid?: true} = changeset ->
+            provider =
+              if ass.chat_provider.id, do: Repo.update!(changeset), else: Repo.insert!(changeset)
+
+            assign(socket,
+              chat_provider: provider,
+              chat_form: to_form(changeset),
+              test_errors: %{ass.test_errors | chat: {:ok, gettext("Configuration saved!")}}
+            )
+
+          changeset ->
+            changeset = %{changeset | action: :validate}
+            assign(socket, chat_form: to_form(changeset))
+        end
+      else
+        _ ->
+          socket
+          |> put_flash(:error, gettext("You are not authorized"))
       end
 
     {:noreply, socket}
@@ -314,23 +346,29 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
   def handle_event("member:change_role", %{"role" => role}, socket) do
     %{current_scope: scope} = ass = socket.assigns
 
-    user =
-      Enum.find(ass.users, &(&1.id == ass.user_to_role_changing.id))
-      |> case do
-        nil -> nil
-        user -> {:ok, user}
-      end
-
     socket =
-      with true <- scope.membership.role == "admin",
-           {:ok, user} <- user,
-           {:ok, _} <- Organizations.set_membership_role(user.id, role) do
-        socket
-        |> assign(role_form: to_form(%{}))
-        |> assign_users()
-        |> push_event("close:modal", %{id: "member-role"})
+      with true <- scope.membership.role == "admin" do
+        user =
+          Enum.find(ass.users, &(&1.id == ass.user_to_role_changing.id))
+          |> case do
+            nil -> nil
+            user -> {:ok, user}
+          end
+
+        with true <- scope.membership.role == "admin",
+             {:ok, user} <- user,
+             {:ok, _} <- Organizations.set_membership_role(user.id, role) do
+          socket
+          |> assign(role_form: to_form(%{}))
+          |> assign_users()
+          |> push_event("close:modal", %{id: "member-role"})
+        else
+          _ -> socket
+        end
       else
-        _ -> socket
+        _ ->
+          socket
+          |> put_flash(:error, gettext("You are not authorized"))
       end
 
     {:noreply, socket}
@@ -341,23 +379,29 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
     %{current_scope: scope} = ass = socket.assigns
     id = String.to_integer(id)
 
-    user =
-      Enum.find(ass.users, &(&1.id == id))
-      |> case do
-        nil -> nil
-        user -> {:ok, user}
-      end
-
     socket =
-      with true <- scope.membership.role == "admin",
-           {:ok, user} <- user do
-        assign(socket,
-          user_to_role_changing: user,
-          role_form: to_form(%{role: user.role})
-        )
-        |> push_event("open:modal", %{id: "member-role"})
+      with true <- scope.membership.role == "admin" do
+        user =
+          Enum.find(ass.users, &(&1.id == id))
+          |> case do
+            nil -> nil
+            user -> {:ok, user}
+          end
+
+        with true <- scope.membership.role == "admin",
+             {:ok, user} <- user do
+          assign(socket,
+            user_to_role_changing: user,
+            role_form: to_form(%{role: user.role})
+          )
+          |> push_event("open:modal", %{id: "member-role"})
+        else
+          _ -> socket
+        end
       else
-        _ -> socket
+        _ ->
+          socket
+          |> put_flash(:error, gettext("You are not authorized"))
       end
 
     {:noreply, socket}
@@ -366,25 +410,32 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
   @impl true
   def handle_event("member:delete:set", %{"id" => id}, socket) do
     %{current_scope: scope} = ass = socket.assigns
-    id = String.to_integer(id)
-
-    user =
-      Enum.find(ass.users, &(&1.id == id))
-      |> case do
-        nil -> nil
-        user -> {:ok, user}
-      end
 
     socket =
-      with true <- scope.membership.role == "admin",
-           false <- scope.user.id == id,
-           {:ok, user} <- user,
-           {:ok, _org, _} <- Organizations.get_user_membership(id, scope.organization.id) do
-        socket
-        |> assign(user_to_delete: user)
-        |> push_event("open:modal", %{id: "delete-member"})
+      with true <- scope.membership.role == "admin" do
+        id = String.to_integer(id)
+
+        user =
+          Enum.find(ass.users, &(&1.id == id))
+          |> case do
+            nil -> nil
+            user -> {:ok, user}
+          end
+
+        with true <- scope.membership.role == "admin",
+             false <- scope.user.id == id,
+             {:ok, user} <- user,
+             {:ok, _org, _} <- Organizations.get_user_membership(id, scope.organization.id) do
+          socket
+          |> assign(user_to_delete: user)
+          |> push_event("open:modal", %{id: "delete-member"})
+        else
+          _ -> socket
+        end
       else
-        _ -> socket
+        _ ->
+          socket
+          |> put_flash(:error, gettext("You are not authorized"))
       end
 
     {:noreply, socket}
@@ -394,26 +445,32 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
   def handle_event("member:delete", _p, socket) do
     %{current_scope: scope} = ass = socket.assigns
 
-    user =
-      Enum.find(ass.users, &(&1.id == ass.user_to_delete.id))
-      |> case do
-        nil -> nil
-        user -> {:ok, user}
-      end
-
     socket =
-      with true <- scope.membership.role == "admin",
-           false <- scope.user.id == ass.user_to_delete,
-           {:ok, _user} <- user,
-           {:ok, _org, _} <-
-             Organizations.get_user_membership(ass.user_to_delete.id, scope.organization.id) do
-        Accounts.delete_user(scope, ass.user_to_delete.id)
+      with true <- scope.membership.role == "admin" do
+        user =
+          Enum.find(ass.users, &(&1.id == ass.user_to_delete.id))
+          |> case do
+            nil -> nil
+            user -> {:ok, user}
+          end
 
-        socket
-        |> assign_users()
-        |> push_event("close:modal", %{id: "delete-member"})
+        with true <- scope.membership.role == "admin",
+             false <- scope.user.id == ass.user_to_delete,
+             {:ok, _user} <- user,
+             {:ok, _org, _} <-
+               Organizations.get_user_membership(ass.user_to_delete.id, scope.organization.id) do
+          Accounts.delete_user(scope, ass.user_to_delete.id)
+
+          socket
+          |> assign_users()
+          |> push_event("close:modal", %{id: "delete-member"})
+        else
+          _ -> socket
+        end
       else
-        _ -> socket
+        _ ->
+          socket
+          |> put_flash(:error, gettext("You are not authorized"))
       end
 
     {:noreply, socket}
@@ -441,13 +498,13 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
 
     with {:ok, response} <- LLM.models(provider),
          {:model, :ok} <- {:model, model_exists?.(response)} do
-      {:ok, gettext("The configuration works, don't forget to save it!")}
+      {:ok, gettext("The configuration is valid. Remember to save it!")}
     else
       {:error, :bad_api_key} ->
-        {:error, gettext("Invalid API KEY")}
+        {:error, gettext("The API key is invalid.")}
 
       {:model, :no_lo_se} ->
-        {:warn, gettext("The configuration is ok but the model couldn’t be verified.")}
+        {:warn, gettext("The configuration is valid, but the model could not be verified.")}
     end
   end
 
@@ -475,7 +532,7 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
         </div>
         <.input
           field={f[:api_base_url]}
-          label={gettext("API base url")}
+          label={gettext("API Base URL")}
         />
         <.input
           field={f[:provider_type]}
@@ -485,7 +542,7 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
         <.input
           type="password"
           field={f[:api_key]}
-          label={gettext("API KEY")}
+          label={gettext("API Key")}
         />
 
         <.input
@@ -495,7 +552,7 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
         />
       </div>
       <.button value="test" name="action">
-        {gettext("Test")}
+        {gettext("Test Configuration")}
       </.button>
 
       <.button value="save" name="action">

@@ -7,7 +7,7 @@ defmodule Roda.Conversations.Conversation do
   @primary_key {:id, Uniq.UUID, autogenerate: true, version: 7}
   schema "conversations" do
     field :fully_transcribed, :boolean, default: false
-    field :from_chat, :boolean, default: false
+    field :active, :boolean, default: true
 
     has_many :chunks, Chunk
     belongs_to :project, Project, type: :binary_id

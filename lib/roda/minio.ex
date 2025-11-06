@@ -10,10 +10,10 @@ defmodule Roda.Minio do
 
   ## Example
 
-      iex> Minio.list("roda")
+      iex> Minio.list()
       {:ok, %{body: %{contents: [], name: "roda"}}}
 
-      iex> Minio.list("roda", pref: "org")
+      iex> Minio.list(prefix: "org")
       {:ok, %{body: %{contents: [], name: "roda"}}}
   """
   def list(args \\ []) do
@@ -73,6 +73,11 @@ defmodule Roda.Minio do
       {:ok, %{body: body}} -> {:ok, body}
       {:error, reason} -> {:error, reason}
     end
+  end
+
+  def delete_object(key) do
+    Minio.S3.delete_object(bucket(), key)
+    |> Minio.request()
   end
 
   defp bucket, do: "roda"

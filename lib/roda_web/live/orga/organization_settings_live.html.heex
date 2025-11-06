@@ -1,6 +1,6 @@
 <.modal id="member-role">
   <div class="space-y-4">
-    <h2 class="text-xl font-bold">{gettext("Change user role")}</h2>
+    <h2 class="text-xl font-bold">{gettext("Change User Role")}</h2>
 
     <div class="text-sm text-base-content/70 space-y-1">
       <p>
@@ -76,7 +76,7 @@
 </.modal>
 <.modal id="new-member">
   <div class="space-y-4">
-    <h2 class="text-xl font-bold">{gettext("Create new member")}</h2>
+    <h2 class="text-xl font-bold">{gettext("Create New Member")}</h2>
 
     <div class="text-sm text-base-content/70 space-y-1">
       <p>
@@ -105,7 +105,7 @@
         <.input
           type="password"
           field={f[:password_confirmation]}
-          label={gettext("Password confifrmation")}
+          label={gettext("Password confirmation")}
           autocomplete="new-password"
         />
         <div class="fieldset">
@@ -172,7 +172,7 @@
           </div>
         </div>
         <.button phx-click={show_modal("new-member")}>
-          {gettext("New member")}
+          {gettext("New Member")}
         </.button>
         <.users_component users={@users} scope={@current_scope} />
       </div>
@@ -218,7 +218,7 @@
         <div class="alert alert-info mb-6">
           <span>
             {gettext(
-              "Chat provider is used for AI-powered conversations in the Prompt and Questions sections."
+              "Chat provider is used for AI-powered conversations in the Prompt and KPI sections."
             )}
           </span>
         </div>

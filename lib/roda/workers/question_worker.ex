@@ -38,6 +38,7 @@ defmodule Roda.Workers.QuestionWorker do
         )
 
       Logger.debug("#{length(conversations)} will be analysed")
+      ids = Enum.map(conversations, & &1.id)
 
       text =
         conversations
@@ -81,7 +82,8 @@ defmodule Roda.Workers.QuestionWorker do
           "structured_response" => structured_response,
           "period_start" => period_start,
           "period_end" => period_end,
-          "question_id" => question_id
+          "question_id" => question_id,
+          "ids" => ids
         }
         |> QuestionResponse.changeset()
         |> Repo.insert!()
@@ -96,8 +98,6 @@ defmodule Roda.Workers.QuestionWorker do
           Logger.error("Error: #{error}")
           :ok
       end
-
-      :ok
     end
   end
 

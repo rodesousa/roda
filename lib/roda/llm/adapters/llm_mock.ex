@@ -1,5 +1,5 @@
 defmodule Roda.Llm.Adapters.LlmMock do
-  @behaviour Roda.Llm.LlmBehaviour
+  # @behaviour Roda.Llm.LlmBehaviour
 
   def chat_completion(_, _) do
     """

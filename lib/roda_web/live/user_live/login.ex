@@ -13,7 +13,7 @@ defmodule RodaWeb.UserLive.Login do
             <p>Log in</p>
             <:subtitle>
               <%= if @current_scope do %>
-                You need to reauthenticate to perform sensitive actions on your account.
+                {gettext("You need to reauthenticate to perform sensitive actions on your account.")}
               <% end %>
             </:subtitle>
           </.header>
@@ -37,7 +37,7 @@ defmodule RodaWeb.UserLive.Login do
             phx-mounted={JS.focus()}
           />
           <.button class="btn btn-primary w-full">
-            Log in with email <span aria-hidden="true">→</span>
+            {gettext("Log in with email")} <span aria-hidden="true">→</span>
           </.button>
         </.form>
 
@@ -69,7 +69,7 @@ defmodule RodaWeb.UserLive.Login do
             {gettext("Log in")}<span aria-hidden="true">→</span>
           </.button>
           <.button :if={false} class="btn btn-primary btn-soft w-full mt-2">
-            Log in only this time
+            {gettext("Log in only this time")}
           </.button>
         </.form>
       </div>
@@ -104,7 +104,9 @@ defmodule RodaWeb.UserLive.Login do
     end
 
     info =
-      "If your email is in our system, you will receive instructions for logging in shortly."
+      gettext(
+        "If your email is in our system, you will receive instructions for logging in shortly."
+      )
 
     {:noreply,
      socket
@@ -112,7 +114,7 @@ defmodule RodaWeb.UserLive.Login do
      |> push_navigate(to: ~p"/users/log-in")}
   end
 
-  defp local_mail_adapter? do
-    Application.get_env(:roda, Roda.Mailer)[:adapter] == Swoosh.Adapters.Local
-  end
+  # defp local_mail_adapter? do
+  #   Application.get_env(:roda, Roda.Mailer)[:adapter] == Swoosh.Adapters.Local
+  # end
 end

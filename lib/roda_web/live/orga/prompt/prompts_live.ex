@@ -18,16 +18,22 @@ defmodule RodaWeb.Orga.Prompt.PromptsLive do
   def handle_event("new_conversation", _params, socket) do
     %{current_scope: scope} = socket.assigns
 
-    {:ok, conversation} =
-      Prompts.create_conversation(scope, %{
-        title: gettext("New conversation")
-      })
-
     socket =
-      push_navigate(socket,
-        to:
-          ~p"/orgas/#{scope.organization.id}/projects/#{scope.project.id}/prompts/#{conversation.id}"
-      )
+      with true <- scope.membership.role in ["admin", "manager"] do
+        {:ok, conversation} =
+          Prompts.create_conversation(scope, %{
+            title: gettext("New conversation")
+          })
+
+        push_navigate(socket,
+          to:
+            ~p"/orgas/#{scope.organization.id}/projects/#{scope.project.id}/prompts/#{conversation.id}"
+        )
+      else
+        _ ->
+          socket
+          |> put_flash(:error, gettext("You are not authorized to create a conversation."))
+      end
 
     {:noreply, socket}
   end
@@ -60,12 +66,12 @@ defmodule RodaWeb.Orga.Prompt.PromptsLive do
         </div>
       </:extends_sidebar>
       <RodaWeb.Layouts.page_content>
-        <.breadcrumb scope={@current_scope} i={gettext("Prompt")} />
+        <.breadcrumb scope={@current_scope} i={gettext("Prompts")} />
         <div class="flex-1 flex items-center justify-center">
           <div class="text-center">
-            <p class="text-lg mb-4">{gettext("Select a conversation or create a new one")}</p>
+            <p class="text-lg mb-4">{gettext("Select a conversation or start a new")}</p>
             <button phx-click="new_conversation" class="btn btn-primary">
-              {gettext("New Conversation")}
+              {gettext("New conversation")}
             </button>
           </div>
         </div>

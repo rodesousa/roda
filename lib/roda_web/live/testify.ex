@@ -1,4 +1,8 @@
 defmodule RodaWeb.Testify do
+  @moduledoc """
+  Technical debt:
+  - useless, migrate to testify_live
+  """
   import Phoenix.Component, only: [assign: 2, to_form: 1]
   import Phoenix.LiveView, only: [push_event: 3, put_flash: 3]
   alias Roda.{Conversations}
@@ -10,8 +14,9 @@ defmodule RodaWeb.Testify do
     |> assign(
       recording_state: :idle,
       text_content: "",
-      chunks: [],
-      conversation_id: nil
+      conversation_id: nil,
+      audio_level: 0,
+      mic_test_success: false
     )
   end
 
@@ -31,7 +36,7 @@ defmodule RodaWeb.Testify do
 
   def start_recording(socket) do
     %{current_scope: scope} = socket.assigns
-    conversation = Conversations.add_conversation!(%{project_id: scope.project.id})
+    conversation = Conversations.add_conversation!(%{project_id: scope.project.id, active: false})
 
     socket
     |> assign(
@@ -44,12 +49,6 @@ defmodule RodaWeb.Testify do
     )
   end
 
-  def pause_recording(socket) do
-    socket
-    |> assign(recording_state: :paused)
-    |> push_event("pause_recording", %{})
-  end
-
   def resume_recording(socket) do
     ass = socket.assigns
 
@@ -58,28 +57,8 @@ defmodule RodaWeb.Testify do
     |> push_event("resume_recording", %{id: ass.conversation_id})
   end
 
-  def stop_recording(socket) do
-    ass = socket.assigns
-
+  def chunk_uploaded(socket, %{"path" => _path}) do
     socket
-    |> assign(recording_state: :idle)
-    |> push_event("stop_recording", %{id: ass.conversation_id})
-  end
-
-  def recording_stopped(socket) do
-    ass = socket.assigns
-
-    %{conversation_id: ass.conversation_id}
-    |> Roda.Workers.TranscribeWorker.new()
-    |> Oban.insert()
-
-    socket
-    |> put_flash(:info, gettext("Recording saved successfully! Processing your testimony..."))
-    |> assign(conversation_id: nil, chunks: [])
-  end
-
-  def chunk_uploaded(socket, %{"path" => path}) do
-    assign(socket, chunks: [path | socket.assigns.chunks])
   end
 
   def chunk_upload_error(socket, %{"error" => error}) do
@@ -134,5 +113,33 @@ defmodule RodaWeb.Testify do
         |> assign(text_content: "")
         |> push_event("reset-form", %{})
     end
+  end
+
+  def start_mic_test(socket) do
+    socket
+    |> assign(recording_state: :testing_mic, audio_level: 0, mic_test_success: false)
+    |> push_event("start_mic_test", %{})
+  end
+
+  def stop_mic_test(socket) do
+    socket
+    |> assign(recording_state: :idle, audio_level: 0)
+  end
+
+  def audio_level_update(socket, %{"level" => level}) do
+    # Ensure level is an integer
+    level = if is_integer(level), do: level, else: String.to_integer("#{level}")
+    mic_test_success = socket.assigns.mic_test_success || level > 5
+
+    IO.inspect(level, label: "Setting audio_level to")
+
+    socket
+    |> assign(audio_level: level, mic_test_success: mic_test_success)
+  end
+
+  def mic_test_error(socket, %{"error" => error}) do
+    socket
+    |> assign(recording_state: :idle)
+    |> put_flash(:error, "Microphone test error: #{error}")
   end
 end

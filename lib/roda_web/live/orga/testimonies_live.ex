@@ -61,7 +61,7 @@ defmodule RodaWeb.Orga.TestimoniesLive do
     <.modal id="delete-conversation">
       <div class="space-y-4">
         <h2 class="text-xl font-bold">
-          {gettext("Delete testimony")}
+          {gettext("Delete this testimony")}
         </h2>
 
         <p class="text-sm text-base-content/70">
@@ -95,7 +95,7 @@ defmodule RodaWeb.Orga.TestimoniesLive do
                   {c.date}
                 </div>
                 <.button
-                  :if={@current_scope.membership.role == "admin"}
+                  :if={@current_scope.membership.role == "admin" && c.fully_transcribed}
                   phx-click={JS.push("conversation:delete:set") |> show_modal("delete-conversation")}
                   phx-value-id={c.id}
                   class="btn btn-error btn-outline btn-sm"
@@ -104,8 +104,20 @@ defmodule RodaWeb.Orga.TestimoniesLive do
                 </.button>
               </div>
             </div>
-            <div class="whitespace-pre-line -translate-y-4">
+            <div :if={c.active} class="whitespace-pre-line -translate-y-4">
               {c.text}
+            </div>
+            <div
+              :if={c.active && c.fully_transcribed == false}
+              class="whitespace-pre-line -translate-y-4"
+            >
+              <div class="alert alert-info">
+                <span>
+                  {gettext(
+                    "This testimony is currently being transcribed. Please check back in a few moments."
+                  )}
+                </span>
+              </div>
             </div>
           </div>
         <% end %>
@@ -127,7 +139,7 @@ defmodule RodaWeb.Orga.TestimoniesLive do
 
   defp list_conversation(scope, params \\ []) do
     Conversations.list_conversations_paginate(scope, params)
-    |> Enum.map(fn %{chunks: chunks, inserted_at: date, id: id} ->
+    |> Enum.map(fn %{chunks: chunks, inserted_at: date, id: id} = c ->
       text =
         Enum.sort_by(chunks, & &1.position)
         |> Enum.reduce("", fn c, acc ->
@@ -137,7 +149,13 @@ defmodule RodaWeb.Orga.TestimoniesLive do
           """
         end)
 
-      %{text: text, date: Date.display_date(date, [:short]), id: id}
+      %{
+        text: text,
+        date: Date.display_date(date, [:short]),
+        id: id,
+        active: c.active,
+        fully_transcribed: c.fully_transcribed
+      }
     end)
   end
 end

@@ -1,5 +1,5 @@
 defmodule Roda.Questions do
-  alias Roda.Repo
+  alias Roda.{Repo, Organizations}
   alias Roda.Questions.{Question, QuestionResponse}
   alias Roda.Accounts.Scope
   import Ecto.Query
@@ -148,5 +148,25 @@ defmodule Roda.Questions do
       qr.structured_response["themes"] || []
     end)
     |> Enum.uniq_by(fn theme -> theme["hashed_name"] end)
+  end
+
+  def set_response_complete(_s, %QuestionResponse{complete: true}), do: {:ok, :ok}
+
+  def set_response_complete(%Scope{} = s, %QuestionResponse{ids: ids} = r) do
+    current_ids =
+      Organizations.get_conversation_ids(
+        s,
+        NaiveDateTime.new!(r.period_start, ~T[00:00:00]),
+        NaiveDateTime.new!(r.period_end, ~T[23:59:59])
+      )
+
+    case Enum.all?(ids, fn i -> i in current_ids end) do
+      true ->
+        QuestionResponse.changeset(r, %{complete: true})
+        |> Repo.update()
+
+      false ->
+        :error
+    end
   end
 end

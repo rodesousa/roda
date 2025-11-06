@@ -1,5 +1,5 @@
 defmodule Roda.LLM do
-  @behaviour Roda.Llm.LlmBehaviour
+  # @behaviour Roda.Llm.LlmBehaviour
   alias Roda.LLM.Provider
   require Logger
 
@@ -50,8 +50,17 @@ defmodule Roda.LLM do
     with {:ok, %{body: body}} <- response do
       adapter.module.parse_response_for_mode(:raw, body)
     else
-      {:ok, %{body: body}} -> {:api_error, body}
-      error -> {:error, error}
+      {:ok, %{status: 429}} ->
+        {:error, :capacity_exceeded}
+
+      {:ok, %{status: 401}} ->
+        {:error, :bad_api_key}
+
+      {:ok, %{status: status}} ->
+        {:error, status}
+
+      error ->
+        {:error, error}
     end
   end
 
@@ -98,7 +107,7 @@ defmodule Roda.LLM do
         {"content-type", Multipart.content_type(multipart, "multipart/form-data")}
       ]
 
-    case Req.post(provider.api_base_url,
+    case Req.post("#{provider.api_base_url}/v1/audio/transcriptions",
            headers: headers,
            body: Multipart.body_stream(multipart)
          ) do
@@ -113,28 +122,8 @@ defmodule Roda.LLM do
     end
   end
 
-  defp headers(%{provider_type: "openai"} = provider) do
-    [{"authorization", "Bearer #{provider.api_key}"}]
-  end
-
-  defp headers(%{provider_type: "anthropic"} = provider) do
-    [{"x-api-key", "#{provider.api_key}"}, {"anthropic-version", "2023-06-01"}]
-  end
-
   def get_embeddings_url(%{provider_type: "openai"} = provider) do
     "#{provider.api_base_url}/v1/embeddings"
-  end
-
-  def get_chat_url(%{provider_type: "openai"} = provider) do
-    "#{provider.api_base_url}/v1/chat/completions"
-  end
-
-  def get_chat_url(%{provider_type: "anthropic"} = provider) do
-    "#{provider.api_base_url}/v1/messages"
-  end
-
-  def get_chat_url(_p) do
-    raise "nop"
   end
 
   @doc """
@@ -243,23 +232,6 @@ defmodule Roda.LLM do
       fn _task -> nil end
     )
     |> Stream.concat([{:done}])
-  end
-
-  defp build_stream_body(%Provider{provider_type: "openai", model: model}, messages) do
-    %{
-      model: model,
-      messages: messages,
-      stream: true
-    }
-  end
-
-  defp build_stream_body(%Provider{provider_type: "anthropic", model: model}, messages) do
-    %{
-      model: model,
-      messages: messages,
-      stream: true,
-      max_tokens: 64000
-    }
   end
 
   defp parse_and_extract_chunks(data, adapter) do

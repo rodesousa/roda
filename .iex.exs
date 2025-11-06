@@ -8,3 +8,4 @@ alias Roda.Accounts.{User, PlatformAdmin}
 alias Roda.Questions.Question
 alias Roda.Invite.InviteAccessToken
 alias Roda.Questions.QuestionResponse
+alias Roda.Workers.Jobs

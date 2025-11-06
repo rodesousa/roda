@@ -14,7 +14,7 @@ defmodule RodaWeb.Button do
   attr :rest, :global,
     include: ~w(href navigate patch method download name value disabled onclick)
 
-  attr :class, :string
+  attr :class, :any
   attr :variant, :string, values: ~w(primary)
   slot :inner_block, required: true
 

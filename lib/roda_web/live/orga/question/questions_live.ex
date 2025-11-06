@@ -1,4 +1,10 @@
 defmodule RodaWeb.Orga.QuestionsLive do
+  @moduledoc """
+  Technical debt:
+  - Cannot delete a question
+  - Cannot rename a question even there arent response
+  - Cannot archive
+  """
   use RodaWeb, :live_view
 
   alias Roda.Questions.Question
@@ -61,11 +67,11 @@ defmodule RodaWeb.Orga.QuestionsLive do
       scope={@current_scope}
     >
       <RodaWeb.Layouts.page_content>
-        <.breadcrumb scope={@current_scope} i={gettext("Ask")} />
+        <.breadcrumb scope={@current_scope} i={gettext("Collective KPIs")} />
         <div class="mb-6">
           <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-3">
-              <h1 class="text-3xl font-bold">{gettext("Ask")}</h1>
+              <h1 class="text-3xl font-bold">{gettext("Collective KPIs")}</h1>
             </div>
             <.button
               :if={@questions.ok? && length(@questions.result) < 4}
@@ -73,14 +79,26 @@ defmodule RodaWeb.Orga.QuestionsLive do
               class="btn btn-primary gap-2"
             >
               <.icon name="hero-plus" />
-              {gettext("New question")}
+              {gettext("New KPI")}
             </.button>
           </div>
-          <p class="text-base-content/70">
-            {gettext(
-              "Groups are spaces where you collect and organize testimonies from your community."
-            )}
-          </p>
+          <div class="text-base-content/70 space-y-4">
+            <p>
+              {gettext(
+                "Here, you can formulate collective questions, called collective KPIs. They're not meant to manage from the top down, but to listen to what truly matters within the organization."
+              )}
+            </p>
+            <p>
+              {gettext(
+                "Each week, the AI analyzes shared testimonies (text or voice) to detect themes, weak signals, and emerging trends. The questions raised by the community then become collective markers — they reveal the issues that arise from the ground up, rather than those decided by managers."
+              )}
+            </p>
+            <p>
+              {gettext(
+                "The goal: to turn lived experience into a shared compass, and make governance more sensitive, fair, and collective."
+              )}
+            </p>
+          </div>
         </div>
         <div :if={@questions.ok?} id="questions" class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <%= for  question <- @questions.result do %>
@@ -101,7 +119,7 @@ defmodule RodaWeb.Orga.QuestionsLive do
   defp question_creation(assigns) do
     ~H"""
     <div class="space-y-4">
-      <h2 class="text-xl font-bold">{gettext("Create new question")}</h2>
+      <h2 class="text-xl font-bold">{gettext("Create new KPI")}</h2>
 
       <p class="text-sm text-base-content/70">
         {gettext("Groups help you organize and track testimonies from specific communities.")}
@@ -120,7 +138,7 @@ defmodule RodaWeb.Orga.QuestionsLive do
             {gettext("Cancel")}
           </.button>
           <.button type="submit" class="btn btn-primary">
-            {gettext("Create question")}
+            {gettext("Create KPI")}
           </.button>
         </div>
       </.form>

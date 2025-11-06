@@ -183,7 +183,7 @@ defmodule RodaWeb.Layouts do
                   <button
                     class={[
                       "is-drawer-close:tooltip is-drawer-close:tooltip-right",
-                      s.id == @current && "bg-gray-200"
+                      s.id == @current && "bg-primary/20 text-primary font-semibold"
                     ]}
                     data-tip={s.name}
                   >
@@ -210,7 +210,7 @@ defmodule RodaWeb.Layouts do
                 navigate={~p"/orgas/#{@scope.organization.id}/projects/#{@scope.project.id}/settings"}
                 class={[
                   "is-drawer-close:tooltip is-drawer-close:tooltip-right",
-                  "group_settings" == @current && "bg-gray-200"
+                  "group_settings" == @current && "bg-primary/20 text-primary font-semibold"
                 ]}
               >
                 <div class="flex items-center space-x-2">
@@ -227,7 +227,7 @@ defmodule RodaWeb.Layouts do
                 :if={@scope.membership && @scope.membership.role == "admin"}
                 class={[
                   "is-drawer-close:tooltip is-drawer-close:tooltip-right",
-                  "orga_settings" == @current && "bg-gray-200"
+                  "orga_settings" == @current && "bg-primary/20 text-primary font-semibold"
                 ]}
                 navigate={~p"/orgas/#{@scope.organization.id}/settings"}
               >
@@ -245,7 +245,7 @@ defmodule RodaWeb.Layouts do
                 href={~p"/users/settings"}
                 class={[
                   "is-drawer-close:tooltip is-drawer-close:tooltip-right",
-                  "user_settings" == @current && "bg-gray-200"
+                  "user_settings" == @current && "bg-primary/20 text-primary font-semibold"
                 ]}
               >
                 <div class="flex items-center space-x-2">
@@ -352,7 +352,7 @@ defmodule RodaWeb.Layouts do
       },
       %{
         id: "questions",
-        name: gettext("Ask"),
+        name: gettext("Collective KPIs"),
         link: ~p"/orgas/#{orga.id}/projects/#{project.id}/questions",
         icon: "hero-presentation-chart-line"
       },

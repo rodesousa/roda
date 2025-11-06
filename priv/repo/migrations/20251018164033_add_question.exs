@@ -15,6 +15,8 @@ defmodule Roda.Repo.Migrations.AddQuestion do
       add :id, :uuid, primary_key: true
       add :narrative_response, :text
       add :structured_response, :map
+      add :ids, {:array, :uuid}, default: []
+      add :complete, :boolean
 
       add :period_start, :date, null: false
       add :period_end, :date, null: false

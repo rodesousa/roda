@@ -5,9 +5,10 @@ defmodule RodaWeb.Orga.Question.ThemesEvolutionLive do
 
   @impl true
   def mount(%{"question_id" => question_id}, _session, socket) do
+    %{current_scope: scope} = socket.assigns
+
     socket =
-      with %{current_scope: scope} <- socket.assigns,
-           {:ok, question} <- Questions.get(scope, question_id) do
+      with {:ok, question} <- Questions.get(scope, question_id) do
         socket
         |> assign(question: question)
         |> load_themes_evolution()
@@ -26,29 +27,26 @@ defmodule RodaWeb.Orga.Question.ThemesEvolutionLive do
     ~H"""
     <RodaWeb.Layouts.page current="questions" scope={@current_scope} flash={@flash}>
       <RodaWeb.Layouts.page_content>
+        <.breadcrumb scope={@current_scope} i={gettext("Evolution")}>
+          <:others>
+            <li>
+              <.link navigate={~p"/orgas/#{@current_scope.organization.id}/groups"}>
+                <.icon name="hero-pencil-square" class="w-5 h-5" />
+                {gettext("Ask")}
+              </.link>
+            </li>
+            <li>
+              <.link navigate={
+                ~p"/orgas/#{@current_scope.organization.id}/projects/#{@current_scope.project.id}/questions/#{@question.id}"
+              }>
+                {@question.name}
+              </.link>
+            </li>
+          </:others>
+        </.breadcrumb>
         <!-- Header -->
         <div class="mb-6">
-          <div class="breadcrumbs text-sm">
-            <ul>
-              <li>
-                <.link navigate={
-                  ~p"/orgas/#{@current_scope.organization.id}/projects/#{@current_scope.project.id}/questions"
-                }>
-                  {gettext("Questions")}
-                </.link>
-              </li>
-              <li>
-                <.link navigate={
-                  ~p"/orgas/#{@current_scope.organization.id}/projects/#{@current_scope.project.id}/questions/#{@question.id}"
-                }>
-                  {@question.name}
-                </.link>
-              </li>
-              <li>{gettext("Évolution des thèmes")}</li>
-            </ul>
-          </div>
-
-          <h1 class="text-3xl font-bold mt-4">{gettext("Évolution des thèmes")}</h1>
+          <h1 class="text-3xl font-bold mt-4">{gettext("Theme evolution")}</h1>
           <p class="text-base-content/70 mt-2">
             {@question.prompt}
           </p>
@@ -60,7 +58,7 @@ defmodule RodaWeb.Orga.Question.ThemesEvolutionLive do
             <div class="card bg-base-100 shadow-lg border border-base-300 sticky top-4">
               <div class="card-body p-4">
                 <h3 class="font-bold text-sm mb-3">
-                  {gettext("Thèmes")} ({length(@all_themes)})
+                  {gettext("Themes")} ({length(@all_themes)})
                 </h3>
 
                 <div class="space-y-1 max-h-[600px] overflow-y-auto">
@@ -77,36 +75,35 @@ defmodule RodaWeb.Orga.Question.ThemesEvolutionLive do
                 </div>
 
                 <button
-                  :if={@selection_mode == :theme}
+                  :if={false && @selection_mode == :theme}
                   phx-click="clear_theme_selection"
                   class="btn btn-ghost btn-sm w-full mt-3"
                 >
-                  {gettext("← Retour aux semaines")}
+                  {gettext("← Back to weeks")}
                 </button>
               </div>
             </div>
           </div>
           <!-- Main content -->
           <div class="flex-1">
-            <!-- Timeline -->
-            <div class="card bg-base-100 shadow-lg border border-base-300 mb-6">
+            <div
+              id="timeline"
+              class="card bg-base-100 shadow-lg border border-base-300 mb-6"
+            >
               <div class="card-body p-6">
                 <h3 class="font-bold mb-4">
                   <%= if @selection_mode == :week do %>
-                    {gettext("Timeline (sentiment majoritaire)")}
+                    {gettext("Timeline (majority sentiment)")}
                   <% else %>
-                    {gettext("Présence du thème")}
+                    {gettext("Theme presence")}
                   <% end %>
                 </h3>
-
-                <div class="flex gap-3 items-center overflow-x-auto pb-2">
+                <div class="flex overflow-x-auto gap-3 items-center max-w-md md:max-w-xl lg:max-w-2xl xl:max-w-4xl h-32 px-2">
                   <%= for week <- @weeks do %>
                     <button
                       phx-click="select_week"
                       phx-value-number={week.number}
-                      class={
-                        week_card_class(@selection_mode, @selected_week, @selected_theme_data, week)
-                      }
+                      class={"flex-shrink-0 " <> week_card_class(@selection_mode, @selected_week, @selected_theme_data, week)}
                     >
                       <div class="font-bold text-lg">S{week.number}</div>
                       <div class="text-xs opacity-70">
@@ -137,8 +134,8 @@ defmodule RodaWeb.Orga.Question.ThemesEvolutionLive do
                     </path>
                   </svg>
                   <span>
-                    {gettext("Semaine")} {@selected_week} - {length(@display_content)} {gettext(
-                      "thème(s) identifié(s)"
+                    {gettext("Week")} {@selected_week} - {length(@display_content)} {gettext(
+                      "identified theme(s)"
                     )}
                   </span>
                 </div>
@@ -164,9 +161,13 @@ defmodule RodaWeb.Orga.Question.ThemesEvolutionLive do
                         </div>
                       </div>
 
-                      <p class="text-sm text-base-content/80 leading-relaxed">
-                        {theme["description"]}
-                      </p>
+                      <div
+                        phx-hook="Markdown"
+                        id={"theme-desc-#{theme["hashed_name"]}"}
+                        class="prose prose-sm max-w-none text-base-content/80"
+                        data-content={theme["description"]}
+                      >
+                      </div>
                     </div>
                   </div>
                 <% end %>
@@ -188,9 +189,9 @@ defmodule RodaWeb.Orga.Question.ThemesEvolutionLive do
                     </path>
                   </svg>
                   <span>
-                    {gettext("Présent dans")} {length(@selected_theme_data.present_in_weeks)}/{length(
+                    {gettext("Present in")} {length(@selected_theme_data.present_in_weeks)}/{length(
                       @weeks
-                    )} {gettext("semaines")}
+                    )} {gettext("weeks")}
                   </span>
                 </div>
 
@@ -222,9 +223,13 @@ defmodule RodaWeb.Orga.Question.ThemesEvolutionLive do
                           <h4 class="font-semibold text-sm mb-2">
                             S{week_desc.week_number}
                           </h4>
-                          <p class="text-sm text-base-content/80 leading-relaxed">
-                            {week_desc.description}
-                          </p>
+                          <div
+                            phx-hook="Markdown"
+                            id={"theme-week-desc-#{week_desc.week_number}"}
+                            class="prose prose-sm max-w-none text-base-content/80"
+                            data-content={week_desc.description}
+                          >
+                          </div>
                         </div>
                       <% end %>
                     </div>
@@ -395,25 +400,30 @@ defmodule RodaWeb.Orga.Question.ThemesEvolutionLive do
     base =
       "flex flex-col items-center justify-center w-20 h-20 rounded-xl border-4 cursor-pointer transition-all"
 
-    base <> " border-primary shadow-lg transform scale-110"
+    # Semaine sélectionnée = neutre
+    base <> " border-base-300 bg-base-200 shadow-lg transform scale-110"
   end
 
-  defp week_card_class(:week, _, _, week) do
-    base =
-      "flex flex-col items-center justify-center w-20 h-20 rounded-xl border-2 cursor-pointer transition-all hover:scale-105"
-
-    border_color = sentiment_border_color(week.sentiment_majority)
-    bg_color = sentiment_bg_color(week.sentiment_majority)
-    base <> " #{border_color} #{bg_color}"
+  defp week_card_class(:week, _, _, _week) do
+    "flex flex-col items-center justify-center w-20 h-20 rounded-xl border-2 cursor-pointer transition-all hover:scale-105 border-base-300 bg-base-200 text-base-content/30 opacity-50"
   end
 
   defp week_card_class(:theme, _, selected_theme_data, week) do
     base =
       "flex flex-col items-center justify-center w-20 h-20 rounded-xl border-2 cursor-pointer transition-all"
 
-    if week.number in selected_theme_data.present_in_weeks do
-      base <> " border-primary bg-primary/20 text-primary hover:scale-105"
+    # Trouver le thème dans cette semaine pour obtenir son sentiment
+    theme_in_week =
+      Enum.find(week.themes, &(&1["hashed_name"] == selected_theme_data.hashed_name))
+
+    if theme_in_week do
+      # Thème présent : afficher la couleur du sentiment
+      sentiment = theme_in_week["sentiment"]
+      border_color = sentiment_border_color(sentiment)
+      bg_color = sentiment_bg_color(sentiment)
+      base <> " #{border_color} #{bg_color} hover:scale-105"
     else
+      # Thème absent : ghost
       base <> " border-base-300 bg-base-200 text-base-content/30 opacity-50"
     end
   end

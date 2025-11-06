@@ -1,4 +1,11 @@
 defmodule RodaWeb.Orga.Prompt.PromptLive do
+  @moduledoc """
+  Technical debt:
+  - If a prompt doesnt work, user cannot resend the same prompt and the prompt are saved
+
+  Error:
+  - For the first time, the textarea are in the top of the page
+  """
   use RodaWeb, :live_view
 
   alias Roda.{Prompts, LLM, Conversations, Organizations}
@@ -58,14 +65,18 @@ defmodule RodaWeb.Orga.Prompt.PromptLive do
   def handle_event("delete", _p, socket) do
     %{current_scope: scope} = ass = socket.assigns
 
-    Prompts.delete_conversation(scope, ass.current_conversation.id)
-
     socket =
-      socket
-      |> assign_init()
-      |> push_navigate(
-        to: ~p"/orgas/#{scope.organization.id}/projects/#{scope.project.id}/prompts"
-      )
+      with true <- scope.membership.role == "admin" do
+        Prompts.delete_conversation(scope, ass.current_conversation.id)
+
+        socket
+        |> assign_init()
+        |> push_navigate(
+          to: ~p"/orgas/#{scope.organization.id}/projects/#{scope.project.id}/prompts"
+        )
+      else
+        _ -> socket
+      end
 
     {:noreply, socket}
   end
@@ -77,7 +88,10 @@ defmodule RodaWeb.Orga.Prompt.PromptLive do
     if String.trim(message_text) == "" or (ass.conversations == [] and ass.messages == []) do
       socket =
         socket
-        |> put_flash(:error, gettext("prompt empty and/or testimonies not selected"))
+        |> put_flash(
+          :error,
+          gettext("Please enter a message and select a date range in the calendar.")
+        )
 
       {:noreply, socket}
     else
@@ -285,7 +299,7 @@ defmodule RodaWeb.Orga.Prompt.PromptLive do
     <.modal id="rename">
       <div class="space-y-4">
         <h2 class="text-xl font-bold">
-          {gettext("Rename prompt")}
+          {gettext("Rename Prompt")}
         </h2>
         <.form :let={f} for={@current_conversation_form} phx-submit="rename">
           <div class="flex-col space-y-4 py-4">
@@ -334,7 +348,7 @@ defmodule RodaWeb.Orga.Prompt.PromptLive do
       <RodaWeb.Layouts.page_content>
         <.breadcrumb scope={@current_scope} i={gettext("Prompts")} />
         
-    <!-- Header avec date et actions -->
+    <!-- Header with date and actions -->
         <div class="flex space-x-2 items-center mb-4">
           <div>
             <%= if @current_conversation.begin_at do %>
@@ -359,7 +373,7 @@ defmodule RodaWeb.Orga.Prompt.PromptLive do
           </.button>
         </div>
         
-    <!-- Zone des messages scrollable -->
+    <!-- Scrollable messages area -->
         <div class="overflow-y-auto space-y-4" id="messages-container">
           <%= for message <- @messages do %>
             <div class={[
@@ -405,7 +419,7 @@ defmodule RodaWeb.Orga.Prompt.PromptLive do
           <% end %>
         </div>
         
-    <!-- Input toujours visible -->
+    <!-- Always visible input -->
         <form phx-submit="send_message" class="flex space-x-2 items-center mt-4 mb-4">
           <div class="flex gap-2 flex-1">
             <.input

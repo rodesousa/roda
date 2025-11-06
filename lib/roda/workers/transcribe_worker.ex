@@ -8,27 +8,43 @@ defmodule Roda.Workers.TranscribeWorker do
   alias Roda.{Minio, Repo, Conversations}
   alias Roda.LLM
 
-  defp chunk_list(path) do
-    %{body: %{contents: content}} =
-      Minio.list(prefix: path)
+  @impl Oban.Worker
+  def perform(%Oban.Job{
+        args: %{
+          "conversation_id" => conversation_id,
+          "action" => "delete"
+        }
+      }) do
+    with {:ok, path} <- Conversations.get_conversation_minio_path(conversation_id) do
+      :timer.sleep(3000)
 
-    if content == [] do
-      {:error, :chunk_empty}
-    else
-      {:ok, content}
+      %{body: %{contents: contents}} = Minio.list(prefix: path)
+
+      contents
+      |> Enum.each(fn %{key: key} ->
+        Minio.delete_object(key)
+      end)
+
+      Conversations.delete_conversation(conversation_id)
+
+      :ok
     end
   end
 
   @impl Oban.Worker
   def perform(%Oban.Job{
         args: %{
-          "conversation_id" => conversation_id
+          "conversation_id" => conversation_id,
+          "total_chunks" => total_chunks
         }
       }) do
     with {:ok, path} <- Conversations.get_conversation_minio_path(conversation_id),
          {:ok, conversation} <- get_conversation(conversation_id),
          {:ok, provider} <- get_provider(conversation.project.organization_id),
-         {:ok, content} <- chunk_list(path) do
+         {:ok, content} <- chunk_list(path, total_chunks) do
+      Conversations.set_convervation_active(conversation)
+      :timer.sleep(10000)
+
       content
       |> Enum.sort_by(fn %{key: key} ->
         [name, _] = Path.basename(key) |> String.split(".")
@@ -37,9 +53,8 @@ defmodule Roda.Workers.TranscribeWorker do
       |> Enum.with_index(fn %{key: key}, index ->
         [chunk_uuid, _] = Path.basename(key) |> String.split(".")
         {:ok, audio_binary} = Minio.get_file(key)
-        text = "coucou"
 
-        LLM.audio_transcribe(provider, audio_binary)
+        {:ok, text} = LLM.audio_transcribe(provider, audio_binary)
 
         create_chunk(
           %{
@@ -56,12 +71,12 @@ defmodule Roda.Workers.TranscribeWorker do
       Conversations.Conversation.update_changeset(conversation, %{fully_transcribed: true})
       |> Repo.update!()
 
-      %{
-        organization_id: conversation.project.organization_id,
-        conversation_id: conversation.id
-      }
-      |> Roda.Workers.EntityExtractionWorker.new()
-      |> Oban.insert!()
+      # %{
+      #   organization_id: conversation.project.organization_id,
+      #   conversation_id: conversation.id
+      # }
+      # |> Roda.Workers.EntityExtractionWorker.new()
+      # |> Oban.insert!()
 
       :ok
     else
@@ -104,5 +119,26 @@ defmodule Roda.Workers.TranscribeWorker do
       nil -> {:error, :conversation_not_found}
       conversation -> {:ok, conversation}
     end
+  end
+
+  defp chunk_list(path, total_chunks) do
+    Enum.reduce_while(0..2, {:error, :bad_count}, fn _c, acc ->
+      case Minio.list(prefix: path) do
+        %{body: %{contents: contents}} ->
+          if length(contents) == total_chunks do
+            Logger.debug("All Chunks are uploaded =)")
+            {:halt, {:ok, contents}}
+          else
+            Logger.debug("All Chunks are not uploaded =(")
+            :timer.sleep(1000)
+            {:cont, acc}
+          end
+
+        error ->
+          Logger.warning("Unexpected Minio.list result: #{inspect(error)}")
+          :timer.sleep(1000)
+          {:cont, acc}
+      end
+    end)
   end
 end

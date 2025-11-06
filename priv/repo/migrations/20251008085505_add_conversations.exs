@@ -28,7 +28,6 @@ defmodule Roda.Repo.Migrations.AddConversations do
     create table(:conversations, primary_key: false) do
       add :id, :uuid, primary_key: true
       add :fully_transcribed, :boolean, default: false
-      add :from_chat, :boolean, default: false
 
       add :project_id, references(:projects, type: :uuid, on_delete: :delete_all)
 

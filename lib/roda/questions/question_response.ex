@@ -7,6 +7,8 @@ defmodule Roda.Questions.QuestionResponse do
   schema "question_responses" do
     field :narrative_response, :string
     field :structured_response, :map, default: %{}
+    field :ids, {:array, :binary_id}, default: []
+    field :complete, :boolean, default: false
     field :period_start, :date
     field :period_end, :date
 
@@ -26,7 +28,9 @@ defmodule Roda.Questions.QuestionResponse do
       :period_end,
       :question_id,
       :narrative_response,
-      :structured_response
+      :structured_response,
+      :ids,
+      :complete
     ])
     |> validate_required([:period_start, :period_end, :question_id])
     |> foreign_key_constraint(:question_id)

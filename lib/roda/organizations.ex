@@ -1,4 +1,9 @@
 defmodule Roda.Organizations do
+  @moduledoc """
+  Technical debt:
+  - Each functions using Conversation have to mentionned if active and fully_transcribed is used and why
+  """
+
   import Ecto.Query
   alias Roda.{Repo, Accounts}
   alias Roda.Organizations.{Project, Organization, OrganizationMembership}
@@ -92,9 +97,23 @@ defmodule Roda.Organizations do
     Conversation
     |> where(
       [c],
-      c.project_id == ^s.project.id and c.inserted_at >= ^begin_at and c.inserted_at <= ^end_at
+      c.project_id == ^s.project.id and c.inserted_at >= ^begin_at and c.inserted_at <= ^end_at and
+        c.active == true and
+        c.fully_transcribed == true
     )
     |> preload([:chunks])
+    |> Repo.all()
+  end
+
+  def get_conversation_ids(%Scope{} = s, %NaiveDateTime{} = begin_at, %NaiveDateTime{} = end_at) do
+    Conversation
+    |> where(
+      [c],
+      c.project_id == ^s.project.id and c.inserted_at >= ^begin_at and c.inserted_at <= ^end_at and
+        c.active == true and
+        c.fully_transcribed == true
+    )
+    |> select([s], s.id)
     |> Repo.all()
   end
 
@@ -172,12 +191,6 @@ defmodule Roda.Organizations do
     |> Repo.one()
   end
 
-  def list_project_by_orga(%Scope{} = s) do
-    Project
-    |> where([p], p.organization_id == ^s.organization.id and p.is_active == true)
-    |> Repo.all()
-  end
-
   def get_project(orga_id, project_id) do
     Project
     |> where([p], p.id == ^project_id and p.organization_id == ^orga_id)
@@ -198,7 +211,12 @@ defmodule Roda.Organizations do
   """
   def count_conversations_by_project(project_id, date) do
     Conversation
-    |> where([c], c.project_id == ^project_id and c.inserted_at >= ^date)
+    |> where(
+      [c],
+      c.project_id == ^project_id and c.inserted_at >= ^date and
+        c.active == true and
+        c.fully_transcribed == true
+    )
     |> Repo.aggregate(:count, :id)
   end
 
@@ -251,7 +269,11 @@ defmodule Roda.Organizations do
 
     conversations_this_week =
       Conversation
-      |> where([c], c.project_id in ^project_ids and c.inserted_at >= ^one_week_ago)
+      |> where(
+        [c],
+        c.project_id in ^project_ids and c.inserted_at >= ^one_week_ago and c.active == true and
+          c.fully_transcribed == true
+      )
       |> Repo.aggregate(:count, :id)
 
     %{

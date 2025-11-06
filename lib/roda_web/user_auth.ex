@@ -265,7 +265,7 @@ defmodule RodaWeb.UserAuth do
   def on_mount(
         :mount_token_context,
         %{"token" => token},
-        session,
+        _session,
         socket
       ) do
     with {:ok, invite} <- Invite.get_projet_token_by_token(token) do
