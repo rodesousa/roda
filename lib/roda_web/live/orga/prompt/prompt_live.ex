@@ -392,7 +392,7 @@ defmodule RodaWeb.Orga.Prompt.PromptLive do
               </div>
               <details
                 :if={testimonies not in ["", nil]}
-                class="collapse collapse-arrow bg-base-200 my-2"
+                class="collapse collapse-arrow bg-base-200 my-2 cursor-pointer"
               >
                 <div class="collapse-content">
                   <pre class="text-xs opacity-70">{testimonies}</pre>

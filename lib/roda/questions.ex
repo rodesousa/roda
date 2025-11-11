@@ -1,4 +1,8 @@
 defmodule Roda.Questions do
+  @moduledoc """
+  Technical debt:
+  - delete_question scope are not used
+  """
   alias Roda.{Repo, Organizations}
   alias Roda.Questions.{Question, QuestionResponse}
   alias Roda.Accounts.Scope
@@ -168,5 +172,10 @@ defmodule Roda.Questions do
       false ->
         :error
     end
+  end
+
+  def delete_question(%Scope{} = _s, question_id) do
+    Repo.get(Question, question_id)
+    |> Repo.delete()
   end
 end

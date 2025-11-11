@@ -85,7 +85,6 @@ defmodule RodaWeb.Orga.GroupsLive do
             <div class="stat-desc">{gettext("New testimonies")}</div>
           </div>
         </div>
-        <!-- Header with context and CTA -->
         <div class="mb-6">
           <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-3">
@@ -103,11 +102,12 @@ defmodule RodaWeb.Orga.GroupsLive do
           </div>
           <p class="text-base-content/70">
             {gettext(
-              "Groups are spaces where you collect and organize testimonies from your community."
+              "Groups are spaces where you can collect testimonies, view and organize them, track collective KPIs, and use prompts to guide testimonies."
             )}
           </p>
         </div>
-        <!-- Groups Grid or Empty State -->
+        
+    <!-- Groups Grid or Empty State -->
         <%= if @projects_with_metrics == [] do %>
           <!-- Empty State -->
           <div class="hero min-h-[50vh] bg-base-200 rounded-box">
@@ -187,7 +187,9 @@ defmodule RodaWeb.Orga.GroupsLive do
       <h2 class="text-xl font-bold">{gettext("Create new group")}</h2>
 
       <p class="text-sm text-base-content/70">
-        {gettext("Groups help you organize and track testimonies from specific communities.")}
+        {gettext(
+          "Groups help you collect, view and organize testimonies, track collective KPIs, and use prompts to guide testimonies from specific communities."
+        )}
       </p>
 
       <.form id="group-form" for={@form} phx-submit="group:creation" class="space-y-4">

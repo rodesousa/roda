@@ -51,6 +51,26 @@ defmodule RodaWeb.Orga.Question.ThemesEvolutionLive do
             {@question.prompt}
           </p>
         </div>
+        <!-- Sentiment Legend -->
+        <div class="alert mb-6">
+          <div class="flex flex-col sm:flex-row gap-3 w-full items-center">
+            <span class="font-semibold">{gettext("Legend")}:</span>
+            <div class="flex flex-wrap gap-3 sm:gap-4">
+              <div class="flex items-center gap-2">
+                <span class="text-lg">🟢</span>
+                <span class="text-sm">{gettext("Positive")}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-lg">🔴</span>
+                <span class="text-sm">{gettext("Negative")}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-lg">⚪</span>
+                <span class="text-sm">{gettext("Neutral")}</span>
+              </div>
+            </div>
+          </div>
+        </div>
         <!-- Main layout: sidebar + content -->
         <div class="flex gap-6">
           <!-- Sidebar: Liste des thèmes -->
@@ -220,8 +240,9 @@ defmodule RodaWeb.Orga.Question.ThemesEvolutionLive do
                     <div class="space-y-4">
                       <%= for week_desc <- @selected_theme_data.week_descriptions do %>
                         <div>
-                          <h4 class="font-semibold text-sm mb-2">
-                            S{week_desc.week_number}
+                          <h4 class="font-semibold text-sm mb-2 flex items-center gap-2">
+                            <span>S{week_desc.week_number}</span>
+                            <span>{sentiment_emoji(week_desc.sentiment)}</span>
                           </h4>
                           <div
                             phx-hook="Markdown"
@@ -324,7 +345,8 @@ defmodule RodaWeb.Orga.Question.ThemesEvolutionLive do
 
             %{
               week_number: week.number,
-              description: theme_in_week["description"]
+              description: theme_in_week["description"],
+              sentiment: theme_in_week["sentiment"]
             }
           end)
 

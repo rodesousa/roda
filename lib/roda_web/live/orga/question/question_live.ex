@@ -93,7 +93,7 @@ defmodule RodaWeb.Orga.QuestionLive do
       else
         _ ->
           socket
-          |> put_flash(:error, gettext("You are not authorized to create an analysis."))
+          |> put_flash(:error, gettext("You are not authorized"))
       end
 
     {:noreply, socket}
@@ -148,7 +148,29 @@ defmodule RodaWeb.Orga.QuestionLive do
       else
         _ ->
           socket
-          |> put_flash(:error, gettext("You are not authorized to create an analysis."))
+          |> put_flash(:error, gettext("You are not authorized"))
+      end
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("delete", _p, socket) do
+    %{current_scope: scope} = ass = socket.assigns
+
+    socket =
+      with true <- scope.membership.role == "admin",
+           true <- ass.completed_count == 0 do
+        Questions.delete_question(scope, ass.question.id)
+
+        socket
+        |> push_navigate(
+          to: ~p"/orgas/#{scope.organization.id}/projects/#{scope.project.id}/questions"
+        )
+      else
+        _ ->
+          socket
+          |> put_flash(:error, gettext("You are not authorized"))
       end
 
     {:noreply, socket}
@@ -157,6 +179,26 @@ defmodule RodaWeb.Orga.QuestionLive do
   @impl true
   def render(assigns) do
     ~H"""
+    <.modal id="delete">
+      <div class="space-y-4">
+        <h2 class="text-xl font-bold">
+          {gettext("Delete KPI")}
+        </h2>
+
+        <p class="text-sm text-base-content/70">
+          {gettext("Are you sure you want to remove this KPI? This action cannot be undone.")}
+        </p>
+
+        <div class="flex justify-end gap-2 pt-4">
+          <.button phx-click={hide_modal("delete")} class="btn btn-ghost">
+            {gettext("Cancel")}
+          </.button>
+          <.button phx-click="delete" class="btn btn-error">
+            {gettext("Delete")}
+          </.button>
+        </div>
+      </div>
+    </.modal>
     <RodaWeb.Layouts.page flash={@flash} current="questions" scope={@current_scope}>
       <RodaWeb.Layouts.page_content>
         <.breadcrumb scope={@current_scope} i={@question.name}>
@@ -174,6 +216,15 @@ defmodule RodaWeb.Orga.QuestionLive do
             <div class="flex items-center gap-3">
               <h1 class="text-3xl font-bold">{gettext("Analyses")}</h1>
             </div>
+            <button
+              :if={@current_scope.membership.role == "admin" && @completed_count == 0}
+              id="modal-group-button"
+              phx-click={show_modal("delete")}
+              class="btn btn-error gap-2"
+            >
+              <.icon name="hero-trash" />
+              {gettext("Delete")}
+            </button>
           </div>
           <div class="text-base-content/70 space-y-2">
             <p>
@@ -297,7 +348,7 @@ defmodule RodaWeb.Orga.QuestionLive do
                   </svg>
                   <span class="text-sm">
                     {gettext(
-                      "Warning: This analysis only includes testimonies received so far this week. Any new messages arriving later will not be included in this analysis."
+                      "Warning: This analysis only includes testimonies received up to the moment it was performed. Any testimonies submitted afterward will not be included."
                     )}
                   </span>
                 </div>
@@ -566,7 +617,7 @@ defmodule RodaWeb.Orga.QuestionLive do
     "#{start_str} - #{end_str}"
   end
 
-  defp conversation_count_text(1), do: gettext("1 analyzed conversation")
+  defp conversation_count_text(1), do: gettext("1 testimony")
 
   defp conversation_count_text(count),
     do: gettext("%{count} testimonies", count: count)
