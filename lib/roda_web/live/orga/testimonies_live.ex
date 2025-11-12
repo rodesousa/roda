@@ -87,6 +87,16 @@ defmodule RodaWeb.Orga.TestimoniesLive do
     >
       <RodaWeb.Layouts.page_content>
         <.breadcrumb scope={@current_scope} i={gettext("Testimonies")} />
+        <div class="mb-6">
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-3">
+              <h1 class="text-3xl font-bold">{gettext("Testimonies")}</h1>
+            </div>
+          </div>
+          <p class="text-base-content/70">
+            {gettext("View all testimonies collected in this group.")}
+          </p>
+        </div>
         <%= for c <- @conversations do %>
           <div class="border-b pt-4">
             <div class="flex justify-between items-center">

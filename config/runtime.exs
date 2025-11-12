@@ -1,22 +1,19 @@
 import Config
 import Dotenvy
-source!([".env", System.get_env()])
 
-#  MINIO
-config :ex_aws,
-  access_key_id: env!("MINIO_ROOT_USER"),
-  secret_access_key: env!("MINIO_ROOT_PASSWORD")
-
-config :ex_aws, :s3,
-  scheme: "http://",
-  host: "localhost",
-  port: 9000
+# Load .env file in dev/test, use system env in prod
+if config_env() in [:dev, :test] do
+  source!([".env", System.get_env()])
+else
+  source!([System.get_env()])
+end
 
 # Cloack
 config :roda, Roda.Vault,
   ciphers: [
     default:
-      {Cloak.Ciphers.AES.GCM, tag: "AES.GCM.V1", key: env!("CLOAK_KEY") |> Base.decode64!()}
+      {Cloak.Ciphers.AES.GCM,
+       tag: "AES.GCM.V1", key: env!("CLOAK_KEY", :string) |> Base.decode64!()}
   ]
 
 # config/runtime.exs is executed for all environments, including
@@ -40,12 +37,18 @@ if System.get_env("PHX_SERVER") do
 end
 
 if config_env() == :prod do
+  config :ex_aws, :s3,
+    scheme: "http://",
+    host: env!("MINIO_HOST", :string),
+    port: String.to_integer(env!("MINIO_PORT"))
+
+  #  MINIO
+  config :ex_aws,
+    access_key_id: env!("MINIO_ROOT_USER", :string),
+    secret_access_key: env!("MINIO_ROOT_PASSWORD", :string)
+
   database_url =
-    System.get_env("DATABASE_URL") ||
-      raise """
-      environment variable DATABASE_URL is missing.
-      For example: ecto://USER:PASS@HOST/DATABASE
-      """
+    System.env!("DATABASE_URL", :string)
 
   maybe_ipv6 = if System.get_env("ECTO_IPV6") in ~w(true 1), do: [:inet6], else: []
 
@@ -62,14 +65,9 @@ if config_env() == :prod do
   # want to use a different value for prod and you most likely don't want
   # to check this value into version control, so we use an environment
   # variable instead.
-  secret_key_base =
-    System.get_env("SECRET_KEY_BASE") ||
-      raise """
-      environment variable SECRET_KEY_BASE is missing.
-      You can generate one by calling: mix phx.gen.secret
-      """
+  secret_key_base = env!("SECRET_KEY_BASE", :string)
 
-  host = System.get_env("PHX_HOST") || "example.com"
+  host = env!("PHX_HOST", :string)
   port = String.to_integer(System.get_env("PORT") || "4000")
 
   config :roda, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
@@ -89,7 +87,10 @@ if config_env() == :prod do
   #  config memgraph
   config :roda, Boltx,
     uri: "bolt://localhost:7687",
-    auth: [username: env!("MEMGRAPH_USER"), password: env!("MEMGRAPH_PASSWORD")],
+    auth: [
+      username: env!("MEMGRAPH_USER", :string),
+      password: env!("MEMGRAPH_PASSWORD", :string)
+    ],
     pool_size: 10
 
   # ## SSL Support

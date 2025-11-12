@@ -1,8 +1,6 @@
 defmodule RodaWeb.Orga.QuestionsLive do
   @moduledoc """
   Technical debt:
-  - Cannot delete a question
-  - Cannot rename a question even there arent response
   - Cannot archive
   """
   use RodaWeb, :live_view

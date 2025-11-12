@@ -1,42 +1,42 @@
 services:
   # Reverse proxy with automatic HTTPS
-  # traefik:
-  #   image: traefik:v3.0
-  #   container_name: traefik
-  #   restart: unless-stopped
-  #   security_opt:
-  #     - no-new-privileges:true
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   volumes:
-  #     - /var/run/docker.sock:/var/run/docker.sock:ro
-  #     - traefik-certificates:/certificates
-  #   command:
-  #     # Enable Docker provider
-  #     - --providers.docker=true
-  #     - --providers.docker.exposedbydefault=false
-  #
-  #     # Entrypoints
-  #     - --entrypoints.web.address=:80
-  #     - --entrypoints.websecure.address=:443
-  #
-  #     # HTTP to HTTPS redirect
-  #     - --entrypoints.web.http.redirections.entrypoint.to=websecure
-  #     - --entrypoints.web.http.redirections.entrypoint.scheme=https
-  #
-  #     # Let's Encrypt
-  #     - --certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}
-  #     - --certificatesresolvers.letsencrypt.acme.storage=/certificates/acme.json
-  #     - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
-  #
-  #     # Logs
-  #     - --log.level=INFO
-  #     - --accesslog=true
-  #   networks:
-  #     - roda-network
-  #   environment:
-  #     - TZ=Europe/Paris
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-certificates:/certificates
+    command:
+      # Enable Docker provider
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+
+      # Entrypoints
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+
+      # HTTP to HTTPS redirect
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+
+      # Let's Encrypt
+      - --certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL}
+      - --certificatesresolvers.letsencrypt.acme.storage=/certificates/acme.json
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+
+      # Logs
+      - --log.level=INFO
+      - --accesslog=true
+    networks:
+      - roda-network
+    environment:
+      - TZ=Europe/Paris
 
   # PostgreSQL with pgvector
   postgres:
@@ -106,9 +106,7 @@ services:
 
   # Database migrations (init container)
   migrate:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: roda
     container_name: roda-migrate
     restart: "no"
     depends_on:
@@ -116,14 +114,24 @@ services:
         condition: service_healthy
       memgraph:
         condition: service_healthy
+      minio:
+        condition: service_healthy
     environment:
       DATABASE_URL: ${DATABASE_URL}
-      MEMGRAPH_USER: ${MEMGRAPH_USER}
-      MEMGRAPH_PASSWORD: ${MEMGRAPH_PASSWORD}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      CLOAK_KEY: ${CLOAK_KEY}
+
+      # MinIO config
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
-      CLOAK_KEY: ${CLOAK_KEY}
-      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      MINIO_HOST: minio
+      MINIO_PORT: ${MINIO_PORT}
+
+      # Memgraph config
+      MEMGRAPH_USER: ${MEMGRAPH_USER}
+      MEMGRAPH_PASSWORD: ${MEMGRAPH_PASSWORD}
+      MEMGRAPH_HOST: memgraph
+      MEMGRAPH_PORT: ${MEMGRAPH_PORT}
     networks:
       - roda-network
     command: ["/app/bin/roda", "eval", "Roda.Release.migrate"]
@@ -149,47 +157,47 @@ services:
       SECRET_KEY_BASE: ${SECRET_KEY_BASE}
       PHX_HOST: ${PHX_HOST}
       PHX_SERVER: "true"
-      PORT: "4000"
-      POOL_SIZE: ${POOL_SIZE:-10}
+      PORT: ${PORT}
+      POOL_SIZE: ${POOL_SIZE}
 
       # MinIO config
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       MINIO_HOST: minio
-      MINIO_PORT: "9000"
+      MINIO_PORT: ${MINIO_PORT}
 
       # Memgraph config
       MEMGRAPH_USER: ${MEMGRAPH_USER}
       MEMGRAPH_PASSWORD: ${MEMGRAPH_PASSWORD}
       MEMGRAPH_HOST: memgraph
-      MEMGRAPH_PORT: "7687"
+      MEMGRAPH_PORT: ${MEMGRAPH_PORT}
 
       # Cloak encryption
       CLOAK_KEY: ${CLOAK_KEY}
 
       # Optional
       DNS_CLUSTER_QUERY: ${DNS_CLUSTER_QUERY:-}
-      ECTO_IPV6: ${ECTO_IPV6:-false}
+      ECTO_IPV6: ${ECTO_IPV6}
     networks:
       - roda-network
-    # labels:
-    #   - "traefik.enable=true"
-    #   - "traefik.http.routers.roda.rule=Host(`${PHX_HOST}`)"
-    #   - "traefik.http.routers.roda.entrypoints=websecure"
-    #   - "traefik.http.routers.roda.tls=true"
-    #   - "traefik.http.routers.roda.tls.certresolver=letsencrypt"
-    #   - "traefik.http.services.roda.loadbalancer.server.port=4000"
-    #   # Optional: Add security headers
-    #   - "traefik.http.middlewares.security-headers.headers.stsSeconds=31536000"
-    #   - "traefik.http.middlewares.security-headers.headers.stsIncludeSubdomains=true"
-    #   - "traefik.http.middlewares.security-headers.headers.stsPreload=true"
-    #   - "traefik.http.routers.roda.middlewares=security-headers"
-    # healthcheck:
-    #   test: ["CMD", "nc", "-z", "localhost", "4000"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 3
-    #   start_period: 40s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.roda.rule=Host(`${PHX_HOST}`)"
+      - "traefik.http.routers.roda.entrypoints=websecure"
+      - "traefik.http.routers.roda.tls=true"
+      - "traefik.http.routers.roda.tls.certresolver=letsencrypt"
+      - "traefik.http.services.roda.loadbalancer.server.port=4000"
+      # Optional: Add security headers
+      - "traefik.http.middlewares.security-headers.headers.stsSeconds=31536000"
+      - "traefik.http.middlewares.security-headers.headers.stsIncludeSubdomains=true"
+      - "traefik.http.middlewares.security-headers.headers.stsPreload=true"
+      - "traefik.http.routers.roda.middlewares=security-headers"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "4000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 volumes:
   roda-pg-prod:

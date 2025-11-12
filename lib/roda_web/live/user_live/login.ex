@@ -7,10 +7,17 @@ defmodule RodaWeb.UserLive.Login do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
-      <div class="mx-auto max-w-sm space-y-4">
+      <div class="mx-auto max-w-sm space-y-6 px-4">
         <div class="text-center">
+          <div class="flex justify-center mb-8">
+            <img
+              src={~p"/images/logo.png"}
+              alt="Roda"
+              class="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28"
+            />
+          </div>
           <.header>
-            <p>Log in</p>
+            <p>{gettext("Log in")}</p>
             <:subtitle>
               <%= if @current_scope do %>
                 {gettext("You need to reauthenticate to perform sensitive actions on your account.")}
