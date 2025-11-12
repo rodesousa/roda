@@ -67,7 +67,7 @@ defmodule RodaWeb.Orga.Question.QuestionResponseLive do
           </svg>
           <span class="text-sm">
             {gettext(
-              "Warning: This analysis only includes testimonies received so far this week. Any new messages arriving later will not be included in this analysis."
+              "Warning: This analysis only includes testimonies received up to the moment it was performed. Any testimonies submitted afterward will not be included."
             )}
           </span>
         </div>

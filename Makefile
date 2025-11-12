@@ -1,11 +1,15 @@
+PG_NAME=postgres
+PG_USER=postgres
+PG_DB=roda_dev
+
 up:
-	@docker compose up -d
+	@docker compose -f ./docker-compose-dev.yml up -d
 
 down:
-	@docker compose down -v
+	@docker compose -f ./docker-compose-dev.yml  down
 
-env:
-	@cp env.sample .env
+purge:
+	@docker compose -f ./docker-compose-dev.yml  down -v
 
 server:
 	@iex -S mix phx.server
@@ -16,7 +20,6 @@ ecto_migration:
 gen_secret:
 	@mix phx.gen.secret 32
 
-# Extract audio chunk from MinIO
 # Usage: make extract_chunk CHUNK_ID=uuid-here
 CHUNK_ID ?= chunk
 extract_chunk:
@@ -30,3 +33,10 @@ ecto_rollback:
 
 gettext:
 	@mix gettext.extract --merge --no-fuzzy
+
+gen_cloak:
+	@openssl rand -base64 32
+
+backup:
+	@docker exec -it $(PG_NAME) bash -c "pg_dump -h localhost $(PG_DB) -U $(PG_USER) > backup.sql"
+	@docker cp $(PG_NAME):/backup.sql backup-`date +'%Y-%m-%d'`.sql

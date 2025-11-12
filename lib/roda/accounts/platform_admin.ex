@@ -19,4 +19,8 @@ defmodule Roda.Accounts.PlatformAdmin do
     changeset(%{user_id: user_id})
     |> Repo.insert!()
   end
+
+  def get(user_id) do
+    Repo.get(__MODULE__, user_id)
+  end
 end

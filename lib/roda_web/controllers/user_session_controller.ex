@@ -9,7 +9,7 @@ defmodule RodaWeb.UserSessionController do
   end
 
   def create(conn, params) do
-    create(conn, params, "Welcome back!")
+    create(conn, params, gettext("Welcome back!"))
   end
 
   # magic link login

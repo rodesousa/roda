@@ -32,7 +32,7 @@ defmodule RodaWeb.Orga.Prompt.PromptsLive do
       else
         _ ->
           socket
-          |> put_flash(:error, gettext("You are not authorized to create a conversation."))
+          |> put_flash(:error, gettext("You are not authorized"))
       end
 
     {:noreply, socket}
