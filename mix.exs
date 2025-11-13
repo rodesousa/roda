@@ -93,7 +93,8 @@ defmodule Roda.MixProject do
       {:timex, "~> 3.7"},
       # qrcode
       {:eqrcode, "~> 0.2.1"},
-      {:floki, "~> 0.38.0"}
+      {:floki, "~> 0.38.0"},
+      {:tidewave, "~> 0.5", only: :dev}
     ]
   end
 

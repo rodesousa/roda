@@ -1,5 +1,7 @@
 import Config
 
+config :roda, RodaWeb.Gettext, default_locale: "en", locales: ~w(en fr)
+
 # Only in tests, remove the complexity from the password hashing algorithm
 config :bcrypt_elixir, :log_rounds, 1
 config :roda, Oban, testing: :manual

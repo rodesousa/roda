@@ -5,11 +5,12 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
 
   alias Roda.{Repo, LLM, Accounts}
   alias Roda.{Organizations}
+  alias Roda.Organizations.Organization
   alias Roda.LLM.Provider
   alias Roda.Accounts.User
   alias Roda.Organizations.OrganizationMembership
 
-  @tabs ["users", "audio", "chat"]
+  @tabs ["users", "audio", "chat", "general"]
 
   @impl true
   def mount(_, _session, socket) do
@@ -76,8 +77,14 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
       )
       |> assign_users()
       |> assign_new_member()
+      |> assign_orga_form(socket.assigns.current_scope.organization)
 
     {:ok, socket}
+  end
+
+  defp assign_orga_form(socket, orga) do
+    changeset = Organization.changeset(orga, %{})
+    assign(socket, orga_form: to_form(changeset))
   end
 
   @impl true
@@ -85,7 +92,7 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
     tab =
       case Map.get(params, "tab") in @tabs do
         true -> Map.get(params, "tab")
-        false -> "users"
+        false -> "general"
       end
 
     socket =
@@ -142,6 +149,30 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
             })
 
           assign(socket, chat_form: to_form(changeset))
+      end
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("rename", %{"organization" => args}, socket) do
+    %{current_scope: scope} = socket.assigns
+
+    socket =
+      with true <- scope.membership.role == "admin",
+           {:ok, orga} <- Organizations.set_organization_name(scope, args) do
+        scope = %{scope | organization: orga}
+
+        assign(socket, current_scope: scope)
+        |> assign_orga_form(orga)
+      else
+        %{valid?: false} = changeset ->
+          changeset = %{changeset | action: :validate}
+          assign(socket, orga_form: changeset)
+
+        _ ->
+          socket
+          |> put_flash(:error, gettext("You are not authorized"))
       end
 
     {:noreply, socket}
@@ -531,21 +562,25 @@ defmodule RodaWeb.Orga.OrganizationSettingsLive do
           </select>
         </div>
         <.input
+          id={"#{@submit}-url"}
           field={f[:api_base_url]}
           label={gettext("API Base URL")}
         />
         <.input
+          id={"#{@submit}-provider-type"}
           field={f[:provider_type]}
           type="hidden"
         />
 
         <.input
+          id={"#{@submit}-password"}
           type="password"
           field={f[:api_key]}
           label={gettext("API Key")}
         />
 
         <.input
+          id={"#{@submit}-model"}
           options={[]}
           field={f[:model]}
           label={gettext("Model")}

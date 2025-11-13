@@ -144,6 +144,27 @@
         type="radio"
         name="my_tabs_3"
         class="tab"
+        aria-label={gettext("General")}
+        phx-click="tab"
+        phx-value-tab="general"
+        checked={@tab == "general"}
+      />
+      <div class="tab-content bg-base-100 border-base-300 p-6">
+        <div class="space-y-4">
+          <.form :let={f} id="set-orga" for={@orga_form} phx-submit="rename">
+            <div class="flex-col  space-y-4 py-4">
+              <.input field={f[:name]} label={gettext("Name")} />
+            </div>
+            <.button type="submit">
+              {gettext("Rename")}
+            </.button>
+          </.form>
+        </div>
+      </div>
+      <input
+        type="radio"
+        name="my_tabs_3"
+        class="tab"
         aria-label={gettext("Users")}
         phx-click="tab"
         phx-value-tab="users"

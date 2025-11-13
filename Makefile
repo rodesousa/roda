@@ -40,3 +40,7 @@ gen_cloak:
 backup:
 	@docker exec -it $(PG_NAME) bash -c "pg_dump -h localhost $(PG_DB) -U $(PG_USER) > backup.sql"
 	@docker cp $(PG_NAME):/backup.sql backup-`date +'%Y-%m-%d'`.sql
+
+db-restore:
+	@docker cp backup.sql $(PG_NAME):/backup.sql 
+	@docker exec -it $(PG_NAME) bash -c "psql -U $(PG_USER) $(PG_DB) -h localhost < backup.sql"
