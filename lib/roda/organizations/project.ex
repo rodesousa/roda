@@ -1,4 +1,10 @@
 defmodule Roda.Organizations.Project do
+  @moduledoc """
+  must be renamed by Group ... not prio... but one day... GOOD LUCK
+
+  Technical debt:
+  - changeset must be merged
+  """
   use Ecto.Schema
   import Ecto.Changeset
   use Gettext, backend: RodaWeb.Gettext

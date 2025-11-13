@@ -9,16 +9,24 @@ defmodule RodaWeb.Orga.ProjectSettingsLive do
   use RodaWeb, :live_view
 
   alias Roda.Invite
+  alias Roda.Organizations.Project
+  alias Roda.Organizations
 
-  @tabs ["invite", "users"]
+  @tabs ["invite", "general"]
 
   @impl true
   def mount(_, _session, socket) do
     socket =
       socket
       |> assign_invitation_link()
+      |> assign_project_form(socket.assigns.current_scope.project)
 
     {:ok, socket}
+  end
+
+  defp assign_project_form(socket, orga) do
+    changeset = Project.changeset(orga, %{})
+    assign(socket, orga_form: to_form(changeset))
   end
 
   @impl true
@@ -56,6 +64,30 @@ defmodule RodaWeb.Orga.ProjectSettingsLive do
       assign(socket,
         tab: tab
       )
+
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("rename", %{"project" => args}, socket) do
+    %{current_scope: scope} = socket.assigns
+
+    socket =
+      with true <- scope.membership.role == "admin",
+           {:ok, project} <- Organizations.set_project_name(scope, args) do
+        scope = %{scope | project: project}
+
+        assign(socket, current_scope: scope)
+        |> assign_project_form(project)
+      else
+        %{valid?: false} = changeset ->
+          changeset = %{changeset | action: :validate}
+          assign(socket, orga_form: changeset)
+
+        _ ->
+          socket
+          |> put_flash(:error, gettext("You are not authorized"))
+      end
 
     {:noreply, socket}
   end
@@ -129,6 +161,27 @@ defmodule RodaWeb.Orga.ProjectSettingsLive do
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+          <input
+            type="radio"
+            name="my_tabs_3"
+            class="tab"
+            aria-label={gettext("General")}
+            phx-click="tab"
+            phx-value-tab="general"
+            checked={@tab == "general"}
+          />
+          <div class="tab-content bg-base-100 border-base-300 p-6">
+            <div class="space-y-4">
+              <.form :let={f} id="set-project" for={@orga_form} phx-submit="rename">
+                <div class="flex-col  space-y-4 py-4">
+                  <.input field={f[:name]} label={gettext("Name")} />
+                </div>
+                <.button type="submit">
+                  {gettext("Rename")}
+                </.button>
+              </.form>
             </div>
           </div>
           <input

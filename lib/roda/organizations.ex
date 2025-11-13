@@ -530,4 +530,29 @@ defmodule Roda.Organizations do
       {:error, :not_authorized}
     end
   end
+
+  @doc """
+  Updates the name of a project.
+
+  Only users with "admin" role can update the project name.
+  Returns `{:error, :not_authorized}` if the user is not an admin.
+
+  ## Example
+
+      iex> set_project_name(scope, %{"name" => "New Project Name"})
+      {:ok, %Project{name: "New Project Name"}}
+  """
+  def set_project_name(%Scope{} = s, args) do
+    if s.membership.role == "admin" do
+      case Project.changeset(s.project, args) do
+        %{valid?: true} = changeset ->
+          Repo.update(changeset)
+
+        changeset ->
+          changeset
+      end
+    else
+      {:error, :not_authorized}
+    end
+  end
 end
